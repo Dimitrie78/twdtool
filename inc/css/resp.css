@@ -1,0 +1,50 @@
+/*
+.table-fixed table {
+  border-collapse: collapse;
+  width: 300px;
+  overflow-x: scroll;
+  display: block;
+}
+*/
+
+.table-fixed thead,
+.table-fixed tbody {
+  display: block;
+}
+
+.table-fixed tbody {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 300px;
+
+}
+
+.table-fixed td,
+.table-fixed th {
+  min-width: 93px;
+  
+}
+.table-fixed thead th{
+	text-align: center;
+}
+/*
+.table-fixed thead tr th:first-child,
+.table-fixed tbody tr td:first-child {
+text-transform: uppercase;
+min-width: 119px;
+text-align: left;
+}
+
+
+
+#avg thead tr th:nth-child(3){
+min-width: 126px;
+}
+
+#avg thead tr th:nth-child(4){
+min-width: 126px;
+}
+*/
+
+
+	

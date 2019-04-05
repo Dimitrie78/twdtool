@@ -1,0 +1,11 @@
+.drag { 
+	z-index:99;
+	color: red;
+	background-color: #599;
+	opacity: 0.8;
+	position: absolute;
+}
+#pic img {
+	height: 100%;
+	width: 100%;
+}
