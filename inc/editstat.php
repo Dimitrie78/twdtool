@@ -12,7 +12,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 		exit();
 	}
 
-	$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."stats WHERE id = :id");
+	$statement = $pdo->prepare("SELECT * FROM stats WHERE id = :id");
 	$result = $statement->execute(array('id' => $_GET['id']));
 	$stat = $statement->fetch();
 	$datetime = new DateTime($stat['date']);
@@ -20,8 +20,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 ?>
 Statistik Nr <?= $id ?>  <?php if($uid > 0){echo 'von '.getuname($uid); }?> <br>
 <form action="?action=doeditstat&id=<?php echo $id;?>" method = "POST" autocomplete="no">
-  <input type="hidden" name="editid" type="text" value="<?php echo ($id);?>">
-  <input type="hidden" name="uid" type="text" value="<?php echo ($uid);?>">
+  <input  type = "hidden" name = "editid" type="text" value = "<?php echo ($id);?>">
   <div class="form-group">
     <label for="date">Datum / Zeit:</label>
     <input type="text" class="form-control" id="date" name = "date"  value = "<?php echo $datetime->format('d.m.Y H:i:s'); ?>">

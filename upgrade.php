@@ -108,7 +108,7 @@ else
 			$pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword);
 			//$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		
-			$sql = "CREATE TABLE IF NOT EXISTS `".$config->db_pre."ocr` (
+			$sql = "CREATE TABLE IF NOT EXISTS `ocr` (
 					  `id` int(11) NOT NULL AUTO_INCREMENT,
 					  `uid` int(11) DEFAULT NULL,
 					  `aktiv` tinyint(3) DEFAULT '0',

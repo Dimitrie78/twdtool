@@ -1,10 +1,10 @@
 <?php
 include "verify.php";
 
-if(isset($_GET['msg'])&&$_GET['msg'] == "deletesuccess") {
+if($_GET['msg'] == "deletesuccess") {
 	okmsg('Der Eintrag wurde entfernt!');
 }
-if(isset($_GET['msg'])&&$_GET['msg'] == "deletefail"){
+if($_GET['msg'] == "deletefail"){
 	failmsg('Die Eintrag konnte nicht entfernt werden!');
 }
 	
@@ -23,7 +23,7 @@ $thead = '
 $tfoot = '</tbody>
 </table></div>';
 
-$qry = 'SELECT id,date,name FROM `'.$config->db_pre.'stats` WHERE fail = 1 ORDER BY date ASC';
+$qry = 'SELECT id,date,name FROM `stats` WHERE fail = 1 ORDER BY date ASC';
 $tbody = '';
 
 foreach ($pdo->query($qry) as $row){
@@ -33,13 +33,12 @@ foreach ($pdo->query($qry) as $row){
       <th scope="row" style="text-align: right;">'.$datetime->format('d.m.Y H:i:s').'</th>
       <td>'.htmlentities($row['id']).'</td>
 	  <td>'.htmlentities($row['name']).'</td>
-      <td><div style="float:left;"><a href="?action=editfail&id='.$row['id'].'"  class="btn btn-success btn-sm">Edit</a>
-      </div>
-      </td> 
+      <td><a href="?action=editfail&id='.$row['id'].'"  class="btn btn-success btn-sm">Edit</a></td>
+ 
     </tr>';
 }
 
-if((!isset($row))||(!$row)){
+if(!$row){
 	echo 'Alles ok. Keine Fehler.';
 } else {
 	echo $thead.$tbody.$tfoot;

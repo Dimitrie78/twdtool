@@ -8,41 +8,41 @@ function in_array_r($item , $array){
 // Ermittlung des aktuellen Levels und des Prozentsatzes
 // der Komplettierung zum nächsten Level - Rückgabe als Array (lvl,prozent)
 function leveldata($exp){
-	$lvls = array(
-		'1105300' => '21',
-		'830300' => '20',
-		'605300' => '19',
-		'430300' => '18',
-		'305300' => '17',
-		'205300' => '16',
-		'130300' => '15',
-		'80300' => '14',
-		'45300' => '13',
-		'25300' => '12',
-		'15300' => '11',
-		'9300' => '10',
-		'5300' => '9',
-		'2300' => '8',
-		'1100' => '7',
-		'750' => '6',
-		'500' => '5',
-		'300' => '4',
-		'50' => '3',
-		'3' => '2'
-	);
-	//Entfernung aller ungültigen Zeichen
-	$clean = preg_replace("/[^0-9\\/]+/i", "",trim($exp));
-	$exp = explode('/',$clean);
-	// Der erste Wert muss kleiner als der zweite sein, und die exp wert muss in Levelarray stehen
-	if($exp[0] < $exp[1] AND in_array_r($exp[1],$lvls)){
-		$currlvl = $lvls[$exp[1]]-1;
-		$p = number_format($exp[0]/$exp[1]*100);
-		return number_format($currlvl.'.'.$p,2);
-	}
-	else
-	{
-		return '-';
-	}
+$lvls = array(
+	'1105300' => '21',
+	'830300' => '20',
+	'605300' => '19',
+	'430300' => '18',
+	'305300' => '17',
+	'205300' => '16',
+	'130300' => '15',
+	'80300' => '14',
+	'45300' => '13',
+	'25300' => '12',
+	'15300' => '11',
+	'9300' => '10',
+	'5300' => '9',
+	'2300' => '8',
+	'1100' => '7',
+	'750' => '6',
+	'500' => '5',
+	'300' => '4',
+	'50' => '3',
+	'3' => '2'
+);
+//Entfernung aller ungültigen Zeichen
+$clean = preg_replace("/[^0-9\\/]+/i", "",trim($exp));
+$exp = explode('/',$clean);
+// Der erste Wert muss kleiner als der zweite sein, und die exp wert muss in Levelarray stehen
+if($exp[0] < $exp[1] AND in_array_r($exp[1],$lvls)){
+$currlvl = $lvls[$exp[1]]-1;
+$p = $exp[0]/$exp[1]*100;
+return number_format($currlvl.'.'.$p,2);
+}
+else
+{
+return '-';
+}
 }
 
 //helper für upload2api
@@ -84,8 +84,7 @@ function getCurrentURL() {
 	
 function getuid($uid){
 	global $pdo;
-	global $config;
-	$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."users WHERE ign = :ign");
+	$statement = $pdo->prepare("SELECT id FROM users WHERE ign = :ign");
 	$result = $statement->execute(array('ign' => $uid));
 	$usr = $statement->fetch();
 	if (!$usr) {
@@ -98,8 +97,7 @@ function getuid($uid){
 
 function geturole($id){
 	global $pdo;
-	global $config;
-	$statement = $pdo->prepare("SELECT role FROM ".$config->db_pre."users WHERE id = :id");
+	$statement = $pdo->prepare("SELECT role FROM users WHERE id = :id");
 	$result = $statement->execute(array('id' => $id));
 	$usr = $statement->fetch();
 	if (!$usr) {
@@ -112,8 +110,7 @@ function geturole($id){
 
 function getuname($uid){
 	global $pdo;
-	global $config;
-	$statement = $pdo->prepare("SELECT ign FROM ".$config->db_pre."users WHERE id = :id");
+	$statement = $pdo->prepare("SELECT ign FROM users WHERE id = :id");
 	$result = $statement->execute(array('id' => $uid));
 	$usr = $statement->fetch();
 	if (!$usr) {
@@ -195,7 +192,7 @@ function uploadToApi($target_file){
 		//Geht nochmal über die einzelnen Postionen um wirklich alles Leerzeichen innerhalb der Elemente zu entfernen
 		$array=array_map('trim',$array);
 		
-		$q = $pdo->query("SELECT `searchfor`, `replacement` FROM `".$config->db_pre."namefix`;");
+		$q = $pdo->query("SELECT `searchfor`, `replacement` FROM `namefix`;");
 		$r  = $q->fetchAll(PDO::FETCH_KEY_PAIR);
 		if($r){
 			$name = strtr($array[0],$r); 
@@ -231,9 +228,9 @@ function uploadToApi($target_file){
 			$duplicate = False;
 			#wenn die uid gefunden wurde, prüfe ob die werte plausibel sind
 
-			//$rst = $pdo->prepare("SELECT * FROM ".$config->db_pre."stats WHERE uid = :uid order by id desc limit 0,1");
+			//$rst = $pdo->prepare("SELECT * FROM stats WHERE uid = :uid order by id desc limit 0,1");
 			//$result = $rst->execute(array('uid' => $usrid));
-			$rst = $pdo->prepare("SELECT * FROM ".$config->db_pre."stats WHERE uid = :uid and date <= :date order by date desc limit 0,1");
+			$rst = $pdo->prepare("SELECT * FROM stats WHERE uid = :uid and date <= :date order by date desc limit 0,1");
 			$result = $rst->execute(array(	'uid' => $usrid,
 											'date' => date("Y-m-d H:i:s", filemtime($target_file))));
 			$usr = $rst->fetch();
@@ -255,7 +252,7 @@ function uploadToApi($target_file){
 			}
 		}
 		
-		if (isset($duplicate)&&($duplicate===True)) {
+		if ($duplicate===True) {
 			unlink($target_file);
 			echo 'Duplikate geöscht<br>';
 			return;
@@ -270,7 +267,7 @@ function uploadToApi($target_file){
 
 			
 		#Werte in eine Datenbank schreiben
-		$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."stats(uid, name, date, exp, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete, notizen, fail)
+		$statement = $pdo->prepare("INSERT INTO stats(uid, name, date, exp, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete, notizen, fail)
 			VALUES(:uid, :name, :date,:exp, :streuner, :menschen, :gespielte_missionen, :abgeschlossene_missonen, :gefeuerte_schuesse, :haufen, :heldenpower, :waffenpower, :karten, :gerettete, :notizen, :fail)");
 
 
@@ -451,8 +448,7 @@ function generatePassword ( $passwordlength = 8,
 
 function user_exists($id){
 	global $pdo;
-	global $config;
-	$statement = $pdo->prepare("SELECT ign FROM ".$config->db_pre."users WHERE id = :id");
+	$statement = $pdo->prepare("SELECT ign FROM users WHERE id = :id");
 	$result = $statement->execute(array('id' => $id));
 	$dusr = $statement->fetch();
 	if(!empty($dusr)){
@@ -462,8 +458,7 @@ function user_exists($id){
 
 function stat_exists($id){
 	global $pdo;
-	global $config;
-	$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."stats WHERE id = :id");
+	$statement = $pdo->prepare("SELECT id FROM stats WHERE id = :id");
 	$result = $statement->execute(array('id' => $id));
 	$stat = $statement->fetch();
 	if(!empty($stat)){

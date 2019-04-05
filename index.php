@@ -8,10 +8,8 @@ include("inc/header.php");
 define('TIMEZONE', 'Europe/Berlin');
 date_default_timezone_set(TIMEZONE);
 
-// error_reporting(E_ALL); ini_set('display_errors', 1);
-
 $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword);
-//$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false); // geht bei Rene nicht....
+$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
 $rights = array("3" => "User",
                "2" => "Mod",
@@ -42,7 +40,7 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 	$ign = $_POST["loginname"];
 	$passwd = $_POST['loginpasswort'];
 
-	$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."users WHERE ign = :ign");
+	$statement = $pdo->prepare("SELECT * FROM users WHERE ign = :ign");
 	$result = $statement->execute(array('ign' => $ign));
 	$user = $statement->fetch();
 	//gruppen die sich immer einloggen dürfen - egal ob aktiv oder inaktiv (dev und admin)
@@ -73,19 +71,19 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
     }
 }
 
-if (!isset($_SESSION["login"])||($_SESSION["login"] != 1)){
+if ($_SESSION["login"] != 1){
 	include("login.php");
 	exit;
 } 
 	
-if (isset($_GET["action"]) && ($_GET["action"] == "logout")){
+if ($_GET["action"] == "logout"){
 	unset($_SESSION["login"]);
 	session_destroy();
 	header('Location: index.php');
 	exit;
 }
 
-$fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHERE fail = 1")->fetch();
+$fails = $pdo->query("SELECT count(id) as anz FROM stats WHERE fail = 1")->fetch();
 ?>
 
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -162,7 +160,7 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 
     <div class="panel panel-primary">
 	
-      <div class="panel-heading"><?php echo (isset($panelhead)?$panelhead:""); ?></div>
+      <div class="panel-heading"><?php echo $panelhead; ?></div>
       <div class="panel-body">
 	  
 <?php
@@ -171,27 +169,25 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 
 # Nur für ADMIN
 if (isadmin()){
-  if (isset($_GET["action"]))
-	switch ($_GET['action']) {
-		case "setHandyType":
-		case "uploadimg":
-		case "prepimg":
-	    case "import":
-	    case "ocrfix":
-	    case "frontpageedit":
-	    $file = "inc/".$_GET['action'].".php";
-	    if(is_file($file)) {
-			include($file);
-		}
-		break;
-	  }
+switch ($_GET['action']) {
+	case "setHandyType":
+	case "uploadimg":
+	case "prepimg":
+    case "import":
+    case "ocrfix":
+    case "frontpageedit":
+    $file = "inc/".$_GET['action'].".php";
+    if(is_file($file)) {
+		include($file);
+	}
+	break;
+  }
 } ## Ende Admin
 
 
 
 # FÜR ADMIN+MOD
 if (isadminormod()){
-  if (isset($_GET["action"]))
 	switch ($_GET['action']) {	
 	case "alldata":
 	case "createnewuser":
@@ -217,7 +213,6 @@ if (isadminormod()){
 } 
 
 #FÜR die User
-if (isset($_GET["action"]))
 switch ($_GET['action']) {
     case "myprofile":
     case "stats":
@@ -232,15 +227,15 @@ switch ($_GET['action']) {
 	break;
 } 
 
-if (!isset($_GET["action"])){
-	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0")->fetch();
-	$stats = $pdo->query("SELECT max(date) as statupdate from ".$config->db_pre."stats")->fetch();
+if(!$_GET['action']){
+	$user = $pdo->query("SELECT COUNT(id) as anz FROM users WHERE active > 0")->fetch();
+	$stats = $pdo->query("SELECT max(date) as statupdate from stats")->fetch();
 	if($stats['statupdate'] != "0000-00-00 00:00:00"){
 		$datetime = new DateTime($stats['statupdate']);
 		$lstatupdate = "<br>Die letzten Statistiken wurden am: " .$datetime->format('d.m.Y H:i:s') ." übertragen.";
 		unset($datetime);
 	}
-	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE id = 1 AND active = 1")->fetch();
+	$news = $pdo->query("SELECT text, ndate FROM news WHERE id = 1 AND active = 1")->fetch();
 ?>
 <audio autoplay>
   <source src="zombie.mp3" type="audio/mpeg">
@@ -253,7 +248,7 @@ if (!isset($_GET["action"])){
 	</div>
 </div> 
 <div class="well">
-V 1.8.2 Beta
+V 1.8 Beta
 </div>
 </div>
 <script src="inc/js/bootstrap.min.js"></script>

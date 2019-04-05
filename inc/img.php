@@ -19,10 +19,10 @@ set_header_content_type($file);
 //readfile($file);
 
 if(isset($_GET['id'])) {
-	$query = $pdo->prepare('SELECT * FROM '.$config->db_pre.'ocr WHERE uid = :uid AND id = :id');
+	$query = $pdo->prepare('SELECT * FROM ocr WHERE uid = :uid AND id = :id');
 	$query->execute(array(':uid' => $_SESSION['userid'], ':id' => $_GET['id']));
 } else {
-	$query = $pdo->prepare('SELECT * FROM '.$config->db_pre.'ocr WHERE uid = :uid');
+	$query = $pdo->prepare('SELECT * FROM ocr WHERE uid = :uid');
 	$query->execute(array(':uid' => $_SESSION['userid']));
 }
 $data = $query->fetchAll(PDO::FETCH_ASSOC); #is maybe faster

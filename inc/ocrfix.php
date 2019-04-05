@@ -1,30 +1,32 @@
 <?php
 include "verify.php";
 
-if (!isset($_GET["do"])){
-	if (isset($_GET["do"])) {
-	  switch ($_GET["do"]) {
-		case "updatesuccess":
-			okmsg('Der Eintrag wurde aktualisiert!');
-		break;
-		case "updatefail":
-			failmsg('Die Eintrag konnten nicht aktualisiert werden!');
-		break;
-		case "addsuccess":
-			okmsg('Der Eintrag wurde hinzugefügt!');
-		break;
-	    case "addfail":
-			failmsg('Die Eintrag konnten nicht hinzugefügt werden!');
-		break;
-	    case "deletesuccess":
-			okmsg('Der Eintrag wurde entfernt!');
-		break;
-	    case "deletefail":
-			failmsg('Die Eintrag konnte nicht entfernt werden!');
-		break;
-	  }
-	}
+if (!$_GET['do']){
 	
+	if($_GET['msg'] == "updatesuccess")
+	{
+		okmsg('Der Eintrag wurde aktualisiert!');
+	}
+	if($_GET['msg'] == "updatefail")
+	{
+		failmsg('Die Eintrag konnten nicht aktualisiert werden!');
+	}
+	if($_GET['msg'] == "addsuccess")
+	{
+		okmsg('Der Eintrag wurde hinzugefügt!');
+	}
+	if($_GET['msg'] == "addfail")
+	{
+		failmsg('Die Eintrag konnten nicht hinzugefügt werden!');
+	}
+	if($_GET['msg'] == "deletesuccess")
+	{
+		okmsg('Der Eintrag wurde entfernt!');
+	}
+	if($_GET['msg'] == "deletefail")
+	{
+		failmsg('Die Eintrag konnte nicht entfernt werden!');
+	}
 ?>
 
   <div class="clearfix">
@@ -36,7 +38,7 @@ if (!isset($_GET["do"])){
 	  </div>
   </div>
 <?php
-	$sql = "SELECT id, searchfor, replacement FROM ".$config->db_pre."namefix";
+	$sql = "SELECT id, searchfor, replacement FROM namefix";
 ?>
 <table class="table table-hover">
   <thead>
@@ -62,9 +64,9 @@ if (!isset($_GET["do"])){
 	</table>';
 }
 
-if (isset($_GET['do']) && $_GET['do'] == "edit"){
+if ($_GET['do']=="edit"){
 	$id = preg_replace('/[^0-9]/','',$_GET['id']);	
-	$statement = $pdo->prepare("SELECT id, searchfor, replacement FROM ".$config->db_pre."namefix WHERE id = :id");
+	$statement = $pdo->prepare("SELECT id, searchfor, replacement FROM namefix WHERE id = :id");
 	$result = $statement->execute(array('id' => $id));
 	$res = $statement->fetch();
 	if(!$res){echo 'Keine Daten zu dieser ID!'; exit();}
@@ -86,7 +88,7 @@ if (isset($_GET['do']) && $_GET['do'] == "edit"){
            <select name = "replacement" class="form-control"  type="number" min="1" required>
 <?php 
 	echo '<option value="">--Wähle--</option>';
-    $sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` ORDER BY ign ASC';
+    $sql = 'SELECT id,ign,telegram,notes FROM `users` ORDER BY ign ASC';
     foreach ($pdo->query($sql) as $row) {
 		$selected = '';
 		if ($res['replacement'] == $row['ign']){
@@ -114,8 +116,8 @@ if (isset($_GET['do']) && $_GET['do'] == "edit"){
 <?php
 }
 
-if ((isset($_GET['do']) && $_GET['do']=="update") && isset($_POST['updaterepl']) && ($_POST['searchfor']>"")){
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'namefix SET searchfor = :searchfor, replacement = :replacement WHERE id = :id');
+if (($_GET['do']=="update") && isset($_POST['updaterepl']) && ($_POST['searchfor']>"")){
+	$query = $pdo->prepare('UPDATE namefix SET searchfor = :searchfor, replacement = :replacement WHERE id = :id');
 	if($query->execute(array(':replacement' => getuname($_POST['replacement']),
 			  ':searchfor' => $_POST['searchfor'],
 			  ':id' => $_POST['editid']))){
@@ -125,7 +127,7 @@ if ((isset($_GET['do']) && $_GET['do']=="update") && isset($_POST['updaterepl'])
 	}					  
 }
 
-if (isset($_GET['do']) && $_GET['do']=="add"){
+if ($_GET['do']=="add"){
 ?>
 	<form action="?action=ocrfix&do=addentry" method = "POST" autocomplete="no">
     <div class="form-group">
@@ -142,7 +144,7 @@ if (isset($_GET['do']) && $_GET['do']=="add"){
 <?php 
 	   
 	echo '<option value="">--Ersetze durch--</option>';
-    $sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` ORDER BY ign ASC';
+    $sql = 'SELECT id,ign,telegram,notes FROM `users` ORDER BY ign ASC';
     foreach ($pdo->query($sql) as $row) {
 		echo '<option value="'.$row['id'].'">'.$row['ign'].'</option>';
 	}
@@ -165,8 +167,8 @@ if (isset($_GET['do']) && $_GET['do']=="add"){
 <?php
 }
 
-if ((isset($_GET['do']) && $_GET['do']=="addentry") && isset($_POST['addrepl']) && ($_POST['searchfor'] > "")){
-	$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."namefix(searchfor, replacement)
+if (($_GET['do']=="addentry") && isset($_POST['addrepl']) && ($_POST['searchfor'] > "")){
+	$statement = $pdo->prepare("INSERT INTO namefix(searchfor, replacement)
 		VALUES(:searchfor, :replacement)");
 
 	if ($statement->execute(array(
@@ -178,9 +180,9 @@ if ((isset($_GET['do']) && $_GET['do']=="addentry") && isset($_POST['addrepl']) 
 	}
 }
 
-if ((isset($_GET['do']) && $_GET['do']=="delete") && is_numeric($_GET['id'])){
+if (($_GET['do']=="delete") && is_numeric($_GET['id'])){
 	$id = preg_replace('/[^0-9]/','',$_GET['id']);
-	$statement = $pdo->prepare("DELETE FROM ".$config->db_pre."namefix WHERE id = :id");
+	$statement = $pdo->prepare("DELETE FROM namefix WHERE id = :id");
 	if($result = $statement->execute(array('id' => $id))){
 		header("Location: ?action=ocrfix&msg=deletesuccess");
 	} else {

@@ -30,7 +30,7 @@
 					</div>
 
 				</form>
-					<?php if(isset($fail)) echo $fail; ?>
+					<?php echo $fail; ?>
 			</div>
 		</div>
 	</div>

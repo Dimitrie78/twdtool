@@ -2,7 +2,7 @@
 $allowed = "Dev";
 include "verify.php";
 
-if(!isset($_POST['createuser'])) { ?>
+if(!$_POST['createuser']) { ?>
 <form action="index.php?action=createnewuser" method="POST" autocomplete="no">
   <div class="form-group">
     <label for="telegram">Ingame-Name:</label>
@@ -43,20 +43,15 @@ foreach($rights as $key => $value) {
 <?php
 }
 
-if(isset($_POST['createuser']) && $_POST['createuser'] == "AddUser" & isadminormod()){
+if($_POST['createuser'] == "AddUser" & isadminormod()){
 
 	$curr_datetime =date("Y-m-d H:i:s");
 	$notetime = ($_POST['notes'] > "" ? $curr_datetime : ''); 
 
 	if (isadmin()){
-		$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."users(telegram, notes, notetime, ign, passwd, role, created_at, active)
+		$statement = $pdo->prepare("INSERT INTO users(telegram, notes, notetime, ign, passwd, role, created_at, active)
 			VALUES(:telegram, :notes, :notetime, :ign, :passwd, :role, :created_at, :active)");
 
-	echo "t:".$_POST['telegram']."<br />";
-	echo "notes:".$_POST['notes']."<br />".
-			"ign:".$_POST['ign']."<br />".
-			"passwd:".$_POST['pwd']."<br />".
-			"role".$_POST['role']."<br />";
 
 		$statement->execute(array(
 			"telegram" => $_POST['telegram'],
@@ -68,10 +63,10 @@ if(isset($_POST['createuser']) && $_POST['createuser'] == "AddUser" & isadminorm
 			"created_at" => $curr_datetime,
 			"active" => 1
 		));
-	}else echo "Keine Rechte 1 (AddUser)".$config->db_pre;
+	}
 
 	if (ismod()){
-		$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."users(telegram, notes, notetime, ign, passwd, role, created_at, active)
+		$statement = $pdo->prepare("INSERT INTO users(telegram, notes, notetime, ign, passwd, role, created_at, active)
 			VALUES(:telegram, :notes, :notetime, :ign, :passwd, :role, :created_at, :active)");
 
 
@@ -85,13 +80,13 @@ if(isset($_POST['createuser']) && $_POST['createuser'] == "AddUser" & isadminorm
 			"created_at" => $curr_datetime,
 			"active" => 1
 		));
-	}else echo "Keine Rechte 2 (AddUser)".$config->db_pre;
+	}
 
 
 			
 	if($statement) {        
 		echo '<div class="alert alert-success"><strong>Nutzer '.$_POST['ign'].' angelegt!</strong> Weiterleitung...</div>';
-  	    header('Refresh: 2; URL=?action=usrmgr&uid='.$pdo->lastInsertId().'');
+		header('Refresh: 2; URL=?action=usrmgr&uid='.$pdo->lastInsertId().'');
 	}
 }
 ?>

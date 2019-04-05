@@ -1,7 +1,7 @@
 <?php
 include "verify.php";
 
-$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."users WHERE id = :id");
+$statement = $pdo->prepare("SELECT * FROM users WHERE id = :id");
 $result = $statement->execute(array('id' => $_SESSION['userid']));
 $user = $statement->fetch();
 ?>
@@ -32,7 +32,7 @@ $user = $statement->fetch();
 			
 			<?php if ($_POST['telegram']) {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET telegram = "'.$_POST['telegram'].'" WHERE id = :id');
+	$query = $pdo->prepare('UPDATE users SET telegram = "'.$_POST['telegram'].'" WHERE id = :id');
    $query->execute(array(':id' => $_SESSION['userid']));
 					echo '<p> </p>
 					<div class="alert alert-success"><span class = "fas fa-info-circle"></span> Die Kontaktinfos wurden gespeichert!</div>';
@@ -64,7 +64,7 @@ Bitte wähle ein starkes Passwort!<br>Wenn du es vergisst kannst du bei einem Mo
 			
 						<?php if (trim($_POST['password']) > "") {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET passwd = "'.password_hash($_POST['password'], PASSWORD_DEFAULT).'" WHERE id = :id');
+	$query = $pdo->prepare('UPDATE users SET passwd = "'.password_hash($_POST['password'], PASSWORD_DEFAULT).'" WHERE id = :id');
    $query->execute(array(':id' => $_SESSION['userid']));
 					echo '<p> </p>
 					<div class="alert alert-success"><span class = "fas fa-info-circle"></span> Dein neues Passwort wurde gespeichert!<br>Merke es dir gut oder schreibe es auf.</div>';
@@ -98,7 +98,7 @@ echo "Letztes Update:<br>".($_POST['notes'] ? date("d.m.Y H:i:s",time()) : $note
 			<?php if ($_POST['notes']) {
 
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET notes = "'.$_POST['notes'].'", notetime = NOW() WHERE id = :id');
+	$query = $pdo->prepare('UPDATE users SET notes = "'.$_POST['notes'].'", notetime = NOW() WHERE id = :id');
    $query->execute(array(':id' => $_SESSION['userid']));
    
 					echo '<p> </p>

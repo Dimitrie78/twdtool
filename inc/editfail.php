@@ -4,9 +4,9 @@ include "verify.php";
 
 if (!isset($_GET['id']) && !is_numeric($_GET['id'])) { exit; }
 
-if((!isset($_GET['do'])) || (!$_GET['do'])){
+if(!$_GET['do']){
 	$id = preg_replace('/[^0-9]/','',$_GET['id']);
-	$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."stats WHERE id = :id AND fail = 1");
+	$statement = $pdo->prepare("SELECT * FROM stats WHERE id = :id AND fail = 1");
 	$result = $statement->execute(array('id' => $id));
 	$stats = $statement->fetch();
 	if (!$stats){exit('Gewählter Eintrag nicht existent oder bereits fehlerfrei!');}
@@ -44,10 +44,10 @@ if((!isset($_GET['do'])) || (!$_GET['do'])){
 			  
 			  <div class="form-group">
 				<label for="name">Name:</label>
-				      <select id="inputUser" id="name" name = "name" class = "form-control" style="width:auto;min-width:200px;" onchange="var mysel = document.getElementById('correct'); if (mysel!=null) if(this.options[this.selectedIndex].value == '-NEW-') mysel.style.display='block'; else mysel.style.display='none';">
+				      <select id="inputUser" id="name" name = "name" class = "form-control" style="width:auto;min-width:200px;">';
 
 <?php	    
-	$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` ORDER BY ign ASC';
+	$sql = 'SELECT id,ign,telegram,notes FROM `users` ORDER BY ign ASC';
 	
 	echo '<option value="">--Wähle--</option>';
     foreach ($pdo->query($sql) as $row) {
@@ -57,8 +57,6 @@ if((!isset($_GET['do'])) || (!$_GET['do'])){
 		echo '<option value="'.$row['ign'].'" '.$selected.'>'.$row['ign'].'</option>';
 		$selected = '';
     }
-	echo '<option value="-NEW-">Benutzer anlegen</option>';
-	echo '<input type="text" name="correction" value="'.$stats['name'].'" style="display:none;" id="correct" />';
 ?>
 					</select>
 			  </div>
@@ -109,8 +107,7 @@ if((!isset($_GET['do'])) || (!$_GET['do'])){
 			  </div>
 			  <div class="clearfix">
 			<div class="pull-left">
-				<button type="submit" name="updatefailid" class="btn btn-success">Update</button><input type="checkbox" name="setFix" value="1" checked="checked" /> ggfls. OCR-Verbesserung anlegen
-				<?php echo '<input type="hidden" name="OCRResult" value="'.$stats['name'].'" />'; ?>
+				<button type="submit" name="updatefailid" class="btn btn-success">Update</button>
 			</div>
 			<div class="pull-right">
 			<a href="?action=editfail&do=failremove&id=<?=$id;?>" name="remove" class="btn btn-danger" role="button"><span class = "fas fa-minus-square"></span> Entfernen</a>
@@ -129,10 +126,10 @@ if((!isset($_GET['do'])) || (!$_GET['do'])){
 
 <?php
 }
-if(isset($_GET['do']) && $_GET['do'] == "failremove" && is_numeric($_GET['id'])){
+if($_GET['do'] == "failremove" && is_numeric($_GET['id'])){
 	$id = preg_replace('/[^0-9]/','',$_GET['id']);
 	
-	$statement = $pdo->prepare("DELETE FROM ".$config->db_pre."stats WHERE id = :id AND fail = 1");
+	$statement = $pdo->prepare("DELETE FROM stats WHERE id = :id AND fail = 1");
 	if($result = $statement->execute(array('id' => $id))) {
 		header("Location: ?action=fails&msg=deletesuccess");
 	} else {
@@ -150,78 +147,42 @@ if(isset($_POST['updatefailid'])){
 	else
 	{
 		$dbid = preg_replace('/[^0-9]/','',$_POST['editid']);
+		
+		$query = $pdo->prepare('UPDATE stats SET uid = :uid, name = :name, exp = :exp, streuner = :streuner, menschen = :menschen,
+								gespielte_missionen = :gespielte_missionen, abgeschlossene_missonen = :abgeschlossene_missonen,
+								gefeuerte_schuesse = :gefeuerte_schuesse, haufen = :haufen, heldenpower = :heldenpower,
+								waffenpower = :waffenpower, karten = :karten, gerettete = :gerettete, notizen = :notizen, fail = :fail WHERE id = :id');
 
-		$igname = $_POST['name'];
-		if ($igname == '-NEW-'){
-			$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."users(telegram, notes, notetime, ign, passwd, role, created_at, active)
-				VALUES(:telegram, :notes, :notetime, :ign, :passwd, :role, :created_at, :active)");
-
-
-			$statement->execute(array(
-				"telegram" => '',
-				"notes" => '',
-				"notetime" => date("Y-m-d H:i:s"),
-				"ign" =>  $_POST['correction'],
-				"passwd" => password_hash('123456', PASSWORD_DEFAULT),
-				"role" => 3,
-				"created_at" => date("Y-m-d H:i:s"),
-				"active" => 1
-			));
-			$igname = $_POST['correction'];
-		  $uid = $pdo->lastInsertId();
-
-		}else $uid = getuid($_POST['name']);
-
-
-		if ($uid > 0){
-			
-			$query = $pdo->prepare('UPDATE '.$config->db_pre.'stats SET uid = :uid, name = :name, exp = :exp, streuner = :streuner, menschen = :menschen,
-									gespielte_missionen = :gespielte_missionen, abgeschlossene_missonen = :abgeschlossene_missonen,
-									gefeuerte_schuesse = :gefeuerte_schuesse, haufen = :haufen, heldenpower = :heldenpower,
-									waffenpower = :waffenpower, karten = :karten, gerettete = :gerettete, notizen = :notizen, fail = :fail WHERE id = :id');
-
-								
-			$query->execute(array(':uid' => $uid,
-								  ':name' => $igname,	
-								  ':exp' => $_POST['exp'],
-								  ':streuner' => $_POST['streuner'],
-								  ':menschen' => $_POST['menschen'],
-								  ':gespielte_missionen' => $_POST['gespielte_missionen'],
-								  ':abgeschlossene_missonen' => $_POST['abgeschlossene_missonen'],
-								  ':gefeuerte_schuesse' => $_POST['gefeuerte_schuesse'],
-								  ':haufen' => $_POST['haufen'],
-								  ':heldenpower' => $_POST['heldenpower'],
-								  ':waffenpower' => $_POST['waffenpower'],
-								  ':karten' => $_POST['karten'],
-								  ':gerettete' => $_POST['gerettete'],
-								  ':fail' => "0",
-								  ':notizen' => "",
-								  ':id' => $dbid));
-
-			if(isset($_POST['setFix'])&&$_POST['setFix']==1){
-				if($igname != $_POST['OCRResult']){
-					$query = $pdo->prepare('INSERT INTO '.$config->db_pre.'namefix SET searchfor = :s, replacement = :r');
-
-										
-					$query->execute(array(':s' => $_POST['OCRResult'],
-										  ':r' => $igname));
-			  }
-
+							
+		$query->execute(array(':uid' => getuid($_POST['name']),
+							  ':name' => $_POST['name'],	
+							  ':exp' => $_POST['exp'],
+							  ':streuner' => $_POST['streuner'],
+							  ':menschen' => $_POST['menschen'],
+							  ':gespielte_missionen' => $_POST['gespielte_missionen'],
+							  ':abgeschlossene_missonen' => $_POST['abgeschlossene_missonen'],
+							  ':gefeuerte_schuesse' => $_POST['gefeuerte_schuesse'],
+							  ':haufen' => $_POST['haufen'],
+							  ':heldenpower' => $_POST['heldenpower'],
+							  ':waffenpower' => $_POST['waffenpower'],
+							  ':karten' => $_POST['karten'],
+							  ':gerettete' => $_POST['gerettete'],
+							  ':fail' => "0",
+							  ':notizen' => "",
+							  ':id' => $dbid));
+						  
+		if($query) {       
+			##sicherheit: alles ausser zahlen entfernen, sicheres entfernen
+			if($_POST['ftype'] == 'jpg' && file_exists('2ocr/fail/'.$dbid.'.jpg')){
+				unlink('2ocr/fail/'.$dbid.'.jpg');
 			}
-							  
-			if($query) {       
-				##sicherheit: alles ausser zahlen entfernen, sicheres entfernen
-				if($_POST['ftype'] == 'jpg' && file_exists('2ocr/fail/'.$dbid.'.jpg')){
-					unlink('2ocr/fail/'.$dbid.'.jpg');
-				}
-				elseif($_POST['ftype'] == 'png' && file_exists('2ocr/fail/'.$dbid.'.png')){
-					unlink('2ocr/fail/'.$dbid.'.png');
-				}
-
-				echo '<div class="alert alert-success"><strong>DB-ID '.$_POST['editid'].' erfolgreich aktualisiert!</strong> <a href = "?action=fails">Weiterleitung</a></div>';
-				header('Refresh: 2; URL=?action=fails');
+			elseif($_POST['ftype'] == 'png' && file_exists('2ocr/fail/'.$dbid.'.png')){
+				unlink('2ocr/fail/'.$dbid.'.png');
 			}
+
+			echo '<div class="alert alert-success"><strong>DB-ID '.$_POST['editid'].' erfolgreich aktualisiert!</strong> <a href = "?action=fails">Weiterleitung</a></div>';
+			header('Refresh: 2; URL=?action=fails');
 		}
-    }
+	}
 }
 ?>

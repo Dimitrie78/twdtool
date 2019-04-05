@@ -15,7 +15,7 @@ if (isset($_GET['uid']) & !user_exists($uid)){echo '<div class="alert alert-dang
       <select onchange="this.form.submit()" id="inputUser" name = "edituid" class = "form-control" style="width:auto;min-width:200px;">
 	 <option value="">--Wählen--</option>
 	<?php  			    
-	$sql = 'SELECT id,ign FROM `'.$config->db_pre.'users` ORDER BY ign ASC';
+	$sql = 'SELECT id,ign FROM `users` ORDER BY ign ASC';
 	
 
 
@@ -36,7 +36,7 @@ if (isset($_GET['uid']) & !user_exists($uid)){echo '<div class="alert alert-dang
 
 if($uid >""){
 	
-$statement = $pdo->prepare("SELECT id,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
+$statement = $pdo->prepare("SELECT id,ign,notes,telegram,role,created_at,updated_at,active FROM users WHERE id = :id");
 $result = $statement->execute(array('id' => $uid));
 $user = $statement->fetch();
 #edituser
@@ -135,7 +135,7 @@ $curr_datetime =date("Y-m-d H:i:s");
 if($_POST['pwd'] > "")
 {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
 							passwd = :passwd, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						 ':role' => $_POST['role'],
@@ -149,7 +149,7 @@ if($_POST['pwd'] > "")
 	
 else
 {
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						  ':role' => $_POST['role'],
 						  ':telegram' => $_POST['telegram'],
@@ -164,7 +164,7 @@ else
 if($_POST['pwd'] > "")
 {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
 							passwd = :passwd, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						 ':telegram' => $_POST['telegram'],
@@ -177,7 +177,7 @@ if($_POST['pwd'] > "")
 	
 else
 {
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						  ':telegram' => $_POST['telegram'],
 						  ':notes' => $_POST['notes'],

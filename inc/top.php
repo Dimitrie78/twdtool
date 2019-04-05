@@ -2,8 +2,8 @@
 include "verify.php";
 
 $top['streuner'] = "SELECT U.ign, MAX( S.streuner ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -13,8 +13,8 @@ $avg['streuner'] = "SELECT round(avg(top)) as avg
 FROM ({$top['streuner']}) as avgtab";
 
 $top['menschen'] = "SELECT U.ign, MAX( S.menschen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -24,8 +24,8 @@ $avg['menschen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['menschen']}) as avgtab";
 
 $top['gespielte_missionen'] = "SELECT U.ign, MAX( S.gespielte_missionen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -35,8 +35,8 @@ $avg['gespielte_missionen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['gespielte_missionen']}) as avgtab";
 
 $top['abgeschlossene_missonen'] = "SELECT U.ign, MAX( S.abgeschlossene_missonen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -46,8 +46,8 @@ $avg['abgeschlossene_missonen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['abgeschlossene_missonen']}) as avgtab";
 
 $top['gefeuerte_schuesse'] = "SELECT U.ign, MAX( S.gefeuerte_schuesse ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -57,8 +57,8 @@ $avg['gefeuerte_schuesse'] = "SELECT round(avg(top)) as avg
 FROM ({$top['gefeuerte_schuesse']}) as avgtab";
 
 $top['haufen'] = "SELECT U.ign, MAX( S.haufen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -68,8 +68,8 @@ $avg['haufen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['haufen']}) as avgtab";
 
 $top['heldenpower'] = "SELECT U.ign, MAX( S.heldenpower ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -79,8 +79,8 @@ $avg['heldenpower'] = "SELECT round(avg(top)) as avg
 FROM ({$top['heldenpower']}) as avgtab";
 
 $top['waffenpower'] = "SELECT U.ign, MAX( S.waffenpower ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -90,8 +90,8 @@ $avg['waffenpower'] = "SELECT round(avg(top)) as avg
 FROM ({$top['waffenpower']}) as avgtab";
 
 $top['karten'] = "SELECT U.ign, MAX( S.karten ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1	   
 GROUP BY S.uid
@@ -101,8 +101,8 @@ $avg['karten'] = "SELECT round(avg(top)) as avg
 FROM ({$top['karten']}) as avgtab";
 
 $top['gerettete'] = "SELECT U.ign, MAX( S.gerettete ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
+FROM stats AS S
+INNER JOIN users AS U 
        ON  (S.uid = U.id)
 WHERE U.active = 1
 GROUP BY S.uid
@@ -129,7 +129,7 @@ foreach($top as $key => $value)
  echo '</select>   
     </div>';
 echo '</form>';
-if (isset($_POST['mode'])){
+if ($_POST['mode']>""){
 switch ($_POST['mode']) {
     case "streuner":
         $qry = $top['streuner'];

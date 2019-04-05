@@ -30,7 +30,7 @@ echo 'Anzahl der durchschnittlichen '.ucfirst($abfrage).' pro Woche in letzten '
 
 
 $sqlgetuser = "SELECT U.id AS uid, U.ign AS ign, count( S.uid ) AS anzstats, min( date ) AS mindate, max( date ) AS maxdate, min( ".$abfrage." ) AS minval, max( ".$abfrage." ) AS maxval
-	FROM ".$config->db_pre."stats AS S
+	FROM stats AS S
 	INNER JOIN users AS U ON ( S.uid = U.id )
 	WHERE U.active =1
 	AND date > NOW( ) - INTERVAL ".$wochen." WEEK
@@ -46,7 +46,7 @@ foreach ($pdo->query($sqlgetuser) as $user) {
 	$diff = $pdo->query("SELECT ceil( (
 	max( ".$abfrage." ) - min( ".$abfrage." ) ) /  ".$wochen."
 	) AS diff
-	FROM ".$config->db_pre."stats
+	FROM stats
 	WHERE date > NOW( ) - INTERVAL ".$wochen." WEEK
 	AND uid = ".$user['uid']."")->fetch();  
 

@@ -79,8 +79,8 @@ echo '</select></div></form></div>';
 
 
 $sqlgetuser = "SELECT U.id AS uid, U.ign AS ign, count( S.uid ) AS anzstats, min( date ) AS mindate, max( date ) AS maxdate, min( ".$abfrage." ) AS minval, max( ".$abfrage." ) AS maxval
-	FROM ".$config->db_pre."stats AS S
-	INNER JOIN ".$config->db_pre."users AS U ON ( S.uid = U.id )
+	FROM stats AS S
+	INNER JOIN users AS U ON ( S.uid = U.id )
 	WHERE U.active =1
 	AND date > NOW( ) - INTERVAL ".$wochen." WEEK
 	GROUP BY S.uid
@@ -95,7 +95,7 @@ foreach ($pdo->query($sqlgetuser) as $user) {
 	$diff = $pdo->query("SELECT ceil( (
 	max( ".$abfrage." ) - min( ".$abfrage." ) ) /  ".$wochen."
 	) AS diff
-	FROM ".$config->db_pre."stats
+	FROM stats
 	WHERE date > NOW( ) - INTERVAL ".$wochen." WEEK
 	AND uid = ".$user['uid']."")->fetch();  
 

@@ -1,7 +1,7 @@
 <?php
 include "verify.php";
 
-$usrqry = $pdo->query('SELECT id,ign FROM '.$config->db_pre.'users WHERE active > 0 ORDER BY ign');
+$usrqry = $pdo->query('SELECT id,ign FROM users WHERE active > 0 ORDER BY ign');
 $usrqry->execute();
 $tbody = '';
 
@@ -10,7 +10,7 @@ foreach ($usrqry as $usr) {
 	$uname = $usr['ign'];
 	
 	$sql1 = 'SELECT streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete 
-		FROM  '.$config->db_pre.'stats
+		FROM  `stats`
 		WHERE uid ='.$uid.'
 		ORDER BY date DESC 
 		LIMIT 0 , 1';
@@ -27,21 +27,17 @@ foreach ($usrqry as $usr) {
 	$karten1 = '';
 	$gerettete1 = '';
 
-	$rows = $pdo->query($sql1);
-	$rows->execute();
-	if (isset($rows)) {
-		foreach ($rows as $row1) {
-			$streuner1 = $row1['streuner'];
-			$menschen1 = $row1['menschen'];
-			$gespielte_missionen1 = $row1['gespielte_missionen'];
-			$abgeschlossene_missonen1 = $row1['abgeschlossene_missonen'];
-			$gefeuerte_schuesse1 = $row1['gefeuerte_schuesse'];
-			$haufen1 = $row1['haufen'];
-			$heldenpower1 = $row1['heldenpower'];
-			$waffenpower1 = $row1['waffenpower'];
-			$karten1 = $row1['karten'];
-			$gerettete1 = $row1['gerettete'];
-		}
+	foreach ($pdo->query($sql1) as $row1) {
+		$streuner1 = $row1['streuner'];
+		$menschen1 = $row1['menschen'];
+		$gespielte_missionen1 = $row1['gespielte_missionen'];
+		$abgeschlossene_missonen1 = $row1['abgeschlossene_missonen'];
+		$gefeuerte_schuesse1 = $row1['gefeuerte_schuesse'];
+		$haufen1 = $row1['haufen'];
+		$heldenpower1 = $row1['heldenpower'];
+		$waffenpower1 = $row1['waffenpower'];
+		$karten1 = $row1['karten'];
+		$gerettete1 = $row1['gerettete'];
 	}
 
 

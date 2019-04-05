@@ -23,7 +23,7 @@ $dirs = array(
 	"./conf",
 	"./screens",
 	"./2ocr");
-$notsupporeted = false;	
+	
 foreach($dirs as $dir)
 	{
 	if (file_exists($dir))
@@ -72,10 +72,9 @@ if ($_POST["do"] == "createdb") {
 	$config['dbname'] = $_POST["dbname"];
 	$config['dbusername'] = $_POST["dbusername"];
 	$config['dbpassword'] = $_POST["dbpassword"];
-	$config['db_pre'] = $_POST["db_pre"];
 
 	$config = array_map('trim', $config);
-	$notfilled = false;
+
 	foreach ($config as $key => $value) {
 		if (empty($value)){
 			$notfilled = true;
@@ -97,8 +96,7 @@ return (object) array(
 	\'clantag\' => \''. $_POST["clantag"]. '\',
 	\'clanname\' => \''. $_POST["clanname"]. '\',
 	\'theme\' => \'slate\',
-	\'statlimit\' => \'8\',
-	\'db_pre\' => \''. $_POST["db_pre"]. '\');
+	\'statlimit\' => \'8\');
 ?>';
 			 
 			$fp = FOPEN("conf/config.php", "w");
@@ -110,15 +108,15 @@ return (object) array(
 			} else {
 				
 				echo '<div class="alert alert-success">Verbindung ok, config.php geschrieben, erstelle Tabellen...</div>';
-				$pre = $_POST["db_pre"];
-				$createqry = "CREATE TABLE IF NOT EXISTS `".$pre."namefix` (
+
+				$createqry = "CREATE TABLE IF NOT EXISTS `namefix` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
 				  `searchfor` varchar(255) NOT NULL,
 				  `replacement` varchar(255) NOT NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `".$pre."news` (
+				CREATE TABLE IF NOT EXISTS `news` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
 				  `ndate` datetime NOT NULL,
 				  `text` text NOT NULL,
@@ -127,7 +125,7 @@ return (object) array(
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `".$pre."stats` (
+				CREATE TABLE IF NOT EXISTS `stats` (
 				  `id` int(10) NOT NULL AUTO_INCREMENT,
 				  `uid` int(4) NOT NULL,
 				  `date` datetime NOT NULL,
@@ -148,7 +146,7 @@ return (object) array(
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `".$pre."users` (
+				CREATE TABLE IF NOT EXISTS `users` (
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 				  `telegram` varchar(255) NOT NULL,
 				  `notes` text NOT NULL,
@@ -163,7 +161,7 @@ return (object) array(
 				  UNIQUE KEY `ign` (`ign`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `".$pre."ocr` (
+				CREATE TABLE IF NOT EXISTS `ocr` (
 					  `id` int(11) NOT NULL AUTO_INCREMENT,
 					  `uid` int(11) DEFAULT NULL,
 					  `aktiv` tinyint(3) DEFAULT '0',
@@ -183,7 +181,7 @@ return (object) array(
 					  PRIMARY KEY (`id`)
 					) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-				INSERT INTO `".$pre."news` (
+				INSERT INTO `news` (
 				`id` ,
 				`ndate` ,
 				`text` ,
@@ -199,7 +197,7 @@ return (object) array(
 				{
 					echo '<div class="alert alert-success">Tabellen erfolgreich erstellt! - Lege Admin-User an...</div>';	
 					$curr_datetime = date("Y-m-d H:i:s");
-					$statement = $conn->prepare("INSERT INTO ".$pre."users(ign, passwd, role, created_at, active)
+					$statement = $conn->prepare("INSERT INTO users(ign, passwd, role, created_at, active)
 					VALUES(:ign, :passwd, :role, :created_at, :active)");
 					$statement->execute(array(
 						"ign" => $_POST['firstuser'],
@@ -245,10 +243,6 @@ if(!$_POST) {
 		  <div class="form-group">
 			<label for="dbname">Datenbank Name:</label>
 			<input type="text" class="form-control" id="dbname" name="dbname" required> 
-		  </div>
-		  <div class="form-group">
-			<label for="db_pre">DB Prefix: (optional)</label>
-			<input type="text" class="form-control" id="db_pre" name="db_pre" required> 
 		  </div>
 		  <div class="form-group">
 			<label for="ocrspace_apikey"><a href="https://ocr.space" target="_new">OCR.Space API KEY:</a></label>

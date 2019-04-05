@@ -1,33 +1,32 @@
 <?php
 include "verify.php";
-$uid =0;
-$uid = ((isset($_POST['edituid'])&&$_POST['edituid'] > "") ?$_POST['edituid'] : (isset($_GET['uid'])?$_GET['uid']:0)); 
 
-if (isset($_GET['uid']) & !user_exists($uid)){
-	echo '<div class="alert alert-danger">
+$uid = ($_POST['edituid'] > "" ? $_POST['edituid'] : $_GET['uid']); 
+
+if (isset($_GET['uid']) & !user_exists($uid)){echo '<div class="alert alert-danger">
   <strong>Abbruch</strong> Gewählte User-ID <b>'.$uid.'</b> existiert nicht. Funktion nicht ausführbar</div>	<a href="?action=usrmgr" name="back" class="btn btn-info" role="button">Zurück</a>'; exit();
 
-}
+  }
+  
+  
+?>
 
-$active = '';
-$optall = '';
-$optactive = '';
-$optinactive ="";
-if (isset($_POST['optactive'])&&$_POST['optactive'] == "all"){
-$active = '';
-$optall = "checked";
-}
-elseif (isset($_POST['optactive'])&&($_POST['optactive'] == "active" OR !isset($_POST['optactive']))){
-$active = 'WHERE active = 1';
-$optactive = "checked";
-}
-elseif (isset($_POST['optactive'])&&$_POST['optactive'] == "inactive"){
-$active = 'WHERE active = 0';
-$optinactive = "checked";
-}
-$cqry = $pdo->query('SELECT count(id) as cnt FROM `'.$config->db_pre.'users` '.$active.' ORDER BY ign ASC');
-$anz = $cqry->fetchColumn();
-
+		<?php
+  
+  	if ($_POST['optactive'] == "all"){
+	$active = '';
+	$optall = "checked";
+	}
+	elseif ($_POST['optactive'] == "active" OR !isset($_POST['optactive'])){
+	$active = 'WHERE active = 1';
+	$optactive = "checked";
+	}
+	elseif ($_POST['optactive'] == "inactive"){
+	$active = 'WHERE active = 0';
+	$optinactive = "checked";
+	}
+	$cqry = $pdo->query('SELECT count(id) as cnt FROM `users` '.$active.' ORDER BY ign ASC');
+	$anz = $cqry->fetchColumn();
 
 ?>
 
@@ -45,7 +44,7 @@ $anz = $cqry->fetchColumn();
       <select onchange="this.form.submit()" id="inputUser" name = "edituid" class = "form-control" style="width:auto;min-width:200px;">
 	 <option value="">--Wählen--</option>
 	<?php
-	$sql = 'SELECT id, ign FROM `'.$config->db_pre.'users` '.$active.' ORDER BY ign ASC';
+	$sql = 'SELECT id,ign FROM `users` '.$active.' ORDER BY ign ASC';
 		
     foreach ($pdo->query($sql) as $row) {
 		if ($uid == $row['id'])
@@ -63,7 +62,7 @@ $anz = $cqry->fetchColumn();
 
 if($uid >""){
 	
-$statement = $pdo->prepare("SELECT id,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
+$statement = $pdo->prepare("SELECT id,ign,notes,telegram,role,created_at,updated_at,active FROM users WHERE id = :id");
 $result = $statement->execute(array('id' => $uid));
 $user = $statement->fetch();
 #edituser
@@ -76,7 +75,7 @@ $user = $statement->fetch();
   <input  type = "hidden" name = "edituid" type="text" value = "<?php echo ($uid);?>">
   <div class="form-group">
     <label for="telegram">Ingame-Name:</label>
-    <input type="ign" class="form-control" id="ign" name = "ign"  value = "<?php echo ((isset($_POST['ign'])&&$_POST['ign'])? $_POST['ign'] : htmlentities(isset($user['ign'])?$user['ign']:"")); ?>">
+    <input type="ign" class="form-control" id="ign" name = "ign"  value = "<?php echo ($_POST['ign'] ? $_POST['ign'] : htmlentities($user['ign'])); ?>">
   </div>
     <div class="form-group">
 	<input type="password" style="display:none"> <!-- Prevent Password-Autofill -->
@@ -109,11 +108,11 @@ foreach($rights as $key => $value)
 
     <div class="form-group">
     <label for="telegram">Telegram:</label>
-    <input type="telegram" class="form-control" id="telegram" name = "telegram"  value = "<?php echo ((isset($_POST['telegram'])&&$_POST['telegram'])? $_POST['telegram'] : htmlentities(isset($user['telegram'])?$user['telegram']:"")); ?>"> 
+    <input type="telegram" class="form-control" id="telegram" name = "telegram"  value = "<?php echo ($_POST['telegram'] ? $_POST['telegram'] : htmlentities($user['telegram'])); ?>"> 
   </div>
   <div class="form-group">
       <label for="notes">Notizen:</label>
-	<textarea class="form-control input-md"  rows="9" name = "notes"><?php echo ((isset($_POST['notes'])&&$_POST['notes'])? $_POST['notes'] : htmlentities(isset($user['notes'])?$user['notes']:"")); ?></textarea>
+	<textarea class="form-control input-md"  rows="9" name = "notes"><?php echo ($_POST['notes'] ? $_POST['notes'] : htmlentities($user['notes'])); ?></textarea>
   </div>
   
   
@@ -143,7 +142,7 @@ if ((ismod() & $user['role'] == 3) OR isadmin()){
 </form>
 <?php
 
-if (isset($_GET['doneedit']) && $_GET['doneedit'] == 'yes')
+if ($_GET['doneedit'] == 'yes')
 {
 ?>	<hr><div class="alert alert-success">
 <strong>Update abgeschlossen!</strong>
@@ -154,7 +153,7 @@ if (isset($_GET['doneedit']) && $_GET['doneedit'] == 'yes')
 
 }
 
-if(isset($_POST['updateuser']) & (isset($_POST['edituid'])&&is_numeric($_POST['edituid']))){
+if(isset($_POST['updateuser']) & is_numeric($_POST['edituid'])){
 ## iif rein und update hier
 $curr_datetime =date("Y-m-d H:i:s");
 
@@ -162,7 +161,7 @@ $curr_datetime =date("Y-m-d H:i:s");
 if($_POST['pwd'] > "")
 {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
 							passwd = :passwd, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						 ':role' => $_POST['role'],
@@ -176,7 +175,7 @@ if($_POST['pwd'] > "")
 	
 else
 {
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						  ':role' => $_POST['role'],
 						  ':telegram' => $_POST['telegram'],
@@ -191,7 +190,7 @@ else
 if($_POST['pwd'] > "")
 {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
 							passwd = :passwd, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						 ':telegram' => $_POST['telegram'],
@@ -204,7 +203,7 @@ if($_POST['pwd'] > "")
 	
 else
 {
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
 	$query->execute(array(':ign' => $_POST['ign'],
 						  ':telegram' => $_POST['telegram'],
 						  ':notes' => $_POST['notes'],

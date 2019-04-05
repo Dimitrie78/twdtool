@@ -5,7 +5,7 @@ include "verify.php";
 if (isset($_GET['uid']) && !empty($_GET['uid'])) {
 	echo '<a href="?action=stats&uid='.$_GET['uid'].'" class="btn btn-info" role="button">Zurück zur Statistik</a><hr>';
 
-	$statement = $pdo->prepare("SELECT id,ign,notetime,notes FROM ".$config->db_pre."users WHERE id = :id");
+	$statement = $pdo->prepare("SELECT id,ign,notetime,notes FROM users WHERE id = :id");
 	$result = $statement->execute(array('id' => $_GET['uid']));
 	$user = $statement->fetch();
 	
