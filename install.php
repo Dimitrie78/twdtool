@@ -154,6 +154,7 @@ return (object) array(
 				  `ign` varchar(255) NOT NULL,
 				  `passwd` varchar(255) NOT NULL,
 				  `role` tinyint(1) NOT NULL,
+				  `lastlogin` datetime NULL,
 				  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 				  `updated_at` timestamp NULL DEFAULT NULL,
 				  `active` tinyint(1) NOT NULL,
