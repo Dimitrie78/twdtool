@@ -3,9 +3,6 @@
     box-shadow: 0 0 0 0.2rem rgba(139, 195, 74, .25);
 }
 
-.odd{
-  background-color:#555;
-}
 body {
   padding-top: 30px;
   padding-bottom: 30px;
@@ -97,10 +94,6 @@ ul.dropdown-menu li span {
 margin-top: 30px;
 }
 
-.card-error{
-  font-weight: bold;
-  color:red;
-}
 
 /* Aktiv/Inaktiv checkbox */
 
@@ -456,14 +449,4 @@ body.loading {
    modal element will be visible */
 body.loading .modal {
     display: block;
-}
-.moveDown{
-  cursor:pointer; 
-  font-weight:600; 
-  font-size:20px; 
-  color:white; 
-  display:inline; 
-  padding:0px 8px 5px 8px; 
-  margin-left:10px; 
-  /*border: 1px solid silver;*/
 }

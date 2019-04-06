@@ -1,7 +1,7 @@
 <?php
 include "verify.php";
 
-$usrqry = $pdo->query('SELECT id,ign FROM '.$config->db_pre.'users WHERE active > 0 ORDER BY ign');
+$usrqry = $pdo->query('SELECT id,ign FROM users WHERE active > 0 ORDER BY ign');
 $usrqry->execute();
 $tbody = '';
 
@@ -10,7 +10,7 @@ foreach ($usrqry as $usr) {
 	$uname = $usr['ign'];
 	
 	$sql1 = 'SELECT streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete 
-		FROM  '.$config->db_pre.'stats
+		FROM  `stats`
 		WHERE uid ='.$uid.'
 		ORDER BY date DESC 
 		LIMIT 0 , 1';
@@ -56,16 +56,16 @@ foreach ($usrqry as $usr) {
 
 	$tbody .=  '<tr>
 		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'">'.$uname.'</a></td>
-		  <td style="text-align: right;">'.number_format($streuner,0, ",", ".").'</td>
-		  <td style="text-align: right;">'.number_format($menschen,0, ",", ".").'</td>
-		  <td style="text-align: right;">'.number_format($gespielte_missionen,0, ",", ".").'</td>
-		  <td style="text-align: right;">'.number_format($abgeschlossene_missonen,0, ",", ".").'</td>
-		  <td style="text-align: right;">'.number_format($gefeuerte_schuesse,0, ",", ".").'</td>
-		  <td style="text-align: right;">'.number_format($haufen,0, ",", ".").'</td>					
-		  <td style="text-align: right;">'.number_format($heldenpower,0, ",", ".").'</td>		
-		  <td style="text-align: right;">'.number_format($waffenpower,0, ",", ".").'</td>	
-		  <td style="text-align: right;">'.number_format($karten,0, ",", ".").'</td>	
-		  <td style="text-align: right;">'.number_format($gerettete,0, ",", ".").'</td>	
+		  <td style="text-align: right;">'.$streuner.'</td>
+		  <td style="text-align: right;">'.$menschen.'</td>
+		  <td style="text-align: right;">'.$gespielte_missionen.'</td>
+		  <td style="text-align: right;">'.$abgeschlossene_missonen.'</td>
+		  <td style="text-align: right;">'.$gefeuerte_schuesse.'</td>
+		  <td style="text-align: right;">'.$haufen.'</td>					
+		  <td style="text-align: right;">'.$heldenpower.'</td>		
+		  <td style="text-align: right;">'.$waffenpower.'</td>	
+		  <td style="text-align: right;">'.$karten.'</td>	
+		  <td style="text-align: right;">'.$gerettete.'</td>	
 		</tr>';
 		
 }
@@ -96,26 +96,4 @@ $tfoot = '</tbody>
 echo $thead.$tbody.$tfoot;
 	
 ?>
-<script>
-
-	// $(document).ready(function(){ $('#sortTable').tablesorter(); });
-
-	 $(document).ready(function () {
-        jQuery.tablesorter.addParser({
-            id: "fancyNumber",
-            is: function (s) {
-                return /^[0-9]?[0-9,\.]*$/.test(s);
-            },
-            format: function (s) {
-                return jQuery.tablesorter.formatFloat(s.replace(/\./g, ''));
-            },
-            type: "numeric"
-        });
-
-        $("#sortTable").tablesorter({
-            headers: { 0: { sorter: 'fancyNumber'} },
-            widgets: ['zebra']
-        });
-    }); 
-
-</script>
+<script>$(document).ready(function(){ $('#sortTable').tablesorter(); });</script>

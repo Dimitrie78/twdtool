@@ -5,11 +5,10 @@ include "verify.php";
 if (!isset($_POST['updatestat'])) { exit; }
 
 $id = preg_replace('/[^0-9]/','',$_GET['id']);
-$uid = preg_replace('/[^0-9]/','',$_POST['uid']);
 $new_date_format = date('Y-m-d H:i:s', strtotime($_POST['date']));
 
 
-$query = $pdo->prepare('UPDATE '.$config->db_pre.'stats SET date = :date, exp = :exp, streuner = :streuner, menschen = :menschen,
+$query = $pdo->prepare('UPDATE stats SET date = :date, exp = :exp, streuner = :streuner, menschen = :menschen,
 						gespielte_missionen = :gespielte_missionen, abgeschlossene_missonen = :abgeschlossene_missonen,
 						gefeuerte_schuesse = :gefeuerte_schuesse, haufen = :haufen, heldenpower = :heldenpower,
 						waffenpower = :waffenpower, karten = :karten, gerettete = :gerettete WHERE id = :id');
@@ -30,6 +29,6 @@ $query->execute(array(':date' => $new_date_format,
 					  ':id' => $id));	
 if($query) {        
 	echo '<div class="alert alert-success"><strong>Statistik-ID '.$id.' editiert!</strong> <a href ="?action=editstat&id='.$id.'">Weiterleitung...</a></div>';
-	header('Refresh: 2; URL=?action=stats&uid='.$uid.'');
+	header('Refresh: 2; URL=?action=editstat&id='.$id.'');
 }
 ?>

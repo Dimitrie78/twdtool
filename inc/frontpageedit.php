@@ -1,17 +1,17 @@
 <?php
 include "verify.php";
 
-if(!$_GET['do']){
-	if($_GET['msg'] == "success")
+if(!isset($_GET['do'])) {
+	if(isset($_GET['msg']) && $_GET['msg'] == "success")
 	{
 		okmsg('Die News wurden aktualisiert!');
 	}
-	if($_GET['msg'] == "fail")
+	if(isset($_GET['msg']) && $_GET['msg'] == "fail")
 	{
 		failmsg('Die News konnten nicht aktualisiert werden!');
 	}
 	
-	$news = $pdo->query("SELECT text, ndate FROM news WHERE id = 1 AND active = 1")->fetch();
+	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE id = 1 AND active = 1")->fetch();
 
 
 	if (!$news){exit('Gewählter Eintrag nicht existent oder bereits fehlerfrei!');}
@@ -26,10 +26,10 @@ if(!$_GET['do']){
 	</form>';
 }
 
-if($_GET['do'] == "update" && $_POST['text']>"" && isset($_POST['updatenews'])){
+if(isset($_GET['do']) && $_GET['do'] == "update" && $_POST['text']>"" && isset($_POST['updatenews'])){
 
 	#vorbereitet für news aktivieren / deaktivieren / mehrere news
-	$query = $pdo->prepare('UPDATE news SET text = :text, ndate = NOW()');
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'news SET text = :text, ndate = NOW()');
 
 	if ($query->execute(array(':text' => $_POST['text'])))
 	{

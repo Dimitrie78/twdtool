@@ -26,7 +26,6 @@ $rights = array("3" => "User",
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="inc/js/jquery.tablesorter.js"></script>
-<script type="text/javascript" src="inc/js/functions.js"></script>
 <script src="inc/js/jquery.ui.touch-punch.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/<?=$config->theme;?>/bootstrap.min.css">
@@ -41,7 +40,7 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 	$ign = $_POST["loginname"];
 	$passwd = $_POST['loginpasswort'];
 
-	$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."users WHERE ign = :ign");
+	$statement = $pdo->prepare("SELECT * FROM users WHERE ign = :ign");
 	$result = $statement->execute(array('ign' => $ign));
 	$user = $statement->fetch();
 	//gruppen die sich immer einloggen dürfen - egal ob aktiv oder inaktiv (dev und admin)
@@ -73,19 +72,19 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
     }
 }
 
-if (!isset($_SESSION["login"])||($_SESSION["login"] != 1)){
+if ($_SESSION["login"] != 1){
 	include("login.php");
 	exit;
 } 
 	
-if (isset($_GET["action"]) && ($_GET["action"] == "logout")){
+if ($_GET["action"] == "logout"){
 	unset($_SESSION["login"]);
 	session_destroy();
 	header('Location: index.php');
 	exit;
 }
 
-$fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHERE fail = 1")->fetch();
+$fails = $pdo->query("SELECT count(id) as anz FROM stats WHERE fail = 1")->fetch();
 ?>
 
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -112,7 +111,6 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 							<li><a href="?action=levelingnumbers"><span style = "margin-right:5px;" class="fas fa-sort-numeric-up"></span> Anstieg in Zahlen</a></li>
 							<li><a href="?action=currentstats"><span style = "margin-right:5px;" class="fas fa-star"></span> Aktuelle Statistik</a></li>
 							<li><a href="?action=avg"><span style = "margin-right:5px;" class="fas fa-stopwatch"></span> Durchschnitt</a></li>
-							<li><a href="?action=custom_stat"><span style = "margin-right:5px;" class="fas fa-stopwatch"></span> Custom</a></li>
 		<?php if (isadminormod()){ ?>								
 						<li><a href="?action=alldata"><span style = "margin-right:5px;" class="fas fa-list-alt"></span> Komplettab.</a></li>
 							<?php } ?>
@@ -163,7 +161,7 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 
     <div class="panel panel-primary">
 	
-      <div class="panel-heading"><?php echo (isset($panelhead)?$panelhead:""); ?></div>
+      <div class="panel-heading"><?php echo $panelhead; ?></div>
       <div class="panel-body">
 	  
 <?php
@@ -172,7 +170,6 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 
 # Nur für ADMIN
 if (isadmin()){
-  if (isset($_GET["action"]))
 switch ($_GET['action']) {
 	case "setHandyType":
 	case "uploadimg":
@@ -192,7 +189,6 @@ switch ($_GET['action']) {
 
 # FÜR ADMIN+MOD
 if (isadminormod()){
-  if (isset($_GET["action"]))
 	switch ($_GET['action']) {	
 	case "alldata":
 	case "createnewuser":
@@ -218,7 +214,6 @@ if (isadminormod()){
 } 
 
 #FÜR die User
-if (isset($_GET["action"]))
 switch ($_GET['action']) {
     case "myprofile":
     case "stats":
@@ -226,7 +221,6 @@ switch ($_GET['action']) {
     case "levelingnumbers":
     case "currentstats":
     case "avg":
-    case "custom_stat":
 	$file = "inc/".$_GET['action'].".php";
 	if(is_file($file)) {
 		include($file);
@@ -234,15 +228,15 @@ switch ($_GET['action']) {
 	break;
 } 
 
-if (!isset($_GET["action"])){
-	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0")->fetch();
-	$stats = $pdo->query("SELECT max(date) as statupdate from ".$config->db_pre."stats")->fetch();
+if(!$_GET['action']){
+	$user = $pdo->query("SELECT COUNT(id) as anz FROM users WHERE active > 0")->fetch();
+	$stats = $pdo->query("SELECT max(date) as statupdate from stats")->fetch();
 	if($stats['statupdate'] != "0000-00-00 00:00:00"){
 		$datetime = new DateTime($stats['statupdate']);
 		$lstatupdate = "<br>Die letzten Statistiken wurden am: " .$datetime->format('d.m.Y H:i:s') ." übertragen.";
 		unset($datetime);
 	}
-	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE id = 1 AND active = 1")->fetch();
+	$news = $pdo->query("SELECT text, ndate FROM news WHERE id = 1 AND active = 1")->fetch();
 ?>
 <audio autoplay>
   <source src="zombie.mp3" type="audio/mpeg">
@@ -255,7 +249,7 @@ if (!isset($_GET["action"])){
 	</div>
 </div> 
 <div class="well">
-V 1.8.2 Beta
+V 1.8 Beta
 </div>
 </div>
 <script src="inc/js/bootstrap.min.js"></script>

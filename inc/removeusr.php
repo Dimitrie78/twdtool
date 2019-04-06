@@ -32,5 +32,5 @@ echo '<br><div class="alert alert-warning">
     <label class="form-check-label" for="suredelete">Ja wirklich löschen</label>
   </div>
   <button type="submit" class="btn btn-danger btn-block">JA - '.getuname($uid).' endgültig löschen!</button>
-</form><br><a href="?action=stats&uid='.$dusr['id'].'" class="btn btn-info btn-block" role="button">'.getuname($uid).' ´s Statistik anschauen</a></p>';
+</form><br><a href="?action=stats&uid='.$_GET['uid'].'" class="btn btn-info btn-block" role="button">'.getuname($uid).' ´s Statistik anschauen</a></p>';
 ?>

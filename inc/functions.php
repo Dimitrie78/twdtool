@@ -8,41 +8,46 @@ function in_array_r($item , $array){
 // Ermittlung des aktuellen Levels und des Prozentsatzes
 // der Komplettierung zum nächsten Level - Rückgabe als Array (lvl,prozent)
 function leveldata($exp){
-$lvls = array(
-	'1105300' => '21',
-	'830300' => '20',
-	'605300' => '19',
-	'430300' => '18',
-	'305300' => '17',
-	'205300' => '16',
-	'130300' => '15',
-	'80300' => '14',
-	'45300' => '13',
-	'25300' => '12',
-	'15300' => '11',
-	'9300' => '10',
-	'5300' => '9',
-	'2300' => '8',
-	'1100' => '7',
-	'750' => '6',
-	'500' => '5',
-	'300' => '4',
-	'50' => '3',
-	'3' => '2'
-);
-//Entfernung aller ungültigen Zeichen
-$clean = preg_replace("/[^0-9\\/]+/i", "",trim($exp));
-$exp = explode('/',$clean);
-// Der erste Wert muss kleiner als der zweite sein, und die exp wert muss in Levelarray stehen
-if($exp[0] < $exp[1] AND in_array_r($exp[1],$lvls)){
-$currlvl = $lvls[$exp[1]]-1;
-$p = $exp[0]/$exp[1]*100;
-return number_format($currlvl.'.'.$p,2);
-}
-else
-{
-return '-';
-}
+	$lvls = array(
+		'2885300' => '26',
+		'2320300' => '25',
+		'2320300' => '24',
+		'1835300' => '23',
+		'1430300' => '22',
+		'1105300' => '21',
+		'830300' => '20',
+		'605300' => '19',
+		'430300' => '18',
+		'305300' => '17',
+		'205300' => '16',
+		'130300' => '15',
+		'80300' => '14',
+		'45300' => '13',
+		'25300' => '12',
+		'15300' => '11',
+		'9300' => '10',
+		'5300' => '9',
+		'2300' => '8',
+		'1100' => '7',
+		'750' => '6',
+		'500' => '5',
+		'300' => '4',
+		'50' => '3',
+		'3' => '2'
+	);
+	//Entfernung aller ungültigen Zeichen
+	$clean = preg_replace("/[^0-9\\/]+/i", "",trim($exp));
+	$exp = explode('/',$clean);
+	// Der erste Wert muss kleiner als der zweite sein, und die exp wert muss in Levelarray stehen
+	if($exp[0] < $exp[1] AND in_array_r($exp[1],$lvls)){
+		$currlvl = $lvls[$exp[1]]-1;
+		$p = number_format($exp[0]/$exp[1]*100);
+		return number_format($currlvl.'.'.$p,2);
+	}
+	else
+	{
+		return '-';
+	}
 }
 
 //helper für upload2api
@@ -54,7 +59,7 @@ function cleanexp($exp)
 $replaceoarr = array("o" => "0","O" => "0","I" => "1");	
 $exp = preg_replace("/[^0-9\\/]+/i", "",strtr($exp,$replaceoarr));
 
-$lvls = array('1105300','830300','605300','430300','305300','205300','130300','80300','45300','25300','15300','9300','5300','2300','1100','750','500','300','50','3');
+$lvls = array('2885300','2320300','1835300','1430300','1105300','830300','605300','430300','305300','205300','130300','80300','45300','25300','15300','9300','5300','2300','1100','750','500','300','50','3');
 if (strpos($exp, "/") == false)
 	{
 	foreach($lvls as $searchfor)
@@ -84,7 +89,8 @@ function getCurrentURL() {
 	
 function getuid($uid){
 	global $pdo;
-	$statement = $pdo->prepare("SELECT id FROM users WHERE ign = :ign");
+	global $config;
+	$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."users WHERE ign = :ign");
 	$result = $statement->execute(array('ign' => $uid));
 	$usr = $statement->fetch();
 	if (!$usr) {
@@ -97,7 +103,8 @@ function getuid($uid){
 
 function geturole($id){
 	global $pdo;
-	$statement = $pdo->prepare("SELECT role FROM users WHERE id = :id");
+	global $config;
+	$statement = $pdo->prepare("SELECT role FROM ".$config->db_pre."users WHERE id = :id");
 	$result = $statement->execute(array('id' => $id));
 	$usr = $statement->fetch();
 	if (!$usr) {
@@ -110,7 +117,8 @@ function geturole($id){
 
 function getuname($uid){
 	global $pdo;
-	$statement = $pdo->prepare("SELECT ign FROM users WHERE id = :id");
+	global $config;
+	$statement = $pdo->prepare("SELECT ign FROM ".$config->db_pre."users WHERE id = :id");
 	$result = $statement->execute(array('id' => $uid));
 	$usr = $statement->fetch();
 	if (!$usr) {
@@ -141,7 +149,7 @@ function uploadToApi($target_file){
 		$data = array(
 			"language" => "ger",
 			"isOverlayRequired" => "false",
-			"detectOrientation" => "true",
+			"detectOrientation" => "false",
 			"scale" => "true",
 			"filetype" => 'JPG',
 			"url" => $imageurl,
@@ -151,7 +159,7 @@ function uploadToApi($target_file){
 		$data = array(
 			"language" => "ger",
 			"isOverlayRequired" => "false",
-			"detectOrientation" => "true",
+			"detectOrientation" => "false",
 			"scale" => "true",
 			"filetype" => 'PNG',
 			"url" => $imageurl,
@@ -192,7 +200,7 @@ function uploadToApi($target_file){
 		//Geht nochmal über die einzelnen Postionen um wirklich alles Leerzeichen innerhalb der Elemente zu entfernen
 		$array=array_map('trim',$array);
 		
-		$q = $pdo->query("SELECT `searchfor`, `replacement` FROM `namefix`;");
+		$q = $pdo->query("SELECT `searchfor`, `replacement` FROM `".$config->db_pre."namefix`;");
 		$r  = $q->fetchAll(PDO::FETCH_KEY_PAIR);
 		if($r){
 			$name = strtr($array[0],$r); 
@@ -218,6 +226,12 @@ function uploadToApi($target_file){
 		$onlyfile = substr(strrchr($target_file, "/"), 1);
 		$fileext = substr(strrchr($target_file, "."), 1);
 		$usrid = getuid($name);
+
+		$notizen = '';
+		unset($errlog);
+		$errlog	= array();
+		$fail = 0;
+
 		if($usrid == 0) {
 			$fail = 1;
 			$errlog[] = "Name";
@@ -228,31 +242,83 @@ function uploadToApi($target_file){
 			$duplicate = False;
 			#wenn die uid gefunden wurde, prüfe ob die werte plausibel sind
 
-			//$rst = $pdo->prepare("SELECT * FROM stats WHERE uid = :uid order by id desc limit 0,1");
+			//$rst = $pdo->prepare("SELECT * FROM ".$config->db_pre."stats WHERE uid = :uid order by id desc limit 0,1");
 			//$result = $rst->execute(array('uid' => $usrid));
-			$rst = $pdo->prepare("SELECT * FROM stats WHERE uid = :uid and date <= :date order by date desc limit 0,1");
+			$rst = $pdo->prepare("SELECT * FROM ".$config->db_pre."stats WHERE uid = :uid and date <= :date order by date desc limit 0,1");
 			$result = $rst->execute(array(	'uid' => $usrid,
 											'date' => date("Y-m-d H:i:s", filemtime($target_file))));
 			$usr = $rst->fetch();
+			$error_row = -1;
+			$fail_count = 0; $save_fail_count = 0;
 			#wenn überhaupt was gefunden wurde
+
+			$arr[] = $exp; //0
+			$arr[] = $streuner; //1
+			$arr[] = $menschen; //2
+			$arr[] = $gespielte_missionen;//3
+			$arr[] = $abgeschlossene_missonen;//4
+			$arr[] = $haufen;//5
+			$arr[] = $heldenpower;//6
+			$arr[] = $waffenpower;//7
+			$arr[] = $karten;//8
+			$arr[] = $gerettete;//9
+
 			if($usr){ 
-				if ($usr['date'] == date("Y-m-d H:i:s", filemtime($target_file))) {$duplicate = True;}
-				#wenn in der exp kein schrägstrich ist
-				if(!strstr($exp, '/')){$fail = 1; $errlog[] = "Exp";}
-				#wenn die anzahl der ausgelesenen werte geringer ist als die zuvor ausgelesene dann fail..
-				if ($streuner < $usr['streuner']) {$fail = 1; $errlog[] = "Streuner";}
-				if ($menschen < $usr['menschen']) {$fail = 1; $errlog[] = "Menschen";}
-				if ($gespielte_missionen < $usr['gespielte_missionen']) {$fail = 1; $errlog[] = "Gespielte Missionen";}
-				if ($gefeuerte_schuesse < $usr['gefeuerte_schuesse']) {$fail = 1; $errlog[] = "Gefeuerte Schüsse";}
-				if ($haufen < $usr['haufen']) {$fail = 1; $errlog[] = "Haufen";}
-				if ($heldenpower < $usr['heldenpower']) {$fail = 1; $errlog[] = "Heldenpower";}
-				if ($waffenpower < $usr['waffenpower']) {$fail = 1; $errlog[] = "Waffenpower";}
-				if ($karten < $usr['karten']) {$fail = 1; $errlog[] = "Karten";}
-				if ($gerettete < $usr['gerettete']) {$fail = 1; $errlog[] = "Gerettete";}
+				for($i = 0; $i < 2; $i++){
+					//Abstand Tage berechnen --> könnte ggfls. benutzt werden, um die Werte besser zu validieren. z.B. $haufen > ($user['haufen']+(1000*$datediff)) sprich Fehler bei mehr als 1k Kisten am Tag.
+					 $datediff = round(abs(strtotime(date("Y-m-d", filemtime($target_file)))-strtotime(substr($usr['date'],0,10)))/86400);
+					 if ($datediff<2) $datediff = 2;
+
+					if ($usr['date'] == date("Y-m-d H:i:s", filemtime($target_file))) {$duplicate = True;}
+					#wenn in der exp kein schrägstrich ist
+					if(!strstr($exp, '/')){$fail = 1; $errlog[] = "Exp"; $error_row = $error_row<0?0:$error_row; $fail_count++;}
+					// else if(!strstr($exp, 'EP')){$fail = 1; $errlog[] = "Exp"; $error_row = $error_row<0?0:$error_row;  $fail_count++;}
+					#wenn die anzahl der ausgelesenen werte geringer ist als die zuvor ausgelesene dann fail..
+					if ($streuner < $usr['streuner']) {$fail = 1; $errlog[] = "Streuner"; $error_row = $error_row<0?0:$error_row; $fail_count++;}
+					if ($menschen < $usr['menschen']) {$fail = 1; $errlog[] = "Menschen"; $error_row = $error_row<0?1:$error_row; $fail_count++;}
+					if ($gespielte_missionen < $usr['gespielte_missionen']) {$fail = 1; $errlog[] = "Gespielte Missionen"; $error_row = $error_row<0?2:$error_row; $fail_count++;}
+					if (($abgeschlossene_missonen < $usr['abgeschlossene_missonen'])||($abgeschlossene_missonen > ($usr['abgeschlossene_missonen']+(500*$datediff)))) {$fail = 1; $errlog[] = "Abgeschlossene Missionen"; $error_row = $error_row<0?3:$error_row; $fail_count++;}
+
+					if ($gefeuerte_schuesse < $usr['gefeuerte_schuesse']) {$fail = 1; $errlog[] = "Gefeuerte Schüsse"; $error_row = $error_row<0?4:$error_row; $fail_count++;}
+					if ($haufen < $usr['haufen']||$haufen > ($usr['haufen']+(1000*$datediff))) {$fail = 1; $errlog[] = "Haufen"; $error_row = $error_row<0?5:$error_row; $fail_count++;}
+					if ($heldenpower < $usr['heldenpower']||$heldenpower > ($usr['heldenpower']+5000)) {$fail = 1; $errlog[] = "Heldenpower"; $error_row = $error_row<0?6:$error_row; $fail_count++;}
+					if ($waffenpower < $usr['waffenpower'] || $waffenpower > ($usr['waffenpower']+5000)) {$fail = 1; $errlog[] = "Waffenpower"; $error_row = $error_row<0?7:$error_row; $fail_count++;}
+					if ($karten < $usr['karten']) {$fail = 1; $errlog[] = "Karten"; $error_row = $error_row<0?8:$error_row; $fail_count++;}
+					if ($gerettete < $usr['gerettete']) {$fail = 1; $errlog[] = "Gerettete"; $error_row = $error_row<0?9:$error_row; $fail_count++;}
+
+					if($fail!=1 || $i > 0) break;
+					else{
+					  $save_fail_count = $fail_count;
+					  if($error_row > -1){
+						  if(isset($arr[9])&&$arr[9]==0){
+						  	for($h=9;$h>$error_row;$h--){
+						  	  $arr[$h] = $arr[$h-1];
+						  	}
+						  	$arr[$error_row] = 0;
+						  }
+						  $errlog = array();
+			$exp = $arr[0];
+			$streuner = $arr[1];
+			$menschen = $arr[2];
+			$gespielte_missionen = $arr[3];
+			$abgeschlossene_missonen = $arr[4];
+			$haufen = $arr[5];
+			$heldenpower = $arr[6];
+			$waffenpower = $arr[7];
+			$karten = $arr[8];
+			$gerettete = $arr[9];
+
+					  }
+
+
+
+
+					}
+				}
 			}
 		}
 		
-		if ($duplicate===True) {
+		if (isset($duplicate)&&($duplicate===True)) {
 			unlink($target_file);
 			echo 'Duplikate geöscht<br>';
 			return;
@@ -267,7 +333,7 @@ function uploadToApi($target_file){
 
 			
 		#Werte in eine Datenbank schreiben
-		$statement = $pdo->prepare("INSERT INTO stats(uid, name, date, exp, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete, notizen, fail)
+		$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."stats(uid, name, date, exp, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete, notizen, fail)
 			VALUES(:uid, :name, :date,:exp, :streuner, :menschen, :gespielte_missionen, :abgeschlossene_missonen, :gefeuerte_schuesse, :haufen, :heldenpower, :waffenpower, :karten, :gerettete, :notizen, :fail)");
 
 
@@ -291,7 +357,7 @@ function uploadToApi($target_file){
 			"notizen" => $notizen,
 			"fail" => $fail
 		));
-				
+			
 		if($statement) {     
 			if($name == ""){$name = "Nicht ermittelbar";}
 			echo $onlyfile . " - LID: " . $pdo->lastInsertId() . " - IGN: ". $name;
@@ -448,7 +514,8 @@ function generatePassword ( $passwordlength = 8,
 
 function user_exists($id){
 	global $pdo;
-	$statement = $pdo->prepare("SELECT ign FROM users WHERE id = :id");
+	global $config;
+	$statement = $pdo->prepare("SELECT ign FROM ".$config->db_pre."users WHERE id = :id");
 	$result = $statement->execute(array('id' => $id));
 	$dusr = $statement->fetch();
 	if(!empty($dusr)){
@@ -458,7 +525,8 @@ function user_exists($id){
 
 function stat_exists($id){
 	global $pdo;
-	$statement = $pdo->prepare("SELECT id FROM stats WHERE id = :id");
+	global $config;
+	$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."stats WHERE id = :id");
 	$result = $statement->execute(array('id' => $id));
 	$stat = $statement->fetch();
 	if(!empty($stat)){

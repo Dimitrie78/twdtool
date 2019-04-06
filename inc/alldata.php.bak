@@ -2,7 +2,7 @@
 include "verify.php";
 
 echo "Statistik von allen</b>";
-$query = $pdo->prepare('SELECT * FROM '.$config->db_pre.'stats ORDER BY name, date desc');
+$query = $pdo->prepare('SELECT * FROM stats ORDER BY name, date desc');
 $query->execute();
    
 ?>   

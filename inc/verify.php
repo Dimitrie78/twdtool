@@ -9,7 +9,7 @@ $rtns = array("Dev" => "99",
    			  "Mod" => "1,2,99",
 			  "User" => "1,2,3,99");
 
-$realrights = explode(",",$rtns[$allowed]);
+$realrights = explode(",",isset($allowed)?$rtns[$allowed]:"");
 /*
 if (!in_array($_SESSION['role'],$realrights)){
 	echo 'No right to open this Site';

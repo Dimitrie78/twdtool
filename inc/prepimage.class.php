@@ -9,7 +9,8 @@ class prepimage {
 	private $height	= 0;
 	private $type	= 2;
 	
-	private $poz 	= 0.8;
+	private $poz 	= 1.5; //0.9;
+	private $poz_ep = 1.6;
 	private $vars	= array();
 	private $out 	= false;
 	
@@ -32,6 +33,7 @@ class prepimage {
 	
 	private function render() {
 		$poz = $this->poz;
+		$poz_ep = $this->poz_ep;
 		
 		// Name
 		$b1 = $this->vars['playerW'];
@@ -52,12 +54,13 @@ class prepimage {
 		$p3 = $this->vars['werteY'];
 		
 		$new_width = $b1*$poz;
-		$new_width2 = $b2*$poz;
+		$new_width2 = $b2*$poz*$poz_ep;
 		$new_width3 = $b3*$poz;
-		$new_height = (($h1+$h2+$h3)*$poz);
+		$new_height = (($h1+$h3)*$poz+($h2*$poz*$poz_ep));
 		
+		$new_width_ges = max($new_width, $new_width2, $new_width3);
 		// Resample
-		$new = imagecreatetruecolor($new_width , $new_height);  // true color for best quality
+		$new = imagecreatetruecolor($new_width_ges , $new_height);  // true color for best quality
 		//2 is jpg, 3 is png
 		if($this->type == 2){
 			$image = imagecreatefromjpeg($this->filename);
@@ -68,8 +71,8 @@ class prepimage {
 
 		#imagecopyresampled($new, $image, 0, 0, 0, 100,$new_width , $h1*$poz, $width, $h1);
 		imagecopyresampled($new, $image, 0, 0, $c1, $p1, $new_width, $h1*$poz, $b1, $h1);
-		imagecopyresampled($new, $image, 0, ($h1)*$poz, $c2, $p2, $new_width2, $h2*$poz, $b2, $h2);
-		imagecopyresampled($new, $image, 0, ($h1+$h2)*$poz, $c3, $p3, $new_width3 , $h3*$poz, $b3, $h3);
+		imagecopyresampled($new, $image, 0, ($h1)*$poz, $c2, $p2, $new_width2, $h2*$poz*$poz_ep, $b2, $h2);
+		imagecopyresampled($new, $image, 0, ($h1*$poz+$h2*$poz*$poz_ep), $c3, $p3, $new_width3 , $h3*$poz, $b3, $h3);
 		
 		imagedestroy($image);
 		

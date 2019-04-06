@@ -14,7 +14,7 @@ if (!user_exists($uid)){
 $curr_datetime =date("Y-m-d H:i:s");
 $notetime = ($_POST['notes'] > "" ? $curr_datetime : ''); 
 
-$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."stats(uid, date, name, exp, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower,  waffenpower, karten, gerettete)
+$statement = $pdo->prepare("INSERT INTO stats(uid, date, name, exp, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower,  waffenpower, karten, gerettete)
     VALUES(:uid, :date, :name, :exp, :streuner, :menschen, :gespielte_missionen, :abgeschlossene_missonen, :gefeuerte_schuesse, :haufen, :heldenpower, :waffenpower, :karten, :gerettete)");
 
 						

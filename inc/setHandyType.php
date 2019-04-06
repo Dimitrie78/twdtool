@@ -11,7 +11,7 @@ foreach ($screens as $filename) {
 	}
 }
 
-$query = $pdo->prepare('SELECT * FROM ocr WHERE uid = :uid');
+$query = $pdo->prepare('SELECT * FROM '.$config->db_pre.'ocr WHERE uid = :uid');
 $query->execute(array(':uid' => $_SESSION['userid']));
 $data = $query->fetchAll(PDO::FETCH_ASSOC); #is maybe faster
 if(empty($data)) {
