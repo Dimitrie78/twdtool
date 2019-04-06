@@ -56,12 +56,13 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 		}
 		else
 		{
-			#$_SESSION['token'] = bin2hex(random_bytes(64));
 			$_SESSION['userid'] = $user['id'];
 			$_SESSION['role'] = $user['role'];
 			$_SESSION['ign'] = $user['ign'];
 			$_SESSION["login"] = 1;
 			$fail = "";
+			$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET lastlogin = NOW() WHERE id = :id');
+			$query->execute(array(':id' => $_SESSION['userid']));
 		}
     } else {
 		$fail = '<div class="modal-heading">
