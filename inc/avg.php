@@ -28,7 +28,9 @@ $abfragen = array('streuner' => 'Streuner',
 $arr_wochen = array(1 => '1 Woche',
 					2 => '2 Wochen',
 					3 => '3 Wochen',
-					4 => '4 Wochen');
+					4 => '4 Wochen',
+					8 => '8 Wochen',
+					12 => '12 Wochen');
 
 $tbody = '';
 $thead = '
@@ -36,12 +38,14 @@ $thead = '
   <thead>
     <tr>
 	  <th scope="col" style="min-width: 120px;">Name</th>
-	  <th scope="col">Diff</th>
-	  <th scope="col" style="min-width: 140px;">Startdatum</th>
-	  <th scope="col" style="min-width: 140px;">Enddatum</th>
-      <th scope="col">Start</th>
-      <th scope="col">Ende</th>
-	  <th scope="col">#Stats</th>
+	  <th scope="col" style="text-align: right;">Diff<br>Messung</th>
+	  <th scope="col" style="text-align: right;">Diff<br>Woche</th>
+	  <th scope="col" style="text-align: right; min-width: 140px;">Startdatum</th>
+	  <th scope="col" style="text-align: right; min-width: 140px;">Enddatum</th>
+	  <th scope="col" style="text-align: right;">Anz.<br>Tage</th>
+      	  <th scope="col" style="text-align: right;">Start</th>
+          <th scope="col" style="text-align: right;">Ende</th>
+	  <th scope="col" style="text-align: right;">#Stats</th>
     </tr>
   </thead>
   <tbody>';
@@ -79,10 +83,10 @@ echo '</select></div></form></div>';
 
 
 $sqlgetuser = "SELECT U.id AS uid, U.ign AS ign, count( S.uid ) AS anzstats, min( date ) AS mindate, max( date ) AS maxdate, min( ".$abfrage." ) AS minval, max( ".$abfrage." ) AS maxval
-	FROM stats AS S
-	INNER JOIN users AS U ON ( S.uid = U.id )
+	FROM ".$config->db_pre."stats AS S
+	INNER JOIN ".$config->db_pre."users AS U ON ( S.uid = U.id )
 	WHERE U.active =1
-	AND date > NOW( ) - INTERVAL ".$wochen." WEEK
+	AND DATE(date) >= DATE(NOW( ) - INTERVAL ".$wochen." WEEK)
 	GROUP BY S.uid
 	HAVING COUNT( S.uid ) >1
 	ORDER BY U.ign";
@@ -90,16 +94,22 @@ $sqlgetuser = "SELECT U.id AS uid, U.ign AS ign, count( S.uid ) AS anzstats, min
 
 $i = 0;
 $difftotal = 0;
+$diffWochetotal = 0;
 foreach ($pdo->query($sqlgetuser) as $user) {
 	$i++;  
-	$diff = $pdo->query("SELECT ceil( (
-	max( ".$abfrage." ) - min( ".$abfrage." ) ) /  ".$wochen."
-	) AS diff
-	FROM stats
-	WHERE date > NOW( ) - INTERVAL ".$wochen." WEEK
+	$diff = $pdo->query(
+        "SELECT 
+	TIMESTAMPDIFF(HOUR,min(date), max(date)) AS HourDiff,
+	TIMESTAMPDIFF(HOUR,min(date), max(date)) / 24 AS TageDiff,
+	7 * ".$wochen." AS WochenTageDiff,
+        ceil( (max( ".$abfrage." ) - min( ".$abfrage." ) ) / ".$wochen.") AS diff,
+        ceil( (max( ".$abfrage." ) - min( ".$abfrage." ) ) / (TIMESTAMPDIFF(HOUR,min(date), max(date)) / 24) * (7 * ".$wochen.") / ".$wochen.") AS diffWoche
+	FROM ".$config->db_pre."stats
+	WHERE DATE(date) >= DATE(NOW( ) - INTERVAL ".$wochen." WEEK)
 	AND uid = ".$user['uid']."")->fetch();  
 
 	$difftotal += $diff['diff'];
+        $diffWochetotal += $diff['diffWoche'];
 
 	$mindt = new DateTime($user['mindate']);
 	$maxdt = new DateTime($user['maxdate']);
@@ -108,14 +118,23 @@ foreach ($pdo->query($sqlgetuser) as $user) {
 	$tbody .=  '<tr'.$style.'>
 	  <td style="min-width: 120px; text-align: left;"><a href="?action=stats&uid='.$user['uid'].'">'.$user['ign'].'</a></td>
 	  <td style="text-align: right;">'.$diff['diff'].'</td>
+	  <td style="text-align: right;">'.$diff['diffWoche'].'</td>
 	  <td style="min-width: 140px; text-align: right;">'.$mindt->format('d.m.Y H:i').'</td>
 	  <td style="min-width: 140px; text-align: right;">'.$maxdt->format('d.m.Y H:i').'</td>
+	  <td style="text-align: right;">'.$diff['TageDiff'].'</td>
 	  <td style="text-align: right;">'.$user['minval'].'</td>
 	  <td style="text-align: right;">'.$user['maxval'].'</td>					
 	  <td style="text-align: right;">'.$user['anzstats'].'</td>
 	</tr>';
 }
-	
-echo $thead.$tbody.$tfoot.'<br>Clandurchschnitt: '. ceil($difftotal/$i);
+
+if ($i > 0){
+echo $thead.$tbody.$tfoot.'<br>Clandurchschnitt (Messung): '. ceil($difftotal/$i);
+echo '<br>Clandurchschnitt (Woche): '. ceil($diffWochetotal/$i);
+}
+else
+{
+echo 'Es sind mindestens 2 Datensätze im gewählten Zeitraum für die Auswertung erforderlich. Dieses Kriterium wird in der momentanen Auswahl nicht erfüllt.';	
+}
 ?>
 <script>$(document).ready(function(){ $('#avg').tablesorter(); });</script>
