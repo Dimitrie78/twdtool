@@ -41,8 +41,8 @@ function leveldata($exp){
 	// Der erste Wert muss kleiner als der zweite sein, und die exp wert muss in Levelarray stehen
 	if($exp[0] < $exp[1] AND in_array_r($exp[1],$lvls)){
 		$currlvl = $lvls[$exp[1]]-1;
-		$p = number_format($exp[0]/$exp[1]*100);
-		return number_format($currlvl.'.'.$p,2);
+		$p = ($exp[0]*100)/$exp[1];
+		return $currlvl.'.'.sprintf ("%02d",$p);
 	}
 	else
 	{
