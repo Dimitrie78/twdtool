@@ -8,8 +8,19 @@ include("inc/header.php");
 define('TIMEZONE', 'Europe/Berlin');
 date_default_timezone_set(TIMEZONE);
 
-$pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword);
-$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+try {  
+ $options = array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, //ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    );  
+$pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword,$options);
+
+if (stripos($pdo->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB')!==true )
+  $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+ }catch(PDOException $e){
+    echo "Datenbankverbindung fehlgeschlagen: " . $e->getMessage();
+  exit;
+}
 
 $rights = array("3" => "User",
                "2" => "Mod",
