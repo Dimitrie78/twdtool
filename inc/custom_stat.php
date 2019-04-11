@@ -31,12 +31,12 @@ foreach ($groupqry as $gro) {
  $grouppicker .= '<option value="'.$gro['ClanID'].'">'.$gro['Name'].' ('.$gro['Anzahl'].')</option>';
 }
 
-$dateqry = $pdo->query('SELECT DATE_FORMAT(s.date, "%Y-%m-%d") Datum , count(s.uid) Anzahl FROM '.$config->db_pre.'stats  s left join '.$config->db_pre.'users  u on s.uid = u.id WHERE u.active = 1 Group BY Datum ORDER BY Datum DESC ');
+$dateqry = $pdo->query('SELECT (CASE WHEN WEEKDAY(s.date) = 0 THEN \'Mo\' WHEN WEEKDAY(s.date) = 1 THEN \'Di\' WHEN WEEKDAY(s.date) = 2 THEN \'Mi\' WHEN WEEKDAY(s.date) = 3 THEN \'Do\' WHEN WEEKDAY(s.date) = 4 THEN \'Fr\' WHEN WEEKDAY(s.date) = 5 THEN \'Sa\' WHEN WEEKDAY(s.date) = 6 THEN \'So\' END) Tag, DATE_FORMAT(s.date, "%Y-%m-%d") Datum , count(s.uid) Anzahl FROM '.$config->db_pre.'stats  s left join '.$config->db_pre.'users  u on s.uid = u.id WHERE u.active = 1 Group BY Datum ORDER BY Datum DESC ');
 $dateqry->execute();
 
 $datepicker = '';
 foreach ($dateqry as $dat) {
- $datepicker .= '<option value="'.$dat['Datum'].'">'.$dat['Datum'].' ('.$dat['Anzahl'].')</option>';
+ $datepicker .= '<option value="'.$dat['Datum'].'">'.$dat['Tag'].' '.((new DateTime($dat['Datum']))->format('d.m.Y')).' ('.$dat['Anzahl'].')</option>';
 }
 $count = 0;
 foreach ($usrqry as $usr) {
