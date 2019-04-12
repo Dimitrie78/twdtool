@@ -23,6 +23,9 @@ if (isSet($date1)&&isSet($date2)){
 }
 $felder = str_replace('$days', $datediff, $felder);
 
+$s1Missed = '';
+$s2Missed = '';
+
 $groupqry = $pdo->query('SELECT u.clanid ClanID, c.name Name, count(u.ID) Anzahl FROM '.$config->db_pre.'users u left join '.$config->db_pre.'clans c on u.clanid = c.id WHERE u.active = 1 Group BY u.clanid ORDER BY c.name ');
 $groupqry->execute();
 
@@ -39,7 +42,9 @@ foreach ($dateqry as $dat) {
  $datepicker .= '<option value="'.$dat['Datum'].'">'.$dat['Tag'].' '.((new DateTime($dat['Datum']))->format('d.m.Y')).' ('.$dat['Anzahl'].')</option>';
 }
 $count = 0;
+$missed = 0;
 foreach ($usrqry as $usr) {
+	$missed = 0;
 	$count++;
 	$uid = $usr['id'];
 	$uname = $usr['ign'];
@@ -63,34 +68,48 @@ foreach ($usrqry as $usr) {
 	$e = array();
 	$q1 = $pdo->query($sql1);
 
+
 	if (count($c)<1){
-	$total_column = 0;
-    $total_column = $q1->columnCount();
-	// var_dump($total_column);
-	for ($counter = 0; $counter < $total_column; $counter ++) {
-	    $meta = $q1->getColumnMeta($counter);
-	    $c[] = $meta['name'];
-	}
+		$total_column = 0;
+	    $total_column = $q1->columnCount();
+		// var_dump($total_column);
+		for ($counter = 0; $counter < $total_column; $counter ++) {
+		    $meta = $q1->getColumnMeta($counter);
+		    $c[] = $meta['name'];
+		}
 	}
 
-	foreach ($q1 as $row1) {
+
+	if ($q1->rowCount()<1){
+	  $s1Missed .= ($s1Missed?', ':'').$usr['ign'];
+	  $missed = 1;
+	}else{ foreach ($q1 as $row1) {
 		for($h=0; $h<count($c);$h++){
 			$s1[] = $row1[$c[$h]];
 		}
 	}
+}
 
-	foreach ($pdo->query($sql2) as $row2) {
+	$q2 = $pdo->query($sql2);
+	if ($q2->rowCount()<1){
+	  $s2Missed .= ($s2Missed?', ':'').$usr['ign'];
+	  $missed = 1;
+	}else{  foreach ($q2 as $row2) {
 		for($h=0; $h<count($c);$h++){
 			$s2[] = $row2[$c[$h]];
 		}
 	}
+}
+
+	
+
 	// if((!$streuner1)||(!$streuner2)) continue;
 
 	for($h=0; $h<count($c);$h++){
 		$e[] = ($s1[$h]&&$s2[$h])?$s1[$h]-$s2[$h]:0;
 	}
 
-	$tbody .=  '<tr>
+	$tbody .=  '<tr '.($missed==1?'style="color:#ff4000;"':'').'>
 		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'">'.$uname.'</a></td>';
 
 	for($h=0; $h<count($c);$h++){
@@ -120,7 +139,8 @@ $thead .= '</tr>
 	
 $tfoot = '</tbody>
 </table></div>';
-
+if($s1Missed||$s2Missed)
+  echo '<br /><div style="border:2px dashed silver; padding:10px; background-color:#111111; font-weight:bold;">Folgende User-Stats fehlen:<br />'.($s1Missed?'Datum 1: <span style="color:red;">'.$s1Missed.'</span><br />':'').($s2Missed?'Datum2: <span style="color:red;">'.$s2Missed.'</span><br />':'').'</div><br />';
 echo $thead.$tbody.$tfoot;
 
 ?>
