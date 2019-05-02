@@ -93,12 +93,11 @@ return (object) array(
 	\'dbpassword\' => \''. $_POST["dbpassword"]. '\',
 	\'dbname\' => \''. $_POST["dbname"]. '\',
 	\'ocrspace_apikey\' => \''. $_POST["ocrspace_apikey"]. '\',
-	\'clantag\' => \''. $_POST["clantag"]. '\',
-	\'clanname\' => \''. $_POST["clanname"]. '\',
 	\'theme\' => \'slate\',
-	\'statlimit\' => \'8\');
+	\'statlimit\' => \'8\',
+	\'db_pre\' => \''. $_POST["db_pre"]. '\');
 ?>';
-			 
+			$pre = $_POST["db_pre"];
 			$fp = FOPEN("conf/config.php", "w");
 			FWRITE($fp, $string);
 			FCLOSE($fp);
@@ -109,14 +108,14 @@ return (object) array(
 				
 				echo '<div class="alert alert-success">Verbindung ok, config.php geschrieben, erstelle Tabellen...</div>';
 
-				$createqry = "CREATE TABLE IF NOT EXISTS `namefix` (
+				$createqry = "CREATE TABLE IF NOT EXISTS `".$pre."namefix` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
 				  `searchfor` varchar(255) NOT NULL,
 				  `replacement` varchar(255) NOT NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `news` (
+				CREATE TABLE IF NOT EXISTS `".$pre."news` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
 				  `ndate` datetime NOT NULL,
 				  `text` text NOT NULL,
@@ -125,7 +124,7 @@ return (object) array(
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `stats` (
+				CREATE TABLE IF NOT EXISTS `".$pre."stats` (
 				  `id` int(10) NOT NULL AUTO_INCREMENT,
 				  `uid` int(4) NOT NULL,
 				  `date` datetime NOT NULL,
@@ -146,12 +145,13 @@ return (object) array(
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `users` (
+				CREATE TABLE IF NOT EXISTS `".$pre."users` (
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				  `gid` int(10) NOT NULL,
 				  `telegram` varchar(255) NOT NULL,
 				  `notes` text NOT NULL,
 				  `notetime` datetime DEFAULT NULL,
-				  `ign` varchar(255) NOT NULL,
+				  `ign` varchar(12) NOT NULL,
 				  `passwd` varchar(255) NOT NULL,
 				  `role` tinyint(1) NOT NULL,
 				  `lastlogin` datetime NULL,
@@ -161,8 +161,16 @@ return (object) array(
 				  PRIMARY KEY (`id`),
 				  UNIQUE KEY `ign` (`ign`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+				
+				CREATE TABLE IF NOT EXISTS `".$pre."groups` (
+				  `id` int(10) NOT NULL AUTO_INCREMENT,
+				  `tag` varchar(3) NOT NULL,
+				  `name` varchar(16) NOT NULL,
+				  PRIMARY KEY (`id`),
+				  UNIQUE KEY `tag` (`tag`)
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-				CREATE TABLE IF NOT EXISTS `ocr` (
+				CREATE TABLE IF NOT EXISTS `".$pre."ocr` (
 					  `id` int(11) NOT NULL AUTO_INCREMENT,
 					  `uid` int(11) DEFAULT NULL,
 					  `aktiv` tinyint(3) DEFAULT '0',
@@ -182,34 +190,52 @@ return (object) array(
 					  PRIMARY KEY (`id`)
 					) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-				INSERT INTO `news` (
-				`id` ,
-				`ndate` ,
-				`text` ,
-				`validuntil` ,
-				`active`
+				INSERT INTO `".$pre."news` (
+				 `id`,
+				 `ndate`,
+				 `text`,
+				 `validuntil`,
+				 `active`
 				)
 				VALUES (
-				'1',  '0000-00-00 00:00:00',  '',  '0000-00-00 00:00:00',  '1'
+				 '1',  '0000-00-00 00:00:00',  '',  '0000-00-00 00:00:00',  '1'
 				);
+				
 				";
 
 				if ($conn->query($createqry))
 				{
-					echo '<div class="alert alert-success">Tabellen erfolgreich erstellt! - Lege Admin-User an...</div>';	
+					echo '<div class="alert alert-success">Tabellen erfolgreich erstellt!</div>';	
+					
+					$statement = $conn->prepare("INSERT INTO ".$pre."groups(tag, name)
+					VALUES(:tag, :name)");
+					$statement->execute(array(
+						"tag" => $_POST["clantag"],
+						"name" => $_POST["clanname"]
+						));
+					
+					$count = $statement->rowCount();
+				    if($count =='1'){
+						echo '<div class="alert alert-success">Gruppe / ersten Clan erfolgreich angelegt.</div>';
+					}
+					else{
+						echo '<div class="alert alert-warning">Fehler bei der Anlage der Gruppe</div>';
+					}
+
 					$curr_datetime = date("Y-m-d H:i:s");
-					$statement = $conn->prepare("INSERT INTO users(ign, passwd, role, created_at, active)
-					VALUES(:ign, :passwd, :role, :created_at, :active)");
+					$statement = $conn->prepare("INSERT INTO ".$pre."users(ign, gid, passwd, role, created_at, active)
+					VALUES(:ign, :gid, :passwd, :role, :created_at, :active)");
 					$statement->execute(array(
 						"ign" => $_POST['firstuser'],
+						"gid" => 1,
 						"passwd" => password_hash($_POST['firstuserpw'], PASSWORD_DEFAULT) ,
 						"role" => 1,
 						"created_at" => $curr_datetime,
 						"active" => 1
 						));
-					if ($statement)
-						{
-						echo '<div class="alert alert-success"><strong>Nutzer ' . htmlentities($_POST['firstuser']) . ' angelegt!</strong> Bitte löschen Sie nun die install.php</div>';
+					$count = $statement->rowCount();
+				    if($count =='1'){
+						echo '<div class="alert alert-success"><strong>Admin ' . htmlentities($_POST['firstuser']) . ' angelegt!</strong> Bitte löschen Sie nun die install.php</div>';
 						}
 					  else {
 						echo '<div class="alert alert-warning">Fehler bei der Anlage des Adminusers</div>';
@@ -221,14 +247,14 @@ return (object) array(
 		}
 	} catch (PDOException $e) {
 		// echo $e->getMessage();
-		echo 'Es ist ein Fehler aufgetreten, bitte prüfen Sie die SQL-Zugangsdaten und versuchen Sie es erneut.<br><form>
+		echo '<div class="alert alert-warning">Es ist ein Fehler aufgetreten, bitte prüfen Sie die SQL-Zugangsdaten und versuchen Sie es erneut.</div><br><form>
   <input type="button" value="Zur&uuml;ck" onClick="history.go(-1);return true;">
 </form>';
 	 }
 } 
 if(!$_POST) {
 ?>
-		<form action="" method = "POST" autocomplete="no" name="install" id="install">
+		<form action="install.php" method = "POST" autocomplete="off" name="install" id="install">
 		  <div class="form-group">
 			<label for="telegram">Datenbank Hostname:</label>
 			<input type="text" class="form-control" id="dbhost" name="dbhost" value="localhost" required>
@@ -239,31 +265,35 @@ if(!$_POST) {
 		  </div>
 		  <div class="form-group">
 			<label for="dbpassword">Datenbank Passwort:</label>
-			<input type="password" class="form-control" id="dbpassword" name="dbpassword" required> 
+			<input type="password" class="form-control" id="dbpassword" name="dbpassword" autocomplete="new-password" required> 
 		  </div>
 		  <div class="form-group">
 			<label for="dbname">Datenbank Name:</label>
 			<input type="text" class="form-control" id="dbname" name="dbname" required> 
 		  </div>
 		  <div class="form-group">
+			<label for="dbname">Datenbank Präfix (Optional):</label>
+			<input type="text" class="form-control" id="db_pre" name="db_pre" required> 
+		  </div>
+		  <div class="form-group">
 			<label for="ocrspace_apikey"><a href="https://ocr.space" target="_new">OCR.Space API KEY:</a></label>
 			<input type="text" class="form-control" id="ocrspace_apikey" name="ocrspace_apikey" required> 
 		  </div>
 		  <div class="form-group">
-			<label for="firstuser">Ingame-Name des Tool-Admins</label>
-			<input type="text" class="form-control" id="firstuser" name="firstuser" required> 
+			<label for="firstuser">Ingame-Name des Tool-Admins / DEV-User</label>
+			<input type="text" class="form-control" id="firstuser" name="firstuser" maxlength = "12" required> 
 		  </div>
 		  <div class="form-group">
-		    <label for="firstuserpw">Gewünschtes Passwort des Tool-Admins</label>
+		    <label for="firstuserpw">Gewünschtes Passwort des Tool-Admins / DEV-User</label>
 		    <input type="password" class="form-control" id="firstuserpw" name="firstuserpw" minlength="5" required> 
 		  </div>
 		  <div class="form-group">
-		    <label for="clantag">Guppen-Kürzel</label>
-		    <input type="text" class="form-control" id="clantag" name="clantag"> 
+		    <label for="clantag">Guppen-Kürzel / Clan-Tag</label>
+		    <input type="text" class="form-control" id="clantag" name="clantag" maxlength = "3" required> 
 		  </div>	
 		  <div class="form-group">
-		    <label for="clanname">Gruppen-Name</label>
-		    <input type="text" class="form-control" id="clanname" name="clanname"> 
+		    <label for="clanname">Gruppen-Name / Clan-Name</label>
+		    <input type="text" class="form-control" id="clanname" name="clanname" maxlength = "16" required> 
 		  </div>			  
 		  <div class="form-group text-center">
 		   <button type="submit" name="do" value="createdb" class="btn btn-success">Installieren</button>
