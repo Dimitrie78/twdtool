@@ -1,3 +1,6 @@
+<?php
+ob_start();
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -17,64 +20,66 @@
 	  <hr />
 	  <div class="modal-body">
 <?php
-// 1. Check if file existits and dir is writeable
-// 2.1 Check if we CAN use chmod -> then chmod it
+	if (is_file('conf/config.php')) {
+		die('<font color="red">Abbruch. Die config Datei existiert bereits!</font>');
+	}
+	if (is_file('conf/.gitignore')) {
+		unlink('conf/.gitignore');
+	}
+	if (is_file('2ocr/fail/.gitignore')) {
+		unlink('2ocr/fail/.gitignore');
+	}
+		
 $dirs = array(
 	"./conf",
 	"./screens",
-	"./2ocr");
+	"./2ocr",
+	"./2ocr/fail");
 	
-foreach($dirs as $dir)
-	{
-	if (file_exists($dir))
-		{
-		if (!is_writable($dir))
-			{
-			echo 'Versuche Schreibrechte für Verzeichnis ' . $dir . ' zu setzen...';
-			if (fileowner($dir) === getmyuid())
-				{
-				if (chmod($dir, 0755))
-					{
-					echo 'erfolgreich!<br />';
-					}
-				  else
-					{
+foreach($dirs as $dir) {
+	if (!file_exists($dir)) {
+		echo 'Verzeichniss '.$dir.
+		' existiert nicht. Es wird automatisch angelegt...';
+		if (!mkdir($dir, 0755, true)) {
+			die('<br><font color="red">Erstellung schlug fehl!</font>
+				 Bitte manuell anlegen und den Installer
+				<a href = "install.php">erneut aufrufen</a>.');
+		} else {
+			echo '<font color="green">erfolgreich!</font>';
+		}
+	} else {
+		if (!is_writable($dir)) {
+			echo 'Versuche Schreibrechte für Verzeichnis '.$dir.
+			' zu setzen...';
+			if (fileowner($dir) === getmyuid()) {
+				if (chmod($dir, 0755)) {
+					echo '<font color="green">erfolgreich!</font><br />';
+				} else {
 					$notsupporeted = true;
 					echo 'fehlgeschlagen<br />';
-					}
 				}
-			  else
-				{
+			} else {
 				$notsupporeted = true;
 				$notokay[] = $dir;
-				}
 			}
 		}
-	  else
-		{
-		echo $dir . ' existiert nicht. bitte anlegen und chmod auf 0755 stellen<br />';
-		exit;
-		}
 	}
+}
 
-if ($notsupporeted)
-	{
-	echo 'Ihr Webspace unterstützt das automatische setzen von Schreibrechten nicht.<br />Bitte setzen Sie in Ihrem FTP-Programm die chmods auf 0755 für die Verzeichnisse:<br />' . implode('<br />', $notokay);
+if ($notsupporeted) {
+	echo 'Ihr Webspace unterstützt das automatische setzen von Schreibrechten nicht.<br />
+	Bitte setzen Sie in Ihrem FTP-Programm die chmods auf 0755 für die Verzeichnisse:<br />
+	' . implode('<br />', $notokay);
 	exit;
 	}
 
-
 if ($_POST["do"] == "createdb") {
-
-	#nur datenbankverbindung muss unbedingt gesetzt sein
-	#rest is optional und kann am ende ergänzt werden	
 	$config['dbhost'] = $_POST["dbhost"];
 	$config['dbname'] = $_POST["dbname"];
 	$config['dbusername'] = $_POST["dbusername"];
 	$config['dbpassword'] = $_POST["dbpassword"];
 
 	$config = array_map('trim', $config);
-
 	foreach ($config as $key => $value) {
 		if (empty($value)){
 			$notfilled = true;
@@ -105,9 +110,7 @@ return (object) array(
 			if (!is_file('conf/config.php')) {
 				echo '<div class="alert alert-warning">Fehler beim erzeugen der config.php</div>';
 			} else {
-				
 				echo '<div class="alert alert-success">Verbindung ok, config.php geschrieben, erstelle Tabellen...</div>';
-
 				$createqry = "CREATE TABLE IF NOT EXISTS `".$pre."namefix` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
 				  `searchfor` varchar(255) NOT NULL,
@@ -171,37 +174,35 @@ return (object) array(
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 				CREATE TABLE IF NOT EXISTS `".$pre."ocr` (
-					  `id` int(11) NOT NULL AUTO_INCREMENT,
-					  `uid` int(11) DEFAULT NULL,
-					  `aktiv` tinyint(3) DEFAULT '0',
-					  `name` varchar(255) DEFAULT NULL,
-					  `playerW` int(11) DEFAULT NULL,
-					  `playerH` int(11) DEFAULT NULL,
-					  `playerX` int(11) DEFAULT NULL,
-					  `playerY` int(11) DEFAULT NULL,
-					  `epW` int(11) DEFAULT NULL,
-					  `epH` int(11) DEFAULT NULL,
-					  `epX` int(11) DEFAULT NULL,
-					  `epY` int(11) DEFAULT NULL,
-					  `werteW` int(11) DEFAULT NULL,
-					  `werteH` int(11) DEFAULT NULL,
-					  `werteX` int(11) DEFAULT NULL,
-					  `werteY` int(11) DEFAULT NULL,
-					  PRIMARY KEY (`id`)
-					) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+					`id` int(11) NOT NULL AUTO_INCREMENT,
+					`uid` int(11) DEFAULT NULL,
+					`aktiv` tinyint(3) DEFAULT '0',
+					`name` varchar(255) DEFAULT NULL,
+					`playerW` int(11) DEFAULT NULL,
+					`playerH` int(11) DEFAULT NULL,
+					`playerX` int(11) DEFAULT NULL,
+					`playerY` int(11) DEFAULT NULL,
+					`epW` int(11) DEFAULT NULL,
+					`epH` int(11) DEFAULT NULL,
+					`epX` int(11) DEFAULT NULL,
+					`epY` int(11) DEFAULT NULL,
+					`werteW` int(11) DEFAULT NULL,
+					`werteH` int(11) DEFAULT NULL,
+					`werteX` int(11) DEFAULT NULL,
+					`werteY` int(11) DEFAULT NULL,
+				  PRIMARY KEY (`id`)
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 				INSERT INTO `".$pre."news` (
-				 `id`,
-				 `ndate`,
-				 `text`,
-				 `validuntil`,
-				 `active`
+					`id`,
+					`ndate`,
+					`text`,
+					`validuntil`,
+					`active`
 				)
 				VALUES (
-				 '1',  '0000-00-00 00:00:00',  '',  '0000-00-00 00:00:00',  '1'
-				);
-				
-				";
+					'1',  '0000-00-00 00:00:00',  '',  '0000-00-00 00:00:00',  '1'
+				);";
 
 				if ($conn->query($createqry))
 				{
@@ -221,7 +222,6 @@ return (object) array(
 					else{
 						echo '<div class="alert alert-warning">Fehler bei der Anlage der Gruppe</div>';
 					}
-
 					$curr_datetime = date("Y-m-d H:i:s");
 					$statement = $conn->prepare("INSERT INTO ".$pre."users(ign, gid, passwd, role, created_at, active)
 					VALUES(:ign, :gid, :passwd, :role, :created_at, :active)");
@@ -235,7 +235,14 @@ return (object) array(
 						));
 					$count = $statement->rowCount();
 				    if($count =='1'){
-						echo '<div class="alert alert-success"><strong>Admin ' . htmlentities($_POST['firstuser']) . ' angelegt!</strong> Bitte löschen Sie nun die install.php</div>';
+						echo '<div class="alert alert-success"><strong>Admin ' . htmlentities($_POST['firstuser']) . ' angelegt!</strong></div>';
+						if(unlink('install.php')){
+						echo '<div class="alert alert-success"><strong>Entferne Installer... OK.</strong> <a href ="index.php">Weiterleitung...</a></div>';
+						header('Refresh: 2; URL=index.php');
+						}
+						else{
+						echo 'Bitte jetzt die install.php löschen.';
+						}
 						}
 					  else {
 						echo '<div class="alert alert-warning">Fehler bei der Anlage des Adminusers</div>';
