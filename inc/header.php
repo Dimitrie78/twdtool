@@ -56,7 +56,10 @@ switch ($_GET['action']) {
         break;	
     case "currentstats":
         $panelhead = "Die zuletzt ausgelesenen Werte";
-        break;			
+        break;
+    case "groupedit":
+        $panelhead = "Gruppen Editor";
+        break;
     case "fails" :
 	case "editfail":
 	case "updatefail":
