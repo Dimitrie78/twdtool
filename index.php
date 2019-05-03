@@ -2,7 +2,9 @@
 session_start();
 ob_start();
 header("Content-Type: text/html; charset=utf-8");
+if (!file_exists("conf/config.php")){exit('Config Datei fehlt. Bitte installieren.');}
 $config = include("conf/config.php");
+$errmode = 'EXCEPTION'; // SILENT im Produktivbetrieb, EXCEPTION oder WARNING beim Debuggen
 include("inc/functions.php");
 include("inc/header.php");
 define('TIMEZONE', 'Europe/Berlin');
@@ -10,7 +12,7 @@ date_default_timezone_set(TIMEZONE);
 
 try {  
   $options = array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, //ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => 'PDO::ERRMODE_'.$errmode, 
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     );  
   $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword,$options);
@@ -33,7 +35,7 @@ $rights = array("3" => "User",
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <title> TWD Stattool [<?=$config->clantag;?>]</title>
+  <title>TWD Stattool</title>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -153,8 +155,9 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 					<li><a href="?action=import"><span style="margin-right:5px;" class="fas fa-save"></span> 4. Auslesen und speichern</a></li> 
 					<li><a href="?action=fails"><span style="margin-right:5px;" class="fas fa-bug"></span> 5. Auslesefehler fixen &nbsp;&nbsp;<span class="badge badge-warning"><?php echo $fails['anz']; ?></span></a></li> 
 					<li><a href="?action=ocrfix"><span style="margin-right:5px;" class="fas fa-rocket"></span> 6. OCR-Verbessern</a></li> 
-					<li><a href="?action=frontpageedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 7. Startseiteneditor</a></li> 
+					<li><a href="?action=frontpageedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 7. Startseiten Editor</a></li> 
 					<li><a href="?action=setHandyType"><span style="margin-right:5px;" class="fas fa-edit"></span> 8. Handy Screen Editor</a></li> 
+					<li><a href="?action=groupedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 9. Gruppen Editor</a></li> 
 					
               </ul>
             </li>
@@ -177,11 +180,23 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 
     <div class="panel panel-primary">
 	
-      <div class="panel-heading"><?php echo (isset($panelhead)?$panelhead:""); ?></div>
+      <div class="panel-heading"><?php echo (isset($panelhead)?$panelhead:"TWD-Stats"); ?></div>
       <div class="panel-body">
 	  
 <?php
+## NUR FÜR DEV
 
+if (isdev()){
+  if (isset($_GET["action"]))
+switch ($_GET['action']) {
+	case "groupedit":
+    $file = "inc/".$_GET['action'].".php";
+    if(is_file($file)) {
+		include($file);
+	}
+	break;
+  }
+} ## Ende DEV
 
 
 # Nur für ADMIN
@@ -249,7 +264,15 @@ switch ($_GET['action']) {
 } 
 
 if (!isset($_GET["action"])){
+	
+	$statement = $pdo->prepare("SELECT ".$config->db_pre."groups.name as name, ".$config->db_pre."groups.tag as tag, ".$config->db_pre."groups.id as id FROM ".$config->db_pre."groups
+	INNER JOIN ".$config->db_pre."users ON ".$config->db_pre."users.gid = ".$config->db_pre."groups.id where ".$config->db_pre."users.id = :uid");
+	$result = $statement->execute(array('uid' => $_SESSION['userid']));
+	$group = $statement->fetch();
+	
+	
 	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0")->fetch();
+	
 	$stats = $pdo->query("SELECT max(date) as statupdate from ".$config->db_pre."stats")->fetch();
 	if($stats['statupdate'] != "0000-00-00 00:00:00"){
 		$datetime = new DateTime($stats['statupdate']);
@@ -257,12 +280,11 @@ if (!isset($_GET["action"])){
 		unset($datetime);
 	}
 	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE id = 1 AND active = 1")->fetch();
+	
 ?>
-<audio autoplay>
-  <source src="zombie.mp3" type="audio/mpeg">
-</audio>
-	<p>Willkommen <b><?php echo $_SESSION['ign']; ?></b>, bei den <?=$config->clanname;?> [<?=$config->clantag;?>]
-	<br><br>Wir haben derzeit: <?php echo  $user['anz']; ?> Spieler.<?php echo $lstatupdate; ?><br>
+
+	<p>Willkommen <b><?php echo $_SESSION['ign']; ?></b>, bei den <?=$group['name'];?> [<?=$group['tag'];?>]
+	<br><br>Wir haben derzeit: <?php echo $user['anz']; ?> Spieler in der Gruppe.<?php echo $lstatupdate; ?><br>
 	<?=nl2br($news['text']);?>
 	
 <?php } ?>
