@@ -1,30 +1,9 @@
 <?php
 include "verify.php";
 
-if (!isset($_GET["do"])){
-	if (isset($_GET["do"])) {
-	  switch ($_GET["do"]) {
-		case "updatesuccess":
-			okmsg('Der Eintrag wurde aktualisiert!');
-		break;
-		case "updatefail":
-			failmsg('Die Eintrag konnten nicht aktualisiert werden!');
-		break;
-		case "addsuccess":
-			okmsg('Der Eintrag wurde hinzugefügt!');
-		break;
-	    case "addfail":
-			failmsg('Die Eintrag konnten nicht hinzugefügt werden!');
-		break;
-	    case "deletesuccess":
-			okmsg('Der Eintrag wurde entfernt!');
-		break;
-	    case "deletefail":
-			failmsg('Die Eintrag konnte nicht entfernt werden!');
-		break;
-	  }
-	}
-	
+msgbox($_GET['msg']);
+
+	if (!isset($_GET["do"])){
 ?>
 
   <div class="clearfix">
