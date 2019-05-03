@@ -1,7 +1,7 @@
 <div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-heading">
-				<h2 class="text-center">Login TWD Statistiktool [<?=$config->clantag;?>]</h2>
+				<h2 class="text-center">Login TWD Statistiktool</h2>
 			</div>
 			<hr />
 			<div class="modal-body">
