@@ -4,7 +4,13 @@ include "verify.php";
 msgbox($_GET['msg']);
 
 if (!isset($_GET['do'])){
-$grpqry = $pdo->query('SELECT id,tag,name FROM '.$config->db_pre.'groups ORDER BY name');
+	
+$grpqry = $pdo->query('SELECT '.$config->db_pre.'groups.tag, '.$config->db_pre.'groups.id, '.$config->db_pre.'groups.name,
+COUNT( '.$config->db_pre.'users.id ) AS anz
+FROM '.$config->db_pre.'groups
+LEFT JOIN '.$config->db_pre.'users ON '.$config->db_pre.'groups.ID = '.$config->db_pre.'users.gid
+GROUP BY '.$config->db_pre.'users.gid ORDER BY '.$config->db_pre.'groups.tag');
+#$grpqry = $pdo->query('SELECT id,tag,name FROM '.$config->db_pre.'groups ORDER BY name');
 $grpqry->execute();
 ?>
 <a href="?action=groupedit&do=add" style = "margin-bottom: 10px" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Gruppe erstellen</a>
@@ -15,6 +21,7 @@ $grpqry->execute();
 	  <th scope="col" style="min-width: 41px;">ID</th>
       <th scope="col" style="min-width: 50px;">Tag</th>
       <th scope="col" style="min-width: 200px;">Name</th>
+	  <th scope="col" style="min-width: 50px;">Nutzer</th>
 	  <th scope="col" style="min-width: 50px;">Edit</th>
     </tr>
   </thead>
@@ -26,6 +33,7 @@ foreach ($grpqry as $group) {
 	  <td><?php echo $group['id']; ?></td>
 	  <td><?php echo $group['tag']; ?></td>
       <td><?php echo $group['name']; ?></td>
+	  <td><?php echo $group['anz']; ?></td>
 	  <td><a href = "?action=groupedit&do=update&id=<?php echo $group['id']; ?>" class="btn btn-primary btn-xs"><span class = "fas fa-edit"></span> EDIT</a></td>
 	</tr>
 <?php
