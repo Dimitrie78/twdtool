@@ -76,6 +76,7 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 			$_SESSION['userid'] = $user['id'];
 			$_SESSION['role'] = $user['role'];
 			$_SESSION['ign'] = $user['ign'];
+			$_SESSION['gid'] = $user['gid'];
 			$_SESSION["login"] = 1;
 			$fail = "";
 			$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET lastlogin = NOW() WHERE id = :id');
@@ -120,18 +121,16 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 		    <li><a href="index.php"><span style = "margin-right:5px;" class="fas fa-home"></span>Home</a></li>
 			<li><a href="?action=stats&uid=<?php echo $_SESSION['userid'];?>"><span style = "margin-right:5px;" class="fas fa-chart-line"></span>Stats</a></li>	
 			<li><a href="?action=top"><span style = "margin-right:5px;" class="fas fa-award"></span>Topliste</a></li>	           
-	
-
-					<li class="dropdown">
+			<li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" ><span class="fas fa-flag-checkered"></span>  Auswertung <span class="caret"></span></a>
               <ul class="dropdown-menu">
-							<li><a href="?action=levelingnumbers"><span style = "margin-right:5px;" class="fas fa-sort-numeric-up"></span> Anstieg in Zahlen</a></li>
-							<li><a href="?action=currentstats"><span style = "margin-right:5px;" class="fas fa-star"></span> Aktuelle Statistik</a></li>
-							<li><a href="?action=avg"><span style = "margin-right:5px;" class="fas fa-stopwatch"></span> Durchschnitt</a></li>
-							<li><a href="?action=custom_stat"><span style = "margin-right:5px;" class="fas fa-stopwatch"></span> Custom</a></li>
+		<li><a href="?action=levelingnumbers"><span style = "margin-right:5px;" class="fas fa-sort-numeric-up"></span> Anstieg in Zahlen</a></li>
+		<li><a href="?action=currentstats"><span style = "margin-right:5px;" class="fas fa-star"></span> Aktuelle Statistik</a></li>
+		<li><a href="?action=avg"><span style = "margin-right:5px;" class="fas fa-stopwatch"></span> Durchschnitt</a></li>
+		<li><a href="?action=custom_stat"><span style = "margin-right:5px;" class="fas fa-stopwatch"></span> Custom</a></li>
 		<?php if (isadminormod()){ ?>								
-						<li><a href="?action=alldata"><span style = "margin-right:5px;" class="fas fa-list-alt"></span> Komplettab.</a></li>
-							<?php } ?>
+		<li><a href="?action=alldata"><span style = "margin-right:5px;" class="fas fa-list-alt"></span> Komplettab.</a></li>
+		<?php } ?>
               </ul>
             </li>
 		<?php if (isadminormod()){ ?>
@@ -142,35 +141,34 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
 					<li><a href="?action=createnewuser"><span style = "margin-right:5px;" class="fas fa-user-plus"></span>Neu anlegen</a></li>
               </ul>
             </li>
-			  
-			  
-								<?php } ?>
+		<?php } ?>
 		 <?php if (isadmin()){ ?>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="fa fa-cog"></span>  ADMIN <span class="caret"></span></a>
               <ul class="dropdown-menu">
-					<li><a href="?action=uploadimg"><span style="margin-right:5px;" class="fas fa-upload"></span> 1. Bilder hochladen</a></li>
-					<li><a href="?action=prepimg"><span style="margin-right:5px;" class="fas fa-bolt"></span> 2. Bilder konvertieren</a></li>
-					<li><a href="2ocr/" target="_new"><span style="margin-right:5px;" class="fas fa-search"></span> 3. Konvertierte aufrufen</a></li>
-					<li><a href="?action=import"><span style="margin-right:5px;" class="fas fa-save"></span> 4. Auslesen und speichern</a></li> 
-					<li><a href="?action=fails"><span style="margin-right:5px;" class="fas fa-bug"></span> 5. Auslesefehler fixen &nbsp;&nbsp;<span class="badge badge-warning"><?php echo $fails['anz']; ?></span></a></li> 
-					<li><a href="?action=ocrfix"><span style="margin-right:5px;" class="fas fa-rocket"></span> 6. OCR-Verbessern</a></li> 
-					<li><a href="?action=frontpageedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 7. Startseiten Editor</a></li> 
-					<li><a href="?action=setHandyType"><span style="margin-right:5px;" class="fas fa-edit"></span> 8. Handy Screen Editor</a></li> 
-					<li><a href="?action=groupedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 9. Gruppen Editor</a></li> 
+				<li><a href="?action=uploadimg"><span style="margin-right:5px;" class="fas fa-upload"></span> 1. Bilder hochladen</a></li>
+				<li><a href="?action=prepimg"><span style="margin-right:5px;" class="fas fa-bolt"></span> 2. Bilder konvertieren</a></li>
+				<li><a href="2ocr/" target="_new"><span style="margin-right:5px;" class="fas fa-search"></span> 3. Konvertierte aufrufen</a></li>
+				<li><a href="?action=import"><span style="margin-right:5px;" class="fas fa-save"></span> 4. Auslesen und speichern</a></li> 
+				<li><a href="?action=fails"><span style="margin-right:5px;" class="fas fa-bug"></span> 5. Auslesefehler fixen &nbsp;&nbsp;<span class="badge badge-warning"><?php echo $fails['anz']; ?></span></a></li> 
+				<li><a href="?action=ocrfix"><span style="margin-right:5px;" class="fas fa-rocket"></span> 6. OCR-Verbessern</a></li> 
+				<li><a href="?action=frontpageedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 7. Startseiten Editor</a></li> 
+				<li><a href="?action=setHandyType"><span style="margin-right:5px;" class="fas fa-edit"></span> 8. Handy Screen Editor</a></li>
+				<?php if (isdev()){ ?>
+				  <li><a href="?action=groupedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 9. Gruppen Editor</a></li> 
+				<?php } ?>
 					
               </ul>
             </li>
 			<?php } ?>
           </ul>
-
           <ul class="nav navbar-nav navbar-right">
 		  <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="fas fa-user"></span> <?php echo $_SESSION['ign'] . " [".$rights[$_SESSION['role']] . "]"; ?>  <span class="caret"></span></a>
-			                <ul class="dropdown-menu">
-      <li><a href="index.php?action=myprofile"><span style = "margin-right:5px;" class="fas fa-cog"></span> Einstellungen</a></li>
-      <li><a href="index.php?action=logout" target = "_new"><span style = "margin-right:5px;" class="fas fa-sign-out-alt"></span> Ausloggen</a></li>
-	  </ul>
+			  <ul class="dropdown-menu">
+				<li><a href="index.php?action=myprofile"><span style = "margin-right:5px;" class="fas fa-cog"></span> Einstellungen</a></li>
+				<li><a href="index.php?action=logout" target = "_new"><span style = "margin-right:5px;" class="fas fa-sign-out-alt"></span> Ausloggen</a></li>
+			  </ul>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -291,7 +289,7 @@ if (!isset($_GET["action"])){
 	</div>
 </div> 
 <div class="well">
-V 1.8.2 Beta
+V 1.8.3 Multigroup Beta
 </div>
 </div>
 <script src="inc/js/bootstrap.min.js"></script>
