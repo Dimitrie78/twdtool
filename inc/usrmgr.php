@@ -9,23 +9,35 @@ if (isset($_GET['uid']) & !user_exists($uid)){
 
 }
 
-$active = '';
+$filter = '';
 $optall = '';
 $optactive = '';
 $optinactive ="";
-if (isset($_POST['optactive'])&&$_POST['optactive'] == "all"){
-$active = '';
+$where_grouplimit = '';
+$and_grouplimit = '';
+$anz = '';
+
+if (!isdev()){
+$gidfilter = 'gid = '.$_SESSION['gid'];
+$where_grouplimit = ' WHERE '.$gidfilter;
+$and_grouplimit = ' AND '.$gidfilter;
+}
+
+if ($_POST['optactive'] == "all"){
+$filter = $where_grouplimit;
 $optall = "checked";
 }
-elseif (isset($_POST['optactive'])&&($_POST['optactive'] == "active" OR !isset($_POST['optactive']))){
-$active = 'WHERE active = 1';
+
+elseif ($_POST['optactive'] == "active" OR !$_POST){
+$filter = 'WHERE active = 1'.$and_grouplimit;
 $optactive = "checked";
 }
-elseif (isset($_POST['optactive'])&&$_POST['optactive'] == "inactive"){
-$active = 'WHERE active = 0';
+elseif ($_POST['optactive'] == "inactive"){
+$filter = 'WHERE active = 0'.$and_grouplimit;
 $optinactive = "checked";
 }
-$cqry = $pdo->query('SELECT count(id) as cnt FROM `'.$config->db_pre.'users` '.$active.' ORDER BY ign ASC');
+
+$cqry = $pdo->query('SELECT count(id) as cnt FROM `'.$config->db_pre.'users` '.$filter.' ORDER BY ign ASC');
 $anz = $cqry->fetchColumn();
 
 
@@ -45,7 +57,7 @@ $anz = $cqry->fetchColumn();
       <select onchange="this.form.submit()" id="inputUser" name = "edituid" class = "form-control" style="width:auto;min-width:200px;">
 	 <option value="">--Wählen--</option>
 	<?php
-	$sql = 'SELECT id, ign FROM `'.$config->db_pre.'users` '.$active.' ORDER BY ign ASC';
+	$sql = 'SELECT id, ign FROM `'.$config->db_pre.'users` '.$filter.' ORDER BY ign ASC';
 		
     foreach ($pdo->query($sql) as $row) {
 		if ($uid == $row['id'])
@@ -63,7 +75,16 @@ $anz = $cqry->fetchColumn();
 
 if($uid >""){
 	
-$statement = $pdo->prepare("SELECT id,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
+#$statement = $pdo->prepare("SELECT id,gid,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
+
+$statement = $pdo->prepare("SELECT id,gid,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
+
+#$statement = $pdo->prepare("SELECT u.id AS uid, u.ign, u.role, u.telegram, u.notes, u.created_at, u.updated_at, u.active, g.id AS gid, g.tag AS gtag, g.name AS gname
+#FROM ".$config->db_pre."users u
+#LEFT JOIN ".$config->db_pre."groups g ON u.gid = g.id
+#WHERE u.id = :id");
+
+
 $result = $statement->execute(array('id' => $uid));
 $user = $statement->fetch();
 ?>
@@ -74,17 +95,38 @@ $user = $statement->fetch();
   <input  type = "hidden" name = "edituid" type="text" value = "<?php echo ($uid);?>">
   <div class="form-group">
     <label for="telegram">Ingame-Name:</label>
-    <input type="ign" class="form-control" id="ign" name = "ign"  value = "<?php echo ((isset($_POST['ign'])&&$_POST['ign'])? $_POST['ign'] : htmlentities(isset($user['ign'])?$user['ign']:"")); ?>">
+    <input type="text" class="form-control" id="ign" name = "ign"  value = "<?php echo ((isset($_POST['ign'])&&$_POST['ign'])? $_POST['ign'] : htmlentities(isset($user['ign'])?$user['ign']:"")); ?>">
   </div>
     <div class="form-group">
+    <label for="grp">Gruppe:</label>
+      <select id="group" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
+	 <option value="">--Wählen--</option>
+	<?php
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+	if ($user['gid'] === 0){
+	 echo '<option value="0" selected>[---] Unkategorisiert</option>';
+	}		
+
+    foreach ($pdo->query($sql) as $group) 
+	{
+	if ($user['gid'] == $group['id']){
+	$selected = ' selected';
+	}
+       echo '<option value="'.$group['id'].'" '.$selected.'>['.$group['tag'].'] '.$group['name'].'</option>';
+	    $selected = '';
+    }
+	?>
+	 </select> 
+    </div>
+  <div class="form-group">
 	<input type="password" style="display:none"> <!-- Prevent Password-Autofill -->
     <label for="pwd">Passwort:</label>
 	<input autocomplete="new-password" type="password" class="form-control" id="pwd" name="pwd" value = "">
   </div>
   
   <?php if (isadmin()){  ?>
-	<div class="form-group">
-	 <label for="inputUser" class = "control-label">Stattool-Rechte:</label>
+  <div class="form-group">
+    <label for="inputUser" class = "control-label">Stattool-Rechte:</label>
      <select  id="inputUser" name = "role" class = "form-control">	    
 <?php 
 $role = ($_POST['role'] ? $_POST['role'] : $user['role']);
