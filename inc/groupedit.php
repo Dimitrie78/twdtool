@@ -4,13 +4,13 @@ include "verify.php";
 msgbox($_GET['msg']);
 
 if (!isset($_GET['do'])){
-	
-$grpqry = $pdo->query('SELECT '.$config->db_pre.'groups.tag, '.$config->db_pre.'groups.id, '.$config->db_pre.'groups.name,
-COUNT( '.$config->db_pre.'users.id ) AS anz
-FROM '.$config->db_pre.'groups
-LEFT JOIN '.$config->db_pre.'users ON '.$config->db_pre.'groups.ID = '.$config->db_pre.'users.gid
-GROUP BY '.$config->db_pre.'users.gid ORDER BY '.$config->db_pre.'groups.tag');
-#$grpqry = $pdo->query('SELECT id,tag,name FROM '.$config->db_pre.'groups ORDER BY name');
+
+$grpqry = $pdo->query('SELECT g.id, g.tag, g.name, COUNT(u.id ) AS  "anz"
+FROM '.$config->db_pre.'groups g
+LEFT JOIN '.$config->db_pre.'users u ON g.id = u.gid
+GROUP BY g.id
+order by g.name asc;');
+
 $grpqry->execute();
 ?>
 <a href="?action=groupedit&do=add" style = "margin-bottom: 10px" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Gruppe erstellen</a>
@@ -83,7 +83,6 @@ if($_GET['do'] == "update" && is_numeric($_GET['id'])){
 }
 
 if($_POST['update'] == "UpdateGroup" && is_numeric($_POST['editid'])){
-##todo: validiation
 	$query = $pdo->prepare('UPDATE '.$config->db_pre.'groups SET tag = :tag, name = :name WHERE id = :id');
 	if($query->execute(array(':tag' => $_POST['grouptag'],
 						 ':name' => $_POST['groupname'],
@@ -134,12 +133,64 @@ if($_POST['creategroup'] == "AddGroup")
 		$count = $statement->rowCount();
 		if($count =='1'){
 		header("Location: ?action=groupedit&msg=addsuccess");  
-	} else {
+       } else {
 		header("Location: ?action=groupedit&msg=addfail");  
 	}	
 }
 
 
+if($_GET['do'] == "delete" && is_numeric($_GET['id'])){
+$grpqry = $pdo->prepare('SELECT g.id, g.tag, g.name, COUNT(u.id ) AS  "anz"
+FROM '.$config->db_pre.'groups g
+LEFT JOIN '.$config->db_pre.'users u ON g.id = u.gid
+WHERE g.id = :id');
+$grpqry->execute(array('id' => $_GET['id']));
+	if($group = $grpqry->fetch()){
+		
+	if($group['anz'] > 0){
+	$uncat = 1;
+	?>
+	<span style = "display: inline-block; margin-bottom:10px; font-weight:bold;">Löschbestätigung</span>
+	<?php
+	warnmsg('Die Gruppe "<b>'.$group['name'].'</b>" hat '.$group['anz'].' Spieler/innen.<br>
+	Wenn die Gruppe entfernt wird, werden die Mitglieder in die Gruppe <b>"unzugeordnet"</b> verschoben und müssen danach neu zugewiesen werden.');
+    }
+	else{
+	$uncat = 0;
+    infomsg('<b>Löschbestätigung.</b><br>Die Gruppe "<b>'.$group['name'].'</b>" hat kein/e Spieler/innen und kann jetzt entfernt werden!');
+	}
+		
+	}
+	else{
+  	echo 'Daten konnten nicht geladen werden...';
+	}
+	
+?>	
+<form action="index.php?action=groupedit&do=rmgrp" method="POST">
+<input type="hidden" name="uncategorize" value = "<?php echo $uncat;?>">
+<input type="hidden" name="gid" value = "<?php echo $group['id'];?>">
+  <div class="form-group">
+      <button type="submit" name = "delete" value="DeleteGroup" class="btn btn-danger">
+	  <span class = "fas fa-fa-trash-alt"></span> Gruppe löschen</button>
+  </div>
+</form>
+<?
+}
+
+if($_POST['delete'] == "DeleteGroup" && is_numeric($_POST['gid'])){
+	if ($_POST['uncategorize'] == 1){ 
+		$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET gid = 0 WHERE gid = ?');
+		$query->execute([$_POST['gid']]);
+		}
+		$query = $pdo->prepare('DELETE FROM '.$config->db_pre.'groups WHERE id = ?');
+		$query->execute([$_POST['gid']]);
+		if($query->rowCount()){
+		header("Location: ?action=groupedit&msg=deletesuccess");  
+		}
+		else{
+		header("Location: ?action=groupedit&msg=deletefail");  
+		}
+}
 	
 ?>
 <script>
