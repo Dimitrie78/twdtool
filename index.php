@@ -262,21 +262,26 @@ switch ($_GET['action']) {
 } 
 
 if (!isset($_GET["action"])){
-	
 	$statement = $pdo->prepare("SELECT ".$config->db_pre."groups.name as name, ".$config->db_pre."groups.tag as tag, ".$config->db_pre."groups.id as id FROM ".$config->db_pre."groups
 	INNER JOIN ".$config->db_pre."users ON ".$config->db_pre."users.gid = ".$config->db_pre."groups.id where ".$config->db_pre."users.id = :uid");
+
 	$result = $statement->execute(array('uid' => $_SESSION['userid']));
 	$group = $statement->fetch();
 	
 	
-	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0")->fetch();
+	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0 AND gid = ".$_SESSION['gid']."")->fetch();
 	
+	##todo: joinen, brauchen die gid für das korrekte datum!
 	$stats = $pdo->query("SELECT max(date) as statupdate from ".$config->db_pre."stats")->fetch();
-	if($stats['statupdate'] != "0000-00-00 00:00:00"){
+	if($stats['statupdate'] != "0000-00-00 00:00:00" AND $stats['statupdate'] != ""){
 		$datetime = new DateTime($stats['statupdate']);
 		$lstatupdate = "<br>Die letzten Statistiken wurden am: " .$datetime->format('d.m.Y H:i:s') ." übertragen.";
 		unset($datetime);
 	}
+	else{
+		$lstatupdate = '<br>Es wurden noch keine Statistiken übertragen.';
+	}
+		
 	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE id = 1 AND active = 1")->fetch();
 	
 ?>
