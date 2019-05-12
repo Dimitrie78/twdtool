@@ -128,6 +128,37 @@ function getuname($uid){
 	}
 }
 
+function getugroupname($uid){
+	global $pdo;
+	global $config;
+	$statement = $pdo->prepare("SELECT ".$config->db_pre."groups.name as groupname
+	FROM ".$config->db_pre."groups
+	INNER JOIN ".$config->db_pre."users ON ".$config->db_pre."users.gid = ".$config->db_pre."groups.id where ".$config->db_pre."users.id = :uid");
+	$result = $statement->execute(array('uid' => $uid));
+	$usr = $statement->fetch();
+	if (!$usr) {
+		return 0;
+	}else{
+		return $usr['groupname'];
+	}
+}
+
+
+function getugrouptag($uid){
+	global $pdo;
+	global $config;
+	$statement = $pdo->prepare("SELECT ".$config->db_pre."groups.tag as grouptag
+	FROM ".$config->db_pre."groups
+	INNER JOIN ".$config->db_pre."users ON ".$config->db_pre."users.gid = ".$config->db_pre."groups.id where ".$config->db_pre."users.id = :uid");
+	$result = $statement->execute(array('uid' => $uid));
+	$usr = $statement->fetch();
+	if (!$usr) {
+		return 0;
+	}else{
+		return $usr['grouptag'];
+	}
+}
+
 function utf8_converter($array) {
     array_walk_recursive($array, function(&$item, $key){
         if(!mb_detect_encoding($item, 'utf-8', true)){
@@ -534,6 +565,31 @@ function stat_exists($id){
 	}
 }
 
+function msgbox($msg){
+		if (isset($msg)) {
+	  switch ($_GET["msg"]) {
+		case "updatesuccess":
+			okmsg('Der Eintrag wurde aktualisiert!');
+		break;
+		case "updatefail":
+			failmsg('Der Eintrag konnten nicht aktualisiert werden!');
+		break;
+		case "addsuccess":
+			okmsg('Der Eintrag wurde hinzugefügt!');
+		break;
+	    case "addfail":
+			failmsg('Der Eintrag konnten nicht hinzugefügt werden!');
+		break;
+	    case "deletesuccess":
+			okmsg('Der Eintrag wurde entfernt!');
+		break;
+	    case "deletefail":
+			failmsg('Der Eintrag konnte nicht entfernt werden!');
+		break;
+	  }
+	}
+}
+
 function isdev(){
 	if ($_SESSION['role'] == 99){
 		return true;
@@ -571,64 +627,18 @@ function okmsg($msg){
 	echo '<div class="alert alert-success"><span class = "fas fa-info-circle"></span> '.$msg.'</div><p> </p>';
 }
 
+function infomsg($msg){
+	echo '<div class="alert alert-info"><span class = "fas fa-info-circle"></span> '.$msg.'</div><p> </p>';
+}
+
+function warnmsg($msg){
+	echo '<div class="alert alert-warning"><span class = "fas fa-info-circle"></span> '.$msg.'</div><p> </p>';
+}
+
+
 function br2nl($string)
 {
     return preg_replace('/\<br(\s*)?\/?\>/i', "\n", $string);
 }
 
-function getugroupname($uid){
-	global $pdo;
-	global $config;
-	$statement = $pdo->prepare("SELECT ".$config->db_pre."groups.name as groupname
-	FROM ".$config->db_pre."groups
-	INNER JOIN ".$config->db_pre."users ON ".$config->db_pre."users.gid = ".$config->db_pre."groups.id where ".$config->db_pre."users.id = :uid");
-	$result = $statement->execute(array('uid' => $uid));
-	$usr = $statement->fetch();
-	if (!$usr) {
-		return 0;
-	}else{
-		return $usr['groupname'];
-	}
-}
-
-
-function getugrouptag($uid){
-	global $pdo;
-	global $config;
-	$statement = $pdo->prepare("SELECT ".$config->db_pre."groups.tag as grouptag
-	FROM ".$config->db_pre."groups
-	INNER JOIN ".$config->db_pre."users ON ".$config->db_pre."users.gid = ".$config->db_pre."groups.id where ".$config->db_pre."users.id = :uid");
-	$result = $statement->execute(array('uid' => $uid));
-	$usr = $statement->fetch();
-	if (!$usr) {
-		return 0;
-	}else{
-		return $usr['grouptag'];
-	}
-}
-
-function msgbox($msg){
-		if (isset($msg)) {
-	  switch ($_GET["msg"]) {
-		case "updatesuccess":
-			okmsg('Der Eintrag wurde aktualisiert!');
-		break;
-		case "updatefail":
-			failmsg('Die Eintrag konnten nicht aktualisiert werden!');
-		break;
-		case "addsuccess":
-			okmsg('Der Eintrag wurde hinzugefügt!');
-		break;
-	    case "addfail":
-			failmsg('Die Eintrag konnten nicht hinzugefügt werden!');
-		break;
-	    case "deletesuccess":
-			okmsg('Der Eintrag wurde entfernt!');
-		break;
-	    case "deletefail":
-			failmsg('Die Eintrag konnte nicht entfernt werden!');
-		break;
-	  }
-	}
-}
 ?>
