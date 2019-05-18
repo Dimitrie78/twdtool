@@ -282,13 +282,13 @@ if (!isset($_GET["action"])){
 		$lstatupdate = '<br>Es wurden noch keine Statistiken übertragen.';
 	}
 		
-	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE id = 1 AND active = 1")->fetch();
+	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE gid = ".$_SESSION['gid']." AND active = 1")->fetch();
 	
 ?>
 
-	<p>Willkommen <b><?php echo $_SESSION['ign']; ?></b>, bei den <?=$group['name'];?> [<?=$group['tag'];?>]
-	<br><br>Wir haben derzeit: <?php echo $user['anz']; ?> Spieler in der Gruppe.<?php echo $lstatupdate; ?><br>
-	<?=nl2br($news['text']);?>
+	<p>Willkommen <b><?php echo $_SESSION['ign']; ?></b>, bei <b>[<?php echo $group['tag'];?>] <?php echo $group['name'];?></b>
+	<br><br>Wir haben derzeit: <?php echo $user['anz']; ?> Spieler in der Gruppe.<?php echo $lstatupdate; ?><br><br>
+	<?php echo nl2br($news['text']); ?>
 	
 <?php } ?>
 	</div>
