@@ -2,20 +2,10 @@
 include "verify.php";
 
 if(!isset($_GET['do'])) {
-	if(isset($_GET['msg']) && $_GET['msg'] == "success")
-	{
-		okmsg('Die News wurden aktualisiert!');
-	}
-	if(isset($_GET['msg']) && $_GET['msg'] == "fail")
-	{
-		failmsg('Die News konnten nicht aktualisiert werden!');
-	}
+	msgbox($_GET['msg']);
 	
-	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE id = 1 AND active = 1")->fetch();
-
-
-	if (!$news){exit('Gewählter Eintrag nicht existent oder bereits fehlerfrei!');}
-
+	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE gid = ".$_SESSION['gid']."  AND active = 1")->fetch();
+	
 	echo 'Zeilenschaltungen werden automatisch registriert.<br> Spezielle Formatierungen müssen in HTML-Code erfasst werden.
 	<form action="?action=frontpageedit&do=update" method = "POST" autocomplete="no">
 	<div class="form-group">
@@ -28,16 +18,48 @@ if(!isset($_GET['do'])) {
 
 if(isset($_GET['do']) && $_GET['do'] == "update" && $_POST['text']>"" && isset($_POST['updatenews'])){
 
-	#vorbereitet für news aktivieren / deaktivieren / mehrere news
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'news SET text = :text, ndate = NOW()');
+$stmt = $pdo->query("SELECT id FROM ".$config->db_pre."news WHERE gid = ".$_SESSION['gid']." AND active = 1"); 
+$stmt->execute(); 
+$ncount = $stmt->rowCount();
 
-	if ($query->execute(array(':text' => $_POST['text'])))
-	{
-		header("Location: ?action=frontpageedit&msg=success");
+
+if($ncount === 0){ 
+echo 'adding news...';
+$date = date('Y-m-d H:i:s');
+	$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."news(gid, ndate, text, active)
+	VALUES(:gid, :ndate, :text, :active)");
+	
+	$statement->execute(array(
+		"gid" => $_SESSION['gid'],
+		"ndate" => $date,
+		"text" => $_POST['text'],
+		"active" => 1
+	));
+
+	
+	$count = $statement->rowCount();
+	if($count =='1'){    
+		header("Location: ?action=frontpageedit&msg=addsuccess");
 	}
 	else
 	{
-		header("Location: ?action=frontpageedit&msg=fail");
+		header("Location: ?action=frontpageedit&msg=addfail");
 	}
+
+}
+else{
+
+	#vorbereitet für news aktivieren / deaktivieren / 1 news per gid
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'news SET text = :text, ndate = NOW() WHERE gid = '.$_SESSION['gid'].'');
+
+	if ($query->execute(array(':text' => $_POST['text'])))
+	{
+		header("Location: ?action=frontpageedit&msg=updatesuccess");
+	}
+	else
+	{
+		header("Location: ?action=frontpageedit&msg=updatefail");
+	}
+}
 }
 ?>
