@@ -21,7 +21,7 @@ ob_start();
 	  <div class="modal-body">
 <?php
 	if (is_file('conf/config.php')) {
-		die('<font color="red">Abbruch. Die config Datei existiert bereits!</font>');
+		die('<span style="color:#FF0000">Abbruch. Die config Datei existiert bereits!</span>');
 	}
 	if (is_file('conf/.gitignore')) {
 		unlink('conf/.gitignore');
@@ -41,11 +41,11 @@ foreach($dirs as $dir) {
 		echo 'Verzeichniss '.$dir.
 		' existiert nicht. Es wird automatisch angelegt...';
 		if (!mkdir($dir, 0755, true)) {
-			die('<br><font color="red">Erstellung schlug fehl!</font>
+			die('<br><span style="color:#FF0000">Erstellung schlug fehl!</span>
 				 Bitte manuell anlegen und den Installer
 				<a href = "install.php">erneut aufrufen</a>.');
 		} else {
-			echo '<font color="green">erfolgreich!</font>';
+			echo '<span style="color:#00FF00">erfolgreich!</span>';
 		}
 	} else {
 		if (!is_writable($dir)) {
@@ -53,7 +53,7 @@ foreach($dirs as $dir) {
 			' zu setzen...';
 			if (fileowner($dir) === getmyuid()) {
 				if (chmod($dir, 0755)) {
-					echo '<font color="green">erfolgreich!</font><br />';
+					echo '<span style="color:#00FF00">erfolgreich!</span><br />';
 				} else {
 					$notsupporeted = true;
 					echo 'fehlgeschlagen<br />';
@@ -120,10 +120,10 @@ return (object) array(
 
 				CREATE TABLE IF NOT EXISTS `".$pre."news` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
+				  `gid` int(10) NOT NULL,
 				  `ndate` datetime NOT NULL,
 				  `text` text NOT NULL,
-				  `validuntil` datetime NOT NULL,
-				  `active` tinyint(4) NOT NULL,
+				  `active` tinyint(1) NOT NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
@@ -191,18 +191,7 @@ return (object) array(
 					`werteX` int(11) DEFAULT NULL,
 					`werteY` int(11) DEFAULT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
-				INSERT INTO `".$pre."news` (
-					`id`,
-					`ndate`,
-					`text`,
-					`validuntil`,
-					`active`
-				)
-				VALUES (
-					'1',  '0000-00-00 00:00:00',  '',  '0000-00-00 00:00:00',  '1'
-				);";
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
 
 				if ($conn->query($createqry))
 				{
