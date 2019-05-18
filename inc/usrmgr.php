@@ -1,5 +1,6 @@
 <?php
 include "verify.php";
+msgbox($_GET['msg']);
 $uid =0;
 $uid = ((isset($_POST['edituid'])&&$_POST['edituid'] > "") ?$_POST['edituid'] : (isset($_GET['uid'])?$_GET['uid']:0)); 
 
@@ -16,12 +17,30 @@ $optinactive ="";
 $where_grouplimit = '';
 $and_grouplimit = '';
 $anz = '';
+$gidselected = '';
+$selected = '';
 
 if (!isdev()){
 $gidfilter = 'gid = '.$_SESSION['gid'];
 $where_grouplimit = ' WHERE '.$gidfilter;
 $and_grouplimit = ' AND '.$gidfilter;
 }
+
+if (isdev() && $_POST['gid']){
+if (is_numeric($_POST['gid'])){
+$and_grouplimit = ' AND gid = '.$_POST['gid'];
+$where_grouplimit = ' WHERE gid = '.$_POST['gid'];
+}
+if ($_POST['gid'] == "allgrp"){
+$and_grouplimit = '';	
+}
+
+if ($_POST['gid'] == "uc"){
+$and_grouplimit =  ' AND gid = 0';
+$where_grouplimit = ' WHERE gid = 0';
+}
+}
+
 
 if ($_POST['optactive'] == "all"){
 $filter = $where_grouplimit;
@@ -37,13 +56,14 @@ $filter = 'WHERE active = 0'.$and_grouplimit;
 $optinactive = "checked";
 }
 
+
 $cqry = $pdo->query('SELECT count(id) as cnt FROM `'.$config->db_pre.'users` '.$filter.' ORDER BY ign ASC');
 $anz = $cqry->fetchColumn();
 
 
 ?>
 
-<div style="padding-top: 5px;padding-left: 5px; margin-bottom: 2px; border-style: solid; border-color: darkgrey; border-width: thin;">
+
 <form class="form-vertical" role="form" method = "POST" action = "?action=usrmgr" >
     <div class="form-group">
 <label class="radio-inline"><input type="radio" value = "all" name="optactive" <?=$optall;?> onchange="this.form.submit()">Alle</label>
@@ -52,8 +72,34 @@ $anz = $cqry->fetchColumn();
 <span style="padding-left:5px" >[<?=$anz;?> User]</span>
 </div>
 
-    <div class="form-group">
-<label for="inputUser" class = "control-label">Mitglied <?php if($uid > 0){ echo 'Nr: '.$uid.' - '.getuname($uid).'  - ';} ?>bearbeiten:</label>
+ <div class="row">
+<?php if (isdev()) {
+
+ ?>
+	<div class="form-group col-xs-6" style="width:auto;">
+	<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
+      <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
+	 <option value="allgrp" <?php if ($_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if ($_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+	<?php
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+	
+	
+    foreach ($pdo->query($sql) as $row) {
+		if ($_POST['gid'] == $row['id'])
+	{
+	$gidselected = ' selected';
+	}
+       echo '<option value="'.$row['id'].'" '.$gidselected.'>['.$row['tag'].'] '.$row['name'].'</option>';
+	    $gidselected = '';
+    }
+	?>
+	
+	 </select> </div>
+ <?php } ?>
+
+<div class="form-group col-xs-6" style="width:auto;">
+<label for="inputUser" class = "control-label">Mitglied <?php if($uid > 0){ echo 'Nr: '.$uid.' ['.getuname($uid).']';} ?> bearbeiten:</label>
       <select onchange="this.form.submit()" id="inputUser" name = "edituid" class = "form-control" style="width:auto;min-width:200px;">
 	 <option value="">--Wählen--</option>
 	<?php
@@ -67,12 +113,18 @@ $anz = $cqry->fetchColumn();
        echo '<option value="'.$row['id'].'" '.$selected.'>'.$row['ign'].'</option>';
 	    $selected = '';
     }
+	?>
 	
-	echo'</select> 
-    </div>
-</form></div>';
+	 </select> </div></div>
 
 
+  
+
+
+
+</form>
+
+<?php
 if($uid >""){
 	
 #$statement = $pdo->prepare("SELECT id,gid,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
@@ -95,12 +147,14 @@ $user = $statement->fetch();
   <input  type = "hidden" name = "edituid" type="text" value = "<?php echo ($uid);?>">
   <div class="form-group">
     <label for="telegram">Ingame-Name:</label>
-    <input type="text" class="form-control" id="ign" name = "ign"  value = "<?php echo ((isset($_POST['ign'])&&$_POST['ign'])? $_POST['ign'] : htmlentities(isset($user['ign'])?$user['ign']:"")); ?>">
+    <input type="text" class="form-control" id="ign" name = "ign"  value = "<?php echo $user['ign']; ?>">
   </div>
+  
+  
+  <?php if (isdev()){ ?>
     <div class="form-group">
     <label for="grp">Gruppe:</label>
       <select id="group" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
-	 <option value="">--Wählen--</option>
 	<?php
 	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
 	if ($user['gid'] === 0){
@@ -118,6 +172,8 @@ $user = $statement->fetch();
 	?>
 	 </select> 
     </div>
+  <?php } ?>
+	
   <div class="form-group">
 	<input type="password" style="display:none"> <!-- Prevent Password-Autofill -->
     <label for="pwd">Passwort:</label>
@@ -129,11 +185,9 @@ $user = $statement->fetch();
     <label for="inputUser" class = "control-label">Stattool-Rechte:</label>
      <select  id="inputUser" name = "role" class = "form-control">	    
 <?php 
-$role = ($_POST['role'] ? $_POST['role'] : $user['role']);
-
 foreach($rights as $key => $value)
 {
-	if ($role == $key)
+	if ($user['role'] == $key)
 	{
 		$selected = ' selected';
     }
@@ -149,11 +203,11 @@ foreach($rights as $key => $value)
 
     <div class="form-group">
     <label for="telegram">Telegram:</label>
-    <input type="telegram" class="form-control" id="telegram" name = "telegram"  value = "<?php echo ((isset($_POST['telegram'])&&$_POST['telegram'])? $_POST['telegram'] : htmlentities(isset($user['telegram'])?$user['telegram']:"")); ?>"> 
+    <input type="telegram" class="form-control" id="telegram" name = "telegram"  value = "<?php echo $user['telegram']; ?>"> 
   </div>
   <div class="form-group">
       <label for="notes">Notizen:</label>
-	<textarea class="form-control input-md"  rows="9" name = "notes"><?php echo ((isset($_POST['notes'])&&$_POST['notes'])? $_POST['notes'] : htmlentities(isset($user['notes'])?$user['notes']:"")); ?></textarea>
+	<textarea class="form-control input-md"  rows="9" name = "notes"><?php echo $user['notes']; ?></textarea>
   </div>
   
   
@@ -182,28 +236,81 @@ if ((ismod() & $user['role'] == 3) OR isadmin()){
   </div>
 </form>
 <?php
-
-if (isset($_GET['doneedit']) && $_GET['doneedit'] == 'yes')
-{
-?>	<hr><div class="alert alert-success">
-<strong>Update abgeschlossen!</strong>
-</div>
-<?php
-	
 }
 
-}
-
-if(isset($_POST['updateuser']) & (isset($_POST['edituid'])&&is_numeric($_POST['edituid']))){
+if(isset($_POST['updateuser']) && is_numeric($_POST['edituid'])){
 
 $curr_datetime =date("Y-m-d H:i:s");
 
-	if (isadmin()){
+#ist dev - darf alles
+#hat pw geändert
+if (isdev()){
+if($_POST['pwd'] > "")
+{
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET
+	gid = :gid,
+	ign = :ign,
+	role = :role,
+	telegram = :telegram,
+	notes = :notes,
+	notetime = NOW(),
+	updated_at = :updated_at,
+	passwd = :passwd,
+	active = :active
+	WHERE id = :id');
+	
+	$query->execute(array(':gid' => $_POST['gid'],
+						  ':ign' => $_POST['ign'],
+						  ':role' => $_POST['role'],
+						  ':telegram' => $_POST['telegram'],
+						  ':notes' => $_POST['notes'],
+						  ':updated_at' => $curr_datetime,
+						  ':passwd' => password_hash($_POST['pwd'], PASSWORD_DEFAULT),
+						  ':active' => ($_POST['active'] ? 1 : 0),
+						  ':id' => $_POST['edituid']));
+}
+#ist dev - darf alles
+#hat pw nicht geändert
+else
+{
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET
+	gid = :gid,
+	ign = :ign,
+	role = :role,
+	telegram = :telegram,
+	notes = :notes,
+	notetime = NOW(),
+	updated_at = :updated_at,
+	active = :active
+	WHERE id = :id');
+	
+	$query->execute(array(':gid' => $_POST['gid'],
+						  ':ign' => $_POST['ign'],
+						  ':role' => $_POST['role'],
+						  ':telegram' => $_POST['telegram'],
+						  ':notes' => $_POST['notes'],
+						  ':updated_at' => $curr_datetime,
+						  ':active' => ($_POST['active'] ? 1 : 0),
+						  ':id' => $_POST['edituid']));
+}
+}
+#ist gruppenadmin - darf gruppe nicht ändern, sonst alles
+#hat pw geändert
+elseif (isadmin()){
 if($_POST['pwd'] > "")
 {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
-							passwd = :passwd, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET
+	ign = :ign,
+	role = :role,
+	telegram = :telegram,
+	notes = :notes,
+	notetime = NOW(),
+	updated_at = :updated_at,
+	passwd = :passwd,
+	active = :active
+	WHERE id = :id');
+	
 	$query->execute(array(':ign' => $_POST['ign'],
 						 ':role' => $_POST['role'],
 						 ':telegram' => $_POST['telegram'],
@@ -213,10 +320,21 @@ if($_POST['pwd'] > "")
 						 ':active' => ($_POST['active'] ? 1 : 0),
 						 ':id' => $_POST['edituid']));
 }
-	
+
+#ist gruppenadmin
+#hat pw nicht geändert	
 else
 {
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, role = :role, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users
+	SET ign = :ign,
+	role = :role,
+	telegram = :telegram,
+	notes = :notes,
+	notetime = NOW(),
+	updated_at = :updated_at,
+	active = :active
+	WHERE id = :id');
+	
 	$query->execute(array(':ign' => $_POST['ign'],
 						  ':role' => $_POST['role'],
 						  ':telegram' => $_POST['telegram'],
@@ -227,12 +345,22 @@ else
 }
 }
 
-	if (ismod()){
+#ist moderator, darf gruppe nicht ändern, darf keine rechte setzen
+#hat pw nicht geändert
+elseif (ismod()){
 if($_POST['pwd'] > "")
 {
 
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at,
-							passwd = :passwd, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET
+	ign = :ign,
+	telegram = :telegram,
+	notes = :notes,
+	notetime = NOW(),
+	updated_at = :updated_at,
+	passwd = :passwd,
+	active = :active
+	WHERE id = :id');
+	
 	$query->execute(array(':ign' => $_POST['ign'],
 						 ':telegram' => $_POST['telegram'],
 						 ':notes' => $_POST['notes'],
@@ -241,10 +369,20 @@ if($_POST['pwd'] > "")
 						 ':active' => ($_POST['active'] ? 1 : 0),
 						 ':id' => $_POST['edituid']));
 }
-	
+
+#ist moderator, darf gruppe nicht ändern, darf keine rechte setzen
+#hat pw geändert	
 else
 {
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET ign = :ign, telegram = :telegram, notes = :notes, notetime = NOW(), updated_at = :updated_at, active = :active WHERE id = :id');
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'users
+	SET ign = :ign,
+	telegram = :telegram,
+	notes = :notes,
+	notetime = NOW(),
+	updated_at = :updated_at,
+	active = :active
+	WHERE id = :id');
+	
 	$query->execute(array(':ign' => $_POST['ign'],
 						  ':telegram' => $_POST['telegram'],
 						  ':notes' => $_POST['notes'],
@@ -254,6 +392,6 @@ else
 }
 }
 
-header('Refresh: 0; URL=?action=usrmgr&uid='.$_POST['edituid'].'&doneedit=yes');
+header('Refresh: 0; URL=?action=usrmgr&uid='.$_POST['edituid'].'&msg=updatesuccess');
 }
 ?>
