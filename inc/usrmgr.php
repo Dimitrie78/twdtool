@@ -69,7 +69,7 @@ $anz = $cqry->fetchColumn();
 <label class="radio-inline"><input type="radio" value = "all" name="optactive" <?=$optall;?> onchange="this.form.submit()">Alle</label>
 <label class="radio-inline"><input type="radio" value = "active" name="optactive" <?=$optactive;?> onchange="this.form.submit()">Aktive</label>
 <label class="radio-inline"><input type="radio" value = "inactive" name="optactive" <?=$optinactive;?> onchange="this.form.submit()">Inaktive</label>
-<span style="padding-left:5px" >[<?=$anz;?> User]</span>
+<span style="padding-left:5px">[<?=$anz;?> User]</span>
 </div>
 
  <div class="row">
@@ -126,16 +126,7 @@ $anz = $cqry->fetchColumn();
 
 <?php
 if($uid >""){
-	
-#$statement = $pdo->prepare("SELECT id,gid,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
-
 $statement = $pdo->prepare("SELECT id,gid,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
-
-#$statement = $pdo->prepare("SELECT u.id AS uid, u.ign, u.role, u.telegram, u.notes, u.created_at, u.updated_at, u.active, g.id AS gid, g.tag AS gtag, g.name AS gname
-#FROM ".$config->db_pre."users u
-#LEFT JOIN ".$config->db_pre."groups g ON u.gid = g.id
-#WHERE u.id = :id");
-
 
 $result = $statement->execute(array('id' => $uid));
 $user = $statement->fetch();
@@ -144,13 +135,11 @@ $user = $statement->fetch();
  | Update: <?php echo ($user['updated_at'] > "0" ? date("d.m.Y", strtotime($user['updated_at'])) : "keines"); ?>
  
 <form action="?action=usrmgr" method = "POST" autocomplete="no">
-  <input  type = "hidden" name = "edituid" type="text" value = "<?php echo ($uid);?>">
+  <input type = "hidden" name = "edituid" type="text" value = "<?php echo ($uid);?>">
   <div class="form-group">
     <label for="telegram">Ingame-Name:</label>
     <input type="text" class="form-control" id="ign" name = "ign"  value = "<?php echo $user['ign']; ?>">
-  </div>
-  
-  
+  </div>  
   <?php if (isdev()){ ?>
     <div class="form-group">
     <label for="grp">Gruppe:</label>
@@ -164,10 +153,10 @@ $user = $statement->fetch();
     foreach ($pdo->query($sql) as $group) 
 	{
 	if ($user['gid'] == $group['id']){
-	$selected = ' selected';
+	  $selected = ' selected';
 	}
-       echo '<option value="'.$group['id'].'" '.$selected.'>['.$group['tag'].'] '.$group['name'].'</option>';
-	    $selected = '';
+    echo '<option value="'.$group['id'].'" '.$selected.'>['.$group['tag'].'] '.$group['name'].'</option>';
+	$selected = '';
     }
 	?>
 	 </select> 
@@ -182,8 +171,8 @@ $user = $statement->fetch();
   
   <?php if (isadmin()){  ?>
   <div class="form-group">
-    <label for="inputUser" class = "control-label">Stattool-Rechte:</label>
-     <select  id="inputUser" name = "role" class = "form-control">	    
+    <label for="role" class = "control-label">Stattool-Rechte:</label>
+     <select  id="role" name = "role" class = "form-control">	    
 <?php 
 foreach($rights as $key => $value)
 {
@@ -197,31 +186,22 @@ foreach($rights as $key => $value)
 }
 ?>
 	 </select>   
-    </div>
+   </div>
   <?php } ?>
-	
-
-    <div class="form-group">
+  <div class="form-group">
     <label for="telegram">Telegram:</label>
-    <input type="telegram" class="form-control" id="telegram" name = "telegram"  value = "<?php echo $user['telegram']; ?>"> 
+    <input type="text" class="form-control" id="telegram" name = "telegram"  value = "<?php echo $user['telegram']; ?>"> 
   </div>
   <div class="form-group">
       <label for="notes">Notizen:</label>
 	<textarea class="form-control input-md"  rows="9" name = "notes"><?php echo $user['notes']; ?></textarea>
   </div>
-  
-  
-      <div class="funkyradio">
+  <div class="funkyradio">
         <div class="funkyradio-success">
             <input type="checkbox" name="active" id="active" <?php echo ($user['active'] == 1 ? "checked" : ""); ?>/>
             <label for="active" id = "active_p" ><?php echo ($user['active'] == 1 ? "Aktiv" : "Inaktiv"); ?></label>
         </div>
     </div>
-
-	
-
-
-	
   <div class="clearfix">
 	  <div class="pull-left">
 		<button type="submit" name = "updateuser" class="btn btn-success">Update</button>
