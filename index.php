@@ -90,7 +90,7 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
     }
 }
 
-if (!isset($_SESSION["login"])||($_SESSION["login"] != 1)){
+if (!isset($_SESSION["login"])||($_SESSION["login"] != 1) || !isset($_SESSION["gid"])){
 	include("login.php");
 	exit;
 } 
@@ -262,13 +262,19 @@ switch ($_GET['action']) {
 } 
 
 if (!isset($_GET["action"])){
+	
+	if (isdev()){
+	$totalactiveusers = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0")->fetch();
+	$totalusers = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users")->fetch();
+	$groupcount = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."groups")->fetch();
+	}
+	
 	$statement = $pdo->prepare("SELECT ".$config->db_pre."groups.name as name, ".$config->db_pre."groups.tag as tag, ".$config->db_pre."groups.id as id FROM ".$config->db_pre."groups
 	INNER JOIN ".$config->db_pre."users ON ".$config->db_pre."users.gid = ".$config->db_pre."groups.id where ".$config->db_pre."users.id = :uid");
 
 	$result = $statement->execute(array('uid' => $_SESSION['userid']));
 	$group = $statement->fetch();
-	
-	
+		
 	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0 AND gid = ".$_SESSION['gid']."")->fetch();
 	
 	##todo: joinen, brauchen die gid für das korrekte datum!
@@ -286,11 +292,17 @@ if (!isset($_GET["action"])){
 	
 ?>
 
-	<p>Willkommen <b><?php echo $_SESSION['ign']; ?></b>, bei <b>[<?php echo $group['tag'];?>] <?php echo $group['name'];?></b>
-	<br><br>Wir haben derzeit: <?php echo $user['anz']; ?> Spieler in der Gruppe.<?php echo $lstatupdate; ?><br><br>
-	<?php echo nl2br($news['text']); ?>
-	
-<?php } ?>
+	<p>Willkommen <b><?php echo $_SESSION['ign'];?></b>, bei <b>[<?php echo $group['tag'];?>] <?php echo $group['name'];?></b>
+	<br><br>Wir haben derzeit: <?php echo $user['anz']; ?> Spieler in der Gruppe.<br>
+	<?php if (isdev()){ ?>
+	DEV-Stats [ User gesamt: <b><?php echo $totalusers['anz'];?></b>
+	davon aktiv: <b><?php echo $totalactiveusers['anz'];?></b>
+	in <b><?php echo $groupcount['anz'];?></b> Gruppe/n ]<br>
+	<?php }
+	echo $lstatupdate; ?>
+	<br><br>
+	<?php echo nl2br($news['text']);
+	} ?>
 	</div>
 </div> 
 <div class="well">
