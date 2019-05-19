@@ -33,8 +33,16 @@ echo '<label for="inputUser" class = "control-label">'.$stattype.'</label>
 	  <div class="pull-left">   
       <select onchange="this.form.submit()" id="inputUser" name = "uid" class = "form-control" style="width:auto;min-width:200px;">';
 
-			    
-	$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 1 ORDER BY ign ASC';
+if (isdev())
+{
+$rfilter = '';
+}
+else
+{
+$rfilter = ' AND gid = '.$_SESSION['gid'];
+}
+
+$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 1 '.$rfilter.' ORDER BY ign ASC';
 		
 	       echo '<option value="">--Wähle--</option>';
 foreach ($pdo->query($sql) as $row) {
