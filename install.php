@@ -167,8 +167,8 @@ return (object) array(
 				
 				CREATE TABLE IF NOT EXISTS `".$pre."groups` (
 				  `id` int(10) NOT NULL AUTO_INCREMENT,
-				  `tag` varchar(3) NOT NULL,
-				  `name` varchar(16) NOT NULL,
+				  `tag` varchar(5) NOT NULL,
+				  `name` varchar(20) NOT NULL,
 				  PRIMARY KEY (`id`),
 				  UNIQUE KEY `tag` (`tag`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -285,11 +285,11 @@ if(!$_POST) {
 		  </div>
 		  <div class="form-group">
 		    <label for="clantag">Guppen-Kürzel / Clan-Tag</label>
-		    <input type="text" class="form-control" id="clantag" name="clantag" maxlength = "3" required> 
+		    <input type="text" class="form-control" id="clantag" name="clantag" maxlength = "5" required> 
 		  </div>	
 		  <div class="form-group">
 		    <label for="clanname">Gruppen-Name / Clan-Name</label>
-		    <input type="text" class="form-control" id="clanname" name="clanname" maxlength = "16" required> 
+		    <input type="text" class="form-control" id="clanname" name="clanname" maxlength = "20" required> 
 		  </div>			  
 		  <div class="form-group text-center">
 		   <button type="submit" name="do" value="createdb" class="btn btn-success">Installieren</button>

@@ -70,8 +70,8 @@ $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charse
 
 $sql = "CREATE TABLE IF NOT EXISTS `".$config->db_pre."groups` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
-  `tag` varchar(3) NOT NULL,
-  `name` varchar(16) NOT NULL,
+  `tag` varchar(5) NOT NULL,
+  `name` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tag` (`tag`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT = 1;
