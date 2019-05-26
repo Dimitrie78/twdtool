@@ -55,12 +55,12 @@ if($_GET['do'] == "update" && is_numeric($_GET['id'])){
 		  <div class="form-group">
 			<label for="grouptag">Tag/Kürzel:</label>
 			<input type="text" class="form-control" id="grouptag" name="grouptag" 
-			value = "<?php echo $group['tag'];?>" maxlength = "3" required>
+			value = "<?php echo $group['tag'];?>" maxlength = "5" required>
 		  </div>
 		  <div class="form-group">
 			<label for="groupname">Gruppen-Name:</label>
 			<input type="text" class="form-control" id="groupname" name = "groupname"
-			value = "<?php echo $group['name'];?>" maxlength = "16" required> 
+			value = "<?php echo $group['name'];?>" maxlength = "20" required> 
 		  </div>
 		  <div class="clearfix">
 		   <div class="pull-left">
@@ -99,11 +99,11 @@ if($_GET['do'] == "add"){?>
 <form action="index.php?action=groupedit&do=add2db" method="POST" autocomplete="no">
   <div class="form-group">
     <label for="grouptag">Tag/Kürzel:</label>
-    <input type="text" class="form-control" id="grouptag" name="grouptag" maxlength = "3" required>
+    <input type="text" class="form-control" id="grouptag" name="grouptag" maxlength = "5" required>
   </div>
   <div class="form-group">
     <label for="groupname">Gruppen-Name:</label>
-    <input type="text" class="form-control" id="groupname" name = "groupname" maxlength = "16" required> 
+    <input type="text" class="form-control" id="groupname" name = "groupname" maxlength = "20" required> 
   </div>
   <div class="clearfix">
     <div class="pull-left">
@@ -182,6 +182,10 @@ if($_POST['delete'] == "DeleteGroup" && is_numeric($_POST['gid'])){
 		$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET gid = 0 WHERE gid = ?');
 		$query->execute([$_POST['gid']]);
 		}
+		
+		$query = $pdo->prepare('DELETE FROM '.$config->db_pre.'news WHERE gid = ?');
+		$query->execute([$_POST['gid']]);
+		
 		$query = $pdo->prepare('DELETE FROM '.$config->db_pre.'groups WHERE id = ?');
 		$query->execute([$_POST['gid']]);
 		if($query->rowCount()){
