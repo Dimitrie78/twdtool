@@ -130,7 +130,7 @@ if($_GET['action'] == "clean"){
 
 	if ($errdel == false)
 	{
-		echo '<div class="alert alert-success">Alles OK Sie können sich jetzt einloggen</div><br>
+		echo '<div class="alert alert-success">Alles OK Sie können sich jetzt einloggen. Alle Mitglieder wurden der Gruppe TWD zugewiesen. Diese kann im Script umbenannt werden.</div><br>
 		<a href="index.php" class="btn btn-success btn-sm" role="button" >Login</a>';
 	}
 }
