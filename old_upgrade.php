@@ -1,31 +1,3 @@
-<?php
-session_start();
-ob_start();
-header("Content-Type: text/html; charset=utf-8");
-if (!file_exists("conf/config.php")){exit('Config Datei fehlt. Bitte installieren.');}
-$config = include("conf/config.php");
-$errmode = 'EXCEPTION'; // SILENT im Produktivbetrieb, EXCEPTION oder WARNING beim Debuggen
-define('TIMEZONE', 'Europe/Berlin');
-date_default_timezone_set(TIMEZONE);
-
-try {  
-  $options = array(
-        PDO::ATTR_ERRMODE => 'PDO::ERRMODE_'.$errmode, 
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    );  
-  $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword,$options);
-
-
-  $vers = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
-  if (stripos($vers, 'MariaDB')===false)
-    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-}catch(PDOException $e){
-    echo "Datenbankverbindung fehlgeschlagen: " . $e->getMessage();
-  exit;
-}
-?>
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
