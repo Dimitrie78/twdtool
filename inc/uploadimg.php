@@ -12,7 +12,7 @@ include "verify.php";
 * @link http://www.w3bees.com/2013/02/multiple-file-upload-with-php.html
 **/
 $valid_formats = array("jpg", "png");
-$max_file_size = 1024*2000; //1 mb
+$max_file_size = 1125*2436; //3 mb
 $path = "screens/"; // Upload directory
 $count = 0;
 if(isset($_POST) and $_SERVER['REQUEST_METHOD'] == "POST"){
@@ -259,7 +259,7 @@ input[type="submit"]:active {
 			</form>';
 		}
 		?>
-		<p>Maximale Dateigröße 2MB, Erlaubt: jpg, png</p>
+		<p>Maximale Dateigröße 3MB, Erlaubt: jpg, png</p>
 		<div class="alert alert-warning"></div>
 		<br />
 		<!-- Multiple file upload html form-->
