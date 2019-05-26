@@ -1,14 +1,30 @@
 <?php
 include "verify.php";
 
-$top['lastlogin'] = "SELECT ign, lastlogin as top FROM ".$config->db_pre."users  where active = 1 ORDER BY lastlogin DESC";
+if (!isdev()){
+$and_grouplimit_nojoin = ' AND gid = '.$_SESSION['gid'];
+$and_grouplimit = ' AND U.gid = '.$_SESSION['gid'];
+}
 
+if (isdev() && $_POST['gid']){
+if (is_numeric($_POST['gid'])){
+$and_grouplimit_nojoin = ' AND gid = '.$_POST['gid'];
+$and_grouplimit = ' AND U.gid = '.$_POST['gid'];
+}
+
+if ($_POST['gid'] == "uc"){
+$and_grouplimit_nojoin =  ' AND gid = 0';
+$and_grouplimit =  ' AND U.gid = 0';
+}
+}
+
+$top['lastlogin'] = "SELECT ign, lastlogin as top FROM ".$config->db_pre."users  where active = 1 ".$and_grouplimit_nojoin." ORDER BY lastlogin DESC";
 
 $top['streuner'] = "SELECT U.ign, MAX( S.streuner ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.streuner ) DESC";
 
@@ -19,7 +35,7 @@ $top['menschen'] = "SELECT U.ign, MAX( S.menschen ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.menschen ) DESC";
 
@@ -30,7 +46,7 @@ $top['gespielte_missionen'] = "SELECT U.ign, MAX( S.gespielte_missionen ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.gespielte_missionen ) DESC";
 
@@ -41,7 +57,7 @@ $top['abgeschlossene_missonen'] = "SELECT U.ign, MAX( S.abgeschlossene_missonen 
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.abgeschlossene_missonen ) DESC";
 
@@ -52,7 +68,7 @@ $top['gefeuerte_schuesse'] = "SELECT U.ign, MAX( S.gefeuerte_schuesse ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.gefeuerte_schuesse ) DESC";
 
@@ -63,7 +79,7 @@ $top['haufen'] = "SELECT U.ign, MAX( S.haufen ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.haufen ) DESC";
 
@@ -74,7 +90,7 @@ $top['heldenpower'] = "SELECT U.ign, MAX( S.heldenpower ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.heldenpower ) DESC";
 
@@ -85,7 +101,7 @@ $top['waffenpower'] = "SELECT U.ign, MAX( S.waffenpower ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.waffenpower ) DESC";
 
@@ -96,7 +112,7 @@ $top['karten'] = "SELECT U.ign, MAX( S.karten ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1	   
+WHERE U.active = 1	".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.karten ) DESC";
 
@@ -107,18 +123,47 @@ $top['gerettete'] = "SELECT U.ign, MAX( S.gerettete ) AS top
 FROM ".$config->db_pre."stats AS S
 INNER JOIN ".$config->db_pre."users AS U 
        ON  (S.uid = U.id)
-WHERE U.active = 1
+WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY MAX( S.gerettete ) DESC";
 
 $avg['gerettete'] = "SELECT round(avg(top)) as avg
 FROM ({$top['gerettete']}) as avgtab";
 
-echo '<label for="inputUser" class = "control-label">Liste:</label>
-      <form class="form-vertical" role="form" method = "POST" action = "?action=top" >
-      <div class="form-group">	      
+
+?>
+    <form class="form-vertical" role="form" method = "POST" action = "?action=top" >
+ <div class="row">
+<?php if (isdev()) {
+
+ ?>
+	<div class="form-group col-xs-6" style="width:auto;">
+	<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
+      <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
+	 <option value="allgrp" <?php if ($_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if ($_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+	<?php
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+	
+	
+    foreach ($pdo->query($sql) as $row) {
+		if ($_POST['gid'] == $row['id'])
+	{
+	$gidselected = ' selected';
+	}
+       echo '<option value="'.$row['id'].'" '.$gidselected.'>['.$row['tag'].'] '.$row['name'].'</option>';
+	    $gidselected = '';
+    }
+	?>
+	
+	 </select> </div>
+ <?php } ?>
+ 
+<div class="form-group col-xs-6" style="width:auto;">
+<label for="inputUser" class = "control-label">Liste:</label>     
       <select onchange="this.form.submit()" id="inputUser" name = "mode" class = "form-control" style="width:auto;min-width:200px">	    
-      <option value="">--Wählen--</option>';
+      <option value="">--Wählen--</option>
+<?php
 foreach($top as $key => $value)
 {
 	if ($_POST['mode'] == $key)
@@ -129,9 +174,13 @@ foreach($top as $key => $value)
  echo '<option value="'.$key.'" '.$selected.'>'.ucfirst($key).'</option>';
  $selected = '';
 }
- echo '</select>   
-    </div>';
-echo '</form>';
+?>
+   </select>   
+  </div>
+ </div>
+</form>
+
+<?php
 if (isset($_POST['mode'])){
 switch ($_POST['mode']) {
 	
@@ -188,9 +237,12 @@ if($_POST['mode']!="lastlogin"){
 $avg = $pdo->query($avgqry);
 $avg->execute(); 
 $row = $avg->fetch();
-echo  	'<p><span style = "margin-left:1em;"> Ø '.$row['avg'].'</span></p>';
+?>
+<p><span style = "margin-left:1em;"> Ø <?php echo $row['avg']; ?></span></p>
+<?php
 }
-echo '<table class="table table-hover datatable table-bordered" style="width:auto;min-width:200px">
+?>
+ <table class="table table-hover datatable table-bordered" style="width:auto;min-width:200px">
   <thead>
     <tr>
       <th scope="col" style="text-align: right;">#</th>
@@ -198,7 +250,8 @@ echo '<table class="table table-hover datatable table-bordered" style="width:aut
       <th scope="col">Wert</th>
     </tr>
   </thead>
-  <tbody>';
+  <tbody>
+<?php
 $i = 1;
     foreach ($pdo->query($qry) as $row)
 	{
@@ -216,7 +269,9 @@ $i = 1;
 		  echo '</tr>';
 	$i++;
 	}
-echo '</tbody>
-</table>';
+?>
+   </tbody>
+</table>
+<?php
 }
 ?>
