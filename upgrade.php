@@ -34,6 +34,7 @@ if ($_POST["do"] == "upgrade") {
 //Evtl. vorhandene Clan-Information aus alter Config auslesen
 $clantag = (isset($config->clantag)) ? $config->clantag : 'TWD';
 $clanname = (isset($config->clanname)) ? $config->clanname : 'twdclan';
+$customstats = (isset($config->customstats)) ? $config->customstats : 'streuner+menschen kills,round((streuner+menschen)/$days) per day, abgeschlossene_missonen missions, waffenpower+heldenpower as upgrades, haufen crates, gerettete survivors';
 
 //Config neu schreiben
 if (is_writable($configfile)) {
@@ -46,6 +47,7 @@ return (object) array(
 	\'ocrspace_apikey\' => \''. $config->ocrspace_apikey. '\',
 	\'theme\' => \''. $config->theme. '\',
 	\'statlimit\' => \''. $config->statlimit. '\',
+	\'customstats\' => \''. $customstats. '\',
 	\'db_pre\' => \''. $config->db_pre. '\');
 ?>';
 
