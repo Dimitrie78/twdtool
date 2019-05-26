@@ -1,5 +1,4 @@
 <?php
-session_start();
 ob_start();
 header("Content-Type: text/html; charset=utf-8");
 if (!file_exists("conf/config.php")){exit('Config Datei fehlt. Bitte installieren.');}
@@ -8,22 +7,7 @@ $errmode = 'EXCEPTION'; // SILENT im Produktivbetrieb, EXCEPTION oder WARNING be
 define('TIMEZONE', 'Europe/Berlin');
 date_default_timezone_set(TIMEZONE);
 
-try {  
-  $options = array(
-        PDO::ATTR_ERRMODE => 'PDO::ERRMODE_'.$errmode, 
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    );  
-  $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword,$options);
 
-
-  $vers = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
-  if (stripos($vers, 'MariaDB')===false)
-    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-}catch(PDOException $e){
-    echo "Datenbankverbindung fehlgeschlagen: " . $e->getMessage();
-  exit;
-}
 ?>
 
 <!DOCTYPE html>
@@ -45,8 +29,77 @@ try {
 	  <hr />
 	  <div class="modal-body">
 <?php
-// 1. Check if file existits and dir is writeable
-// 2.1 Check if we CAN use chmod -> then chmod it
+
+if ($_POST["do"] == "upgrade") {
+try {  
+  $options = array(
+        PDO::ATTR_ERRMODE => 'PDO::ERRMODE_'.$errmode, 
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    );  
+  $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword,$options);
+
+$sql = "CREATE TABLE IF NOT EXISTS `".$config->db_pre."groups` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `tag` varchar(3) NOT NULL,
+  `name` varchar(16) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tag` (`tag`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT = 1;
+
+CREATE TABLE `".$config->db_pre."ocr` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) DEFAULT NULL,
+  `aktiv` tinyint(3) DEFAULT '0',
+  `name` varchar(255) DEFAULT NULL,
+  `playerW` int(11) DEFAULT NULL,
+  `playerH` int(11) DEFAULT NULL,
+  `playerX` int(11) DEFAULT NULL,
+  `playerY` int(11) DEFAULT NULL,
+  `epW` int(11) DEFAULT NULL,
+  `epH` int(11) DEFAULT NULL,
+  `epX` int(11) DEFAULT NULL,
+  `epY` int(11) DEFAULT NULL,
+  `werteW` int(11) DEFAULT NULL,
+  `werteH` int(11) DEFAULT NULL,
+  `werteX` int(11) DEFAULT NULL,
+  `werteY` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
+ALTER TABLE `".$config->db_pre."ocr` ENGINE = MYISAM;
+
+ALTER TABLE  `".$config->db_pre."news` ADD `gid` INT( 10 ) NOT NULL AFTER  `id` ;
+
+ALTER TABLE  `".$config->db_pre."news` DROP `validuntil`;
+
+ALTER TABLE  `".$config->db_pre."news` CHANGE `active` `active` TINYINT( 1 ) NOT NULL;
+
+ALTER TABLE  `".$config->db_pre."users` ADD `gid` INT( 10 ) NOT NULL AFTER  `id` ;
+
+INSERT INTO `".$config->db_pre."groups` (`tag`, `name`) VALUES
+('TWD', 'Twdclan');
+
+UPDATE `".$config->db_pre."users` SET  `gid` =  '1';";
+
+			
+			if ($pdo->query($sql)) {
+				echo '<div class="alert alert-success">Daten erfolgreich in die Datebank geschrieben</div><br>';
+				if(file_exists('install.php') OR file_exists('upgrade.php') OR file_exists('config.php')){
+					echo 'Bitte löschen Sie jetzt aus Sicherheitsgründen die Installationsdateien sowie die alte Config-Datei, danach können Sie sich einloggen.<br><a href="upgrade.php?action=clean" class="btn btn-success btn-sm" role="button" >Installer löschen</a>';
+				} else {
+					echo '<a href="index.php" class="btn btn-success btn-sm" role="button">Login</a>';
+				}
+			} else {
+				echo '<div class="alert alert-warning">Fehler beim Datenbank import</div>';
+			}
+		} 
+
+
+	catch(PDOException $e){
+    echo "Datenbankverbindung fehlgeschlagen: " . $e->getMessage();
+    exit;
+		}
+	}
 
 
 if($_GET['action'] == "clean"){
@@ -75,105 +128,14 @@ if($_GET['action'] == "clean"){
 		}
 	}
 
-	if(file_exists('config.php')){
-		if(unlink('config.php'))
-		{
-			echo 'Alte config.php entfernt!<br>';
-		}
-		else
-		{
-			echo 'config.php konnte nicht entfernt werden, bitte manuell löschen<br>';
-			$errdel = true;
-		}
-	}
-
 	if ($errdel == false)
 	{
 		echo '<div class="alert alert-success">Alles OK Sie können sich jetzt einloggen</div><br>
 		<a href="index.php" class="btn btn-success btn-sm" role="button" >Login</a>';
 	}
 }
-else
-{
-	if(file_exists('conf/config.php')){
-		$config = include 'conf/config.php';
-	}
 
-	$dirs = array(
-		"./conf",
-		"./screens",
-		"./2ocr");
-		
-	foreach($dirs as $dir) {
-		if (file_exists($dir)) {
-			if (!is_writable($dir))	{
-				echo 'Versuche Schreibrechte für Verzeichnis ' . $dir . ' zu setzen...';
-				if (fileowner($dir) === getmyuid())	{
-					if (chmod($dir, 0755)) {
-						echo 'erfolgreich!<br />';
-					} else {
-						$notsupporeted = true;
-						echo 'fehlgeschlagen<br />';
-					}
-				} else {
-					$notsupporeted = true;
-					$notokay[] = $dir;
-				}
-			}
-		} else {
-			echo $dir . ' existiert nicht. bitte anlegen und chmod auf 0755 stellen<br />';
-			exit;
-		}
-	}
-
-	if ($notsupporeted) {
-		echo 'Ihr Webspace unterstützt das automatische setzen von Schreibrechten nicht.<br />Bitte setzen Sie in Ihrem FTP-Programm das chmod (Verzeichnisberechtigung) auf 0755 für das/die folgende/n Verzeichnis/e:<br />' . implode('<br />', $notokay);
-		exit;
-	}
-
-	if ($_POST["do"] == "upgrade") {
-		try {
-			$pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword);
-			//$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		
-			$sql = "CREATE TABLE IF NOT EXISTS `ocr` (
-					  `id` int(11) NOT NULL AUTO_INCREMENT,
-					  `uid` int(11) DEFAULT NULL,
-					  `aktiv` tinyint(3) DEFAULT '0',
-					  `name` varchar(255) DEFAULT NULL,
-					  `playerW` int(11) DEFAULT NULL,
-					  `playerH` int(11) DEFAULT NULL,
-					  `playerX` int(11) DEFAULT NULL,
-					  `playerY` int(11) DEFAULT NULL,
-					  `epW` int(11) DEFAULT NULL,
-					  `epH` int(11) DEFAULT NULL,
-					  `epX` int(11) DEFAULT NULL,
-					  `epY` int(11) DEFAULT NULL,
-					  `werteW` int(11) DEFAULT NULL,
-					  `werteH` int(11) DEFAULT NULL,
-					  `werteX` int(11) DEFAULT NULL,
-					  `werteY` int(11) DEFAULT NULL,
-					  PRIMARY KEY (`id`)
-					) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-					";
-			
-			if ($pdo->query($sql)) {
-				echo '<div class="alert alert-success">Daten erfolgreich in die Datebank geschrieben</div><br>';
-				if(file_exists('install.php') OR file_exists('upgrade.php') OR file_exists('config.php')){
-					echo 'Bitte löschen Sie jetzt aus Sicherheitsgründen die Installationsdateien sowie die alte Config-Datei, danach können Sie sich einloggen.<br><a href="upgrade.php?action=clean" class="btn btn-success btn-sm" role="button" >Installer löschen</a>';
-				} else {
-					echo '<a href="index.php" class="btn btn-success btn-sm" role="button">Login</a>';
-				}
-			} else {
-				echo '<div class="alert alert-warning">Fehler beim Datebank import</div>';
-			}
-		} catch (PDOException $e) {
-			echo $e->getMessage();
-		}
-	}
-
-
-	if(!$_POST AND ! $_GET) {
+	if(!$_POST AND !$_GET) {
 	?>
 			<form action="" method = "POST" autocomplete="no" name="install" id="install">	  
 			  <div class="form-group text-center">
@@ -182,7 +144,7 @@ else
 			</form>		
 	<?php	
 	}
-}
+
 ?>	
 	  </div>
 	</div>
