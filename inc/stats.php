@@ -24,25 +24,61 @@ else
 {
 	$stattype = 'Spieler/in:';	
 }
-  
-echo '<label for="inputUser" class = "control-label">'.$stattype.'</label>
+
+if (!isdev()){
+$gidfilter = 'gid = '.$_SESSION['gid'];
+$and_grouplimit = ' AND '.$gidfilter;
+}
+
+if (isdev() && $_POST['gid']){
+if (is_numeric($_POST['gid'])){
+$and_grouplimit = ' AND gid = '.$_POST['gid'];
+}
+
+if ($_POST['gid'] == "uc"){
+$and_grouplimit =  ' AND gid = 0';
+}
+}
+
+?>  
 <form class="form-vertical" role="form" method = "POST" action = "?action=stats" >
-<input  type = "hidden" name = "suid" type="text" value = "'.$sUser.'">
+<input  type = "hidden" name = "suid" type="text" value = "<? echo $sUser; ?>">
+
+<?php if (isdev()){?>
+<div class ="form-group">
+<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
+      <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
+	 <option value="allgrp" <?php if ($_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if ($_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+<?php
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+	
+	
+    foreach ($pdo->query($sql) as $row) {
+		if ($_POST['gid'] == $row['id'])
+	{
+	$gidselected = ' selected';
+	}
+       echo '<option value="'.$row['id'].'" '.$gidselected.'>['.$row['tag'].'] '.$row['name'].'</option>';
+	    $gidselected = '';
+    }
+
+?>
+     </select>
+	 </div>
+<?php 
+}
+?>
+	<label for="inputUser" class = "control-label"><?php echo $stattype; ?></label> 
     <div class="form-group">
 		<div class="clearfix">
 	  <div class="pull-left">   
-      <select onchange="this.form.submit()" id="inputUser" name = "uid" class = "form-control" style="width:auto;min-width:200px;">';
+      <select onchange="this.form.submit()" id="inputUser" name = "uid" class = "form-control" style="width:auto;min-width:200px;">
 
-if (isdev())
-{
-$rfilter = '';
-}
-else
-{
-$rfilter = ' AND gid = '.$_SESSION['gid'];
-}
+<?php
 
-$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 1 '.$rfilter.' ORDER BY ign ASC';
+
+$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 1 '.$and_grouplimit.' ORDER BY ign ASC';
 		
 	       echo '<option value="">--Wähle--</option>';
 foreach ($pdo->query($sql) as $row) {
