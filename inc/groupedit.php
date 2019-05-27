@@ -42,13 +42,13 @@ foreach ($grpqry as $group) {
  </tbody>
 </table>
 </div>
-<?
+<?php
 }
 	
 if($_GET['do'] == "update" && is_numeric($_GET['id'])){
 	$grpqry = $pdo->prepare("SELECT id,tag,name FROM ".$config->db_pre."groups WHERE id = :id");
 	$grpqry->execute(array('id' => $_GET['id']));
-	if($group = $grpqry->fetch()){?>
+	if($group = $grpqry->fetch()){ ?>
 <span style = "display: inline-block; margin-bottom:10px; font-weight:bold;">Gruppen-ID: <?php echo $group['id'];?></span>
 		<form action="index.php?action=groupedit&do=update2db" method="POST" autocomplete="no">
          <input type="hidden" name="editid" value = "<?php echo $group['id'];?>">
@@ -94,7 +94,7 @@ if($_POST['update'] == "UpdateGroup" && is_numeric($_POST['editid'])){
 	
 }
 
-if($_GET['do'] == "add"){?>
+if($_GET['do'] == "add"){ ?>
 <span style = "display: inline-block; margin-bottom:10px; font-weight:bold;">Gruppe erstellen</span>
 <form action="index.php?action=groupedit&do=add2db" method="POST" autocomplete="no">
   <div class="form-group">
@@ -116,8 +116,8 @@ if($_GET['do'] == "add"){?>
     </div>
   </div>
 </form>
-<?
-	}
+<?php
+}
 
 if($_POST['creategroup'] == "AddGroup")
 {
@@ -174,7 +174,7 @@ $grpqry->execute(array('id' => $_GET['id']));
 	  <span class = "fas fa-fa-trash-alt"></span> Gruppe löschen</button>
   </div>
 </form>
-<?
+<?php
 }
 
 if($_POST['delete'] == "DeleteGroup" && is_numeric($_POST['gid'])){

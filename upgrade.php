@@ -76,7 +76,7 @@ $sql = "CREATE TABLE IF NOT EXISTS `".$config->db_pre."groups` (
   UNIQUE KEY `tag` (`tag`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT = 1;
 
-CREATE TABLE `".$config->db_pre."ocr` (
+CREATE TABLE IF NOT EXISTS `".$config->db_pre."ocr` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(11) DEFAULT NULL,
   `aktiv` tinyint(3) DEFAULT '0',
