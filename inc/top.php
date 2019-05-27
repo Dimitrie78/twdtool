@@ -18,114 +18,76 @@ $and_grouplimit =  ' AND U.gid = 0';
 }
 }
 
-$top['lastlogin'] = "SELECT ign, lastlogin as top FROM ".$config->db_pre."users  where active = 1 ".$and_grouplimit_nojoin." ORDER BY lastlogin DESC";
-
-$top['streuner'] = "SELECT U.ign, MAX( S.streuner ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
+function topqry($field)
+{
+global $config;
+global $and_grouplimit;
+$out = "SELECT U.gid, U.ign, G.tag, max(S.".$field.") as top
+FROM  `".$config->db_pre."users` U
+INNER JOIN ".$config->db_pre."stats S ON U.id = S.uid
+INNER JOIN ".$config->db_pre."groups G ON G.id = U.gid
 WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
-ORDER BY MAX( S.streuner ) DESC";
+ORDER BY top DESC";
+return $out;	
+}
+
+
+
+$top['lastlogin'] = "SELECT u.ign, u.lastlogin as top, g.tag
+FROM ".$config->db_pre."users u
+INNER JOIN ".$config->db_pre."groups as g on (u.gid = g.id)
+WHERE u.active = 1 ".$and_grouplimit_nojoin."
+ORDER BY u.lastlogin DESC";
+
+
+$top['streuner'] = topqry('streuner');
 
 $avg['streuner'] = "SELECT round(avg(top)) as avg
 FROM ({$top['streuner']}) as avgtab";
 
-$top['menschen'] = "SELECT U.ign, MAX( S.menschen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.menschen ) DESC";
+
+$top['menschen'] = topqry('menschen');
 
 $avg['menschen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['menschen']}) as avgtab";
 
-$top['gespielte_missionen'] = "SELECT U.ign, MAX( S.gespielte_missionen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.gespielte_missionen ) DESC";
+$top['gespielte_missionen'] = topqry('gespielte_missionen');
 
 $avg['gespielte_missionen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['gespielte_missionen']}) as avgtab";
 
-$top['abgeschlossene_missonen'] = "SELECT U.ign, MAX( S.abgeschlossene_missonen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.abgeschlossene_missonen ) DESC";
+$top['abgeschlossene_missonen'] = topqry('abgeschlossene_missonen');
 
 $avg['abgeschlossene_missonen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['abgeschlossene_missonen']}) as avgtab";
 
-$top['gefeuerte_schuesse'] = "SELECT U.ign, MAX( S.gefeuerte_schuesse ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.gefeuerte_schuesse ) DESC";
+$top['gefeuerte_schuesse'] = topqry('gefeuerte_schuesse');
 
 $avg['gefeuerte_schuesse'] = "SELECT round(avg(top)) as avg
 FROM ({$top['gefeuerte_schuesse']}) as avgtab";
 
-$top['haufen'] = "SELECT U.ign, MAX( S.haufen ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.haufen ) DESC";
+$top['haufen'] = topqry('haufen');
 
 $avg['haufen'] = "SELECT round(avg(top)) as avg
 FROM ({$top['haufen']}) as avgtab";
 
-$top['heldenpower'] = "SELECT U.ign, MAX( S.heldenpower ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.heldenpower ) DESC";
+$top['heldenpower'] = topqry('heldenpower');
 
 $avg['heldenpower'] = "SELECT round(avg(top)) as avg
 FROM ({$top['heldenpower']}) as avgtab";
 
-$top['waffenpower'] = "SELECT U.ign, MAX( S.waffenpower ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.waffenpower ) DESC";
+$top['waffenpower'] = topqry('waffenpower');
 
 $avg['waffenpower'] = "SELECT round(avg(top)) as avg
 FROM ({$top['waffenpower']}) as avgtab";
 
-$top['karten'] = "SELECT U.ign, MAX( S.karten ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1	".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.karten ) DESC";
+$top['karten'] = topqry('karten');
 
 $avg['karten'] = "SELECT round(avg(top)) as avg
 FROM ({$top['karten']}) as avgtab";
 
-$top['gerettete'] = "SELECT U.ign, MAX( S.gerettete ) AS top
-FROM ".$config->db_pre."stats AS S
-INNER JOIN ".$config->db_pre."users AS U 
-       ON  (S.uid = U.id)
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY MAX( S.gerettete ) DESC";
+$top['gerettete'] = topqry('gerettete');
 
 $avg['gerettete'] = "SELECT round(avg(top)) as avg
 FROM ({$top['gerettete']}) as avgtab";
@@ -246,6 +208,7 @@ $row = $avg->fetch();
   <thead>
     <tr>
       <th scope="col" style="text-align: right;">#</th>
+	  <th scope="col">Grp</th>
       <th scope="col">Name</th>
       <th scope="col">Wert</th>
     </tr>
@@ -257,6 +220,7 @@ $i = 1;
 	{
 	echo '<tr>
 			  <th scope="row" style="text-align: right;">'.$i.'</th>
+              <td>'.$row['tag'].'</td>
 			  <td>'.$row['ign'].'</td>';
 			if($_POST['mode']=="lastlogin"){
 				$lastlogin = (($row['top']) <>  "" ? date("d.m.Y H:i:s", strtotime($row['top'])) : "Kein Login");
