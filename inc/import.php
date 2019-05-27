@@ -10,10 +10,14 @@ $data = array();
 $screens = glob("2ocr/*.{jpg,png}", GLOB_BRACE);
 foreach ($screens as $target_file) {
 	if (strlen(trim($target_file)) > 0){
-		$hasfiles = true;
-		$data[] = $target_file;
+    $file   = substr($target_file, strrpos($target_file, '/')+1, strlen($target_file));
+    $fileid = explode("_", $file);
+    if($_SESSION['userid']==$fileid[0]){
+      $hasfiles = true;
+      $data[] = $target_file;
 //		echo $target_file." - ";
 //		uploadToApi($target_file);
+    }
 	}
 }
 

@@ -10,8 +10,12 @@ $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $screens = glob("../screens/*.{jpg,png}", GLOB_BRACE);
 foreach ($screens as $filename) {
 	if (strlen(trim($filename)) > 0){
-		$hasfiles = True;
-		break;
+		$file   = substr($filename, strrpos($filename, '/')+1, strlen($filename));
+    $fileid = explode("_", $file);
+    if($_SESSION['userid']==$fileid[0]){
+      $hasfiles = True;
+      break;
+    }
 	}
 }
 $file = $filename;

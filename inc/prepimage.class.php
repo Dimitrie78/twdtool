@@ -104,7 +104,7 @@ class prepimage {
 	private function filetimebyname() {
 		if ( strpos(strtolower($this->rfile), 'screenshot') !== false ) {
 			$str = strtolower($this->rfile);
-			$w = array('screenshot','-','_');
+			$w = array('screenshot','-','_',$_SESSION['userid']);
 			$str = str_replace($w,'',$str);
 			$str = substr($str, 0, 14);
 			$str = strtotime($str);
