@@ -240,26 +240,35 @@ function uploadToApi($target_file){
 		$array=array_map('trim',$array);
 		
 		$q = $pdo->query("SELECT `searchfor`, `replacement` FROM `".$config->db_pre."namefix`;");
-		$r  = $q->fetchAll(PDO::FETCH_KEY_PAIR);
-		if($r){
-			$name = strtr($array[0],$r); 
-		}
-		else
-		{
-			$name =$array[0]; 
-		}
+		$r = $q->fetchAll(PDO::FETCH_KEY_PAIR);
+	
+    $exp = cleanexp($array[0]);
+    $x = explode('/',$exp);
 
-		$exp = cleanexp($array[1]);
-		$streuner =  str_replace("o","0",$array[2]);
-		$menschen = str_replace("o","0",$array[3]);
-		$gespielte_missionen =  str_replace("o","0",$array[4]);
-		$abgeschlossene_missonen =  str_replace("o","0",$array[5]);
-		$gefeuerte_schuesse =  str_replace("o","0",$array[6]);
-		$haufen =  str_replace("o","0",$array[7]);
-		$heldenpower =  str_replace("o","0",$array[8]);
-		$waffenpower =  str_replace("o","0",$array[9]);
-		$karten =  str_replace("o","0",$array[10]);
-		$gerettete =  str_replace("o","0",$array[11]);
+    if(is_numeric($x[0])) {
+      if($r)
+        $name = strtr($array[0],$r);
+      else $name = $array[0];
+      $y = 1;
+    } else {
+      if($r)
+        $name = strtr($array[0],$r);
+      else $name = $array[0];
+      $y = 0;
+    }
+
+		$exp = cleanexp($array[1-$y]);
+   
+		$streuner =  str_replace("o","0",$array[2-$y]);
+		$menschen = str_replace("o","0",$array[3-$y]);
+		$gespielte_missionen =  str_replace("o","0",$array[4-$y]);
+		$abgeschlossene_missonen =  str_replace("o","0",$array[5-$y]);
+		$gefeuerte_schuesse =  str_replace("o","0",$array[6-$y]);
+		$haufen =  str_replace("o","0",$array[7-$y]);
+		$heldenpower =  str_replace("o","0",$array[8-$y]);
+		$waffenpower =  str_replace("o","0",$array[9-$y]);
+		$karten =  str_replace("o","0",$array[10-$y]);
+		$gerettete =  str_replace("o","0",$array[11-$y]);
 
 		#nur die datei ohne weitere Verzeichnisse daran bereitstellen
 		$onlyfile = substr(strrchr($target_file, "/"), 1);

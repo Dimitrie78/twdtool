@@ -24,7 +24,7 @@ if(empty($data)) {
       if($_SESSION['userid']==$fileid[0]){
         $hasfiles = True;
         $img->run($filename);
-        #unlink($filename);
+        unlink($filename);
         echo " - Original entfernt. <br>";
       }
 		}
