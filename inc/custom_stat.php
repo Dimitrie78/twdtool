@@ -8,7 +8,7 @@ $felder = (isSet($config->customstats)&&$config->customstats?$config->customstat
 $tbody = '';
 $c = array(); //columns
 
-$usrqry = $pdo->query('SELECT id,ign FROM '.$config->db_pre.'users WHERE active > 0 '.(isSet($clan)&&$clan>0?' AND clanid='.$clan.' ':'').' ORDER BY ign');
+$usrqry = $pdo->query('SELECT id,ign FROM '.$config->db_pre.'users WHERE active > 0 '.(isSet($group)&&$group>0?' AND gid='.$group.' ':'').' ORDER BY ign');
 $usrqry->execute();
 $datediff = 0;
 if (isSet($date1)&&isSet($date2)){
@@ -26,12 +26,12 @@ $felder = str_replace('$days', $datediff, $felder);
 $s1Missed = '';
 $s2Missed = '';
 
-$groupqry = $pdo->query('SELECT u.clanid ClanID, c.name Name, count(u.ID) Anzahl FROM '.$config->db_pre.'users u left join '.$config->db_pre.'clans c on u.clanid = c.id WHERE u.active = 1 Group BY u.clanid ORDER BY c.name ');
+$groupqry = $pdo->query('SELECT u.gid gid, c.name Name, count(u.ID) Anzahl FROM '.$config->db_pre.'users u left join '.$config->db_pre.'groups c on u.gid = c.id WHERE u.active = 1 Group BY u.gid ORDER BY c.name ');
 $groupqry->execute();
 
 $grouppicker = '';
 foreach ($groupqry as $gro) {
- $grouppicker .= '<option value="'.$gro['ClanID'].'">'.$gro['Name'].' ('.$gro['Anzahl'].')</option>';
+ $grouppicker .= '<option value="'.$gro['gid'].'">'.$gro['Name'].' ('.$gro['Anzahl'].')</option>';
 }
 
 $dateqry = $pdo->query('SELECT (CASE WHEN WEEKDAY(s.date) = 0 THEN \'Mo\' WHEN WEEKDAY(s.date) = 1 THEN \'Di\' WHEN WEEKDAY(s.date) = 2 THEN \'Mi\' WHEN WEEKDAY(s.date) = 3 THEN \'Do\' WHEN WEEKDAY(s.date) = 4 THEN \'Fr\' WHEN WEEKDAY(s.date) = 5 THEN \'Sa\' WHEN WEEKDAY(s.date) = 6 THEN \'So\' END) Tag, DATE_FORMAT(s.date, "%Y-%m-%d") Datum , count(s.uid) Anzahl FROM '.$config->db_pre.'stats  s left join '.$config->db_pre.'users  u on s.uid = u.id WHERE u.active = 1 Group BY Datum ORDER BY Datum DESC ');
@@ -121,7 +121,7 @@ foreach ($usrqry as $usr) {
 	
 $thead = '
 <div class="table-responsive"> 
-<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="clan" name="clan"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select>
+<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select>
 &nbsp;&nbsp;&nbsp;Bis: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select><button type="submit">Laden</button></form>'.($datediff?$datediff.' Tage<br/>':'<br />').'
 <table class="table table-hover table-fixed datatable table-bordered" id="sortTable" style="width:auto">
   <thead>
@@ -146,7 +146,7 @@ echo $thead.$tbody.$tfoot;
 ?>
 <script>
 	//$(document).ready(function(){ $('#sortTable').tablesorter(); });
-	<?php echo '$("#clan").val("'.$clan.'"); $("#date1").val("'.$date1.'"); $("#date2").val("'.$date2.'"); ';   ?>
+	<?php echo '$("#group").val("'.$group.'"); $("#date1").val("'.$date1.'"); $("#date2").val("'.$date2.'"); ';   ?>
 	 $(document).ready(function () {
         jQuery.tablesorter.addParser({
             id: "fancyNumber",
