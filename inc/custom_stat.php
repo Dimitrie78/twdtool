@@ -1,9 +1,45 @@
 <?php
 // error_reporting(E_ALL);
 extract($_GET);
+extract($_POST);
+
+if(isSet($createOpenKey)&&$createOpenKey==1){
+	$sq = "INSERT ".$config->db_pre."openStats (gid, Query, DateVon, DateBis, DateDisable) VALUES (".(isSet($cgroup)&&$cgroup!=""?$cgroup:0).", '".(isSet($cfelder)?($cfelder):"")."', '".$cdate1."', '".$cdate2."', DATE_ADD(CURDATE(), INTERVAL 10 DAY))";
+	// print $sq;
+	$cKeyqry = $pdo->query($sq);
+
+	$cKeyqry->execute();
+	$openKey = $pdo->lastInsertId();
+}
+
+
+if(isSet($openKey)&&$openKey>0){
+	$oKeyqry = $pdo->query('SELECT gid, Query, DateVon, DateBis, (active=1 AND DateDisable > CURRENT_DATE()) as Aktiv FROM '.$config->db_pre.'openStats WHERE ID = '.$openKey);
+	$oKeyqry->execute();
+	$c = 0;
+	if($oKeyqry){
+	foreach ($oKeyqry as $oKey) {
+	  if ($oKey["Aktiv"]==0){
+	  	echo "Link ist abgelaufen!";
+	  	$c = 1;
+	  }else{
+	  	$felder = $oKey["Query"];
+	  	$date1	= $oKey["DateVon"];
+	  	$date2	= $oKey["DateBis"];
+	  	$group  = $oKey["gid"];
+	  	$c = $felder!=""?1:0;
+	  }
+	}
+}else echo "Link ungültig!";
+
+	if($c==0) echo "Link ungültig!";
+
+}else{
 include "verify.php";
 
 $felder = (isSet($config->customstats)&&$config->customstats?$config->customstats:' streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete ');
+
+}
 
 $tbody = '';
 $c = array(); //columns
@@ -26,21 +62,23 @@ $felder = str_replace('$days', $datediff, $felder);
 $s1Missed = '';
 $s2Missed = '';
 
-$groupqry = $pdo->query('SELECT u.gid gid, c.name Name, count(u.ID) Anzahl FROM '.$config->db_pre.'users u left join '.$config->db_pre.'groups c on u.gid = c.id WHERE u.active = 1 Group BY u.gid ORDER BY c.name ');
-$groupqry->execute();
+if(!(isSet($openKey)&&$openKey>0)){
+	$groupqry = $pdo->query('SELECT u.gid gid, c.name Name, count(u.ID) Anzahl FROM '.$config->db_pre.'users u left join '.$config->db_pre.'groups c on u.gid = c.id WHERE u.active = 1 Group BY u.gid ORDER BY c.name ');
+	$groupqry->execute();
 
-$grouppicker = '';
-foreach ($groupqry as $gro) {
- $grouppicker .= '<option value="'.$gro['gid'].'">'.$gro['Name'].' ('.$gro['Anzahl'].')</option>';
-}
+	$grouppicker = '';
+	foreach ($groupqry as $gro) {
+	 $grouppicker .= '<option value="'.$gro['gid'].'">'.$gro['Name'].' ('.$gro['Anzahl'].')</option>';
+	}
 
-$dateqry = $pdo->query('SELECT (CASE WHEN WEEKDAY(s.date) = 0 THEN \'Mo\' WHEN WEEKDAY(s.date) = 1 THEN \'Di\' WHEN WEEKDAY(s.date) = 2 THEN \'Mi\' WHEN WEEKDAY(s.date) = 3 THEN \'Do\' WHEN WEEKDAY(s.date) = 4 THEN \'Fr\' WHEN WEEKDAY(s.date) = 5 THEN \'Sa\' WHEN WEEKDAY(s.date) = 6 THEN \'So\' END) Tag, DATE_FORMAT(s.date, "%Y-%m-%d") Datum , count(s.uid) Anzahl FROM '.$config->db_pre.'stats  s left join '.$config->db_pre.'users  u on s.uid = u.id WHERE u.active = 1 Group BY Datum ORDER BY Datum DESC ');
-$dateqry->execute();
+	$dateqry = $pdo->query('SELECT (CASE WHEN WEEKDAY(s.date) = 0 THEN \'Mo\' WHEN WEEKDAY(s.date) = 1 THEN \'Di\' WHEN WEEKDAY(s.date) = 2 THEN \'Mi\' WHEN WEEKDAY(s.date) = 3 THEN \'Do\' WHEN WEEKDAY(s.date) = 4 THEN \'Fr\' WHEN WEEKDAY(s.date) = 5 THEN \'Sa\' WHEN WEEKDAY(s.date) = 6 THEN \'So\' END) Tag, DATE_FORMAT(s.date, "%Y-%m-%d") Datum , count(s.uid) Anzahl FROM '.$config->db_pre.'stats  s left join '.$config->db_pre.'users  u on s.uid = u.id WHERE u.active = 1 Group BY Datum ORDER BY Datum DESC ');
+	$dateqry->execute();
 
-$datepicker = '';
-foreach ($dateqry as $dat) {
- $datepicker .= '<option value="'.$dat['Datum'].'">'.$dat['Tag'].' '.((new DateTime($dat['Datum']))->format('d.m.Y')).' ('.$dat['Anzahl'].')</option>';
-}
+	$datepicker = '';
+	foreach ($dateqry as $dat) {
+	 $datepicker .= '<option value="'.$dat['Datum'].'">'.$dat['Tag'].' '.((new DateTime($dat['Datum']))->format('d.m.Y')).' ('.$dat['Anzahl'].')</option>';
+	}
+}	
 $count = 0;
 $missed = 0;
 foreach ($usrqry as $usr) {
@@ -106,28 +144,33 @@ foreach ($usrqry as $usr) {
 	// if((!$streuner1)||(!$streuner2)) continue;
 
 	for($h=0; $h<count($c);$h++){
-		$e[] = ($s1[$h]&&$s2[$h])?$s1[$h]-$s2[$h]:0;
+		$e[] = (isSet($s1[$h])&&$s1[$h]&&isSet($s2[$h])&&$s2[$h])?$s1[$h]-$s2[$h]:0;
 	}
 
 	$tbody .=  '<tr '.($missed==1?'style="color:#ff4000;"':'').'>
 		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'">'.$uname.'</a></td>';
 
 	for($h=0; $h<count($c);$h++){
-    	$tbody .= '<td style="text-align: right;">'.number_format(round($e[$h]/(isSet($avgTage)&&$avgTage?$datediff:1)),0, ",", ".").'</td>';
+    	$tbody .= '<td style="text-align: right;">'.number_format(round((isSet($e[$h])?$e[$h]:0)/(isSet($avgTage)&&$avgTage?$datediff:1)),0, ",", ".").'</td>';
 	}
 	$tbody .= '</tr>';
 		
 }
-	
-$thead = '
-<div class="table-responsive"> 
-<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select>
-&nbsp;&nbsp;&nbsp;Bis: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select><button type="submit">Laden</button></form>'.($datediff?$datediff.' Tage<br/>':'<br />').'
-<table class="table table-hover table-fixed datatable table-bordered" id="sortTable" style="width:auto">
-  <thead>
-    <tr>
-	  <th scope="col" style="min-width: 120px;">Spieler/in</th>
-';
+$thead = '';	
+if(!(isSet($openKey)&&$openKey>0)){
+	$thead .= '
+	<div class="table-responsive"> 
+	<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select>
+	&nbsp;&nbsp;&nbsp;Bis: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select><button type="submit" class="btn btn-success">Laden</button></form>';
+}
+$thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
+//table-fixed
+$thead .=	'<table class="table table-hover  datatable table-bordered" id="sortTable" style="width:auto">
+	  <thead>
+	    <tr>
+		  <th scope="col" style="min-width: 120px;">Spieler/in</th>
+	';
+
 
 for($h=0; $h<count($c);$h++){
   $thead .= '<th scope="col">'.$c[$h].'</th>';
@@ -141,12 +184,39 @@ $tfoot = '</tbody>
 </table></div>';
 if($s1Missed||$s2Missed)
   echo '<br /><div style="border:2px dashed silver; padding:10px; background-color:#111111; font-weight:bold;">Folgende User-Stats fehlen:<br />'.($s1Missed?'Datum 1: <span style="color:red;">'.$s1Missed.'</span><br />':'').($s2Missed?'Datum2: <span style="color:red;">'.$s2Missed.'</span><br />':'').'</div><br />';
+
+if(isSet($openKey)&&$openKey>0){
+  $l = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].explode('?', $_SERVER['REQUEST_URI'], 2)[0];	
+//  echo $l.'<br />';
+  $tfoot .= '<br /><br /><center><a href="'.$l.'?openKey='.$openKey.'" target="_new">öffentlicher Link zu dieser Statistik</a> <input type="hidden" name="oKeyLink" id="oKeyLink" value="'.$l.'?openKey='.$openKey.'" /><!--<button onclick="var o = document.getElementById(\"oKeyLink\"); if(o!=null) window.clipboardData.setData(\"Text\", o.value);"> kopieren </button>--></center><br />';
+}else{
+  if($date1&&$date2)
+  $tfoot .= '<br /><br /><form target="_blank" method="post" action="index.php?action=custom_stat">
+  				<input type="hidden" name="cfelder" value="'.$felder.'" />
+  				<input type="hidden" name="cdate1" value="'.$date1.'" />
+  				<input type="hidden" name="cdate2" value="'.$date2.'" />
+  				<input type="hidden" name="cgroup" value="'.$group.'" />
+  				<input type="hidden" name="createOpenKey" value="1" />
+  				<input type="hidden" name="action" value="custom_stat" />
+  				<button type="submit" class="btn btn-success">öffentlichen Link erstellen</button>
+  			</form><br />';
+}
+
 echo $thead.$tbody.$tfoot;
 
 ?>
 <script>
 	//$(document).ready(function(){ $('#sortTable').tablesorter(); });
-	<?php echo '$("#group").val("'.$group.'"); $("#date1").val("'.$date1.'"); $("#date2").val("'.$date2.'"); ';   ?>
+
+	<?php 
+		echo '$("#group").val("'.$group.'"); $("#date1").val("'.$date1.'"); $("#date2").val("'.$date2.'"); ';   
+		/*
+		if(isSet($openKey)&&$openKey>0){
+	      echo 'var o = document.getElementById("oKeyLink"); if(o!=null) window.clipboardData.setData("Text", o.value);';
+	    }
+	    */
+	?>
+
 	 $(document).ready(function () {
         jQuery.tablesorter.addParser({
             id: "fancyNumber",

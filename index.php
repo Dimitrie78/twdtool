@@ -53,6 +53,17 @@ $rights = array("3" => "User",
 <body>
 
 <?php
+if ((isset($_GET["openKey"]) && $_GET["openKey"]<>"")||(isset($_POST["createOpenKey"]) && $_POST["createOpenKey"]<>"")){
+  print '<div class="container">
+
+    <div class="panel panel-primary">
+	
+      <div class="panel-heading"><?php echo (isset($panelhead)?$panelhead:"TWD-Stats"); ?></div>
+      <div class="panel-body">';
+      include("inc/custom_stat.php");
+  
+}else{
+
 if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 	$ign = $_POST["loginname"];
 	$passwd = $_POST['loginpasswort'];
@@ -302,7 +313,11 @@ if (!isset($_GET["action"])){
 	echo $lstatupdate; ?>
 	<br><br>
 	<?php echo nl2br($news['text']);
-	} ?>
+	}
+} 
+
+?>
+
 	</div>
 </div> 
 <div class="well">

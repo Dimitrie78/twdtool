@@ -96,6 +96,17 @@ CREATE TABLE IF NOT EXISTS `".$config->db_pre."ocr` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
+CREATE TABLE IF NOT EXISTS `".$config->db_pre."openStats` (
+				  `ID` int(11) NOT NULL AUTO_INCREMENT,
+				  `Query` varchar(2000) NULL,
+				  `gid` int(11) NULL,
+				  `DateVon` date NULL,
+				  `DateBis` date NULL,
+				  `DateDisable` date NULL,
+				  `active` bit(1) NULL DEFAULT b'1',
+				PRIMARY KEY (`Id`)
+				) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 ALTER TABLE `".$config->db_pre."ocr` ENGINE = MYISAM;
 
 ALTER TABLE  `".$config->db_pre."news` ADD `gid` INT( 10 ) NOT NULL AFTER  `id` ;

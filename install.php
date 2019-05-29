@@ -191,7 +191,19 @@ return (object) array(
 					`werteX` int(11) DEFAULT NULL,
 					`werteY` int(11) DEFAULT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+				CREATE TABLE IF NOT EXISTS `".$pre."openStats` (
+				  `ID` int(11) NOT NULL AUTO_INCREMENT,
+				  `Query` varchar(2000) NULL,
+				  `gid` int(11) NULL,
+				  `DateVon` date NULL,
+				  `DateBis` date NULL,
+				  `DateDisable` date NULL,
+				  `active` bit(1) NULL DEFAULT b'1',
+				PRIMARY KEY (`Id`)
+				) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+				";
 
 				if ($conn->query($createqry))
 				{

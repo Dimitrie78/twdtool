@@ -325,10 +325,10 @@ function uploadToApi($target_file){
 					if ($streuner < $usr['streuner']) {$fail = 1; $errlog[] = "Streuner"; $error_row = $error_row<0?0:$error_row; $fail_count++;}
 					if ($menschen < $usr['menschen']) {$fail = 1; $errlog[] = "Menschen"; $error_row = $error_row<0?1:$error_row; $fail_count++;}
 					if ($gespielte_missionen < $usr['gespielte_missionen']) {$fail = 1; $errlog[] = "Gespielte Missionen"; $error_row = $error_row<0?2:$error_row; $fail_count++;}
-					if (($abgeschlossene_missonen < $usr['abgeschlossene_missonen'])||($abgeschlossene_missonen > ($usr['abgeschlossene_missonen']+(500*$datediff)))) {$fail = 1; $errlog[] = "Abgeschlossene Missionen"; $error_row = $error_row<0?3:$error_row; $fail_count++;}
+					if (($abgeschlossene_missonen < $usr['abgeschlossene_missonen'])||($abgeschlossene_missonen > ($usr['abgeschlossene_missonen']+(2000*$datediff)))) {$fail = 1; $errlog[] = "Abgeschlossene Missionen"; $error_row = $error_row<0?3:$error_row; $fail_count++;}
 
 					if ($gefeuerte_schuesse < $usr['gefeuerte_schuesse']) {$fail = 1; $errlog[] = "Gefeuerte Schüsse"; $error_row = $error_row<0?4:$error_row; $fail_count++;}
-					if ($haufen < $usr['haufen']||$haufen > ($usr['haufen']+(1000*$datediff))) {$fail = 1; $errlog[] = "Haufen"; $error_row = $error_row<0?5:$error_row; $fail_count++;}
+					if ($haufen < $usr['haufen']||$haufen > ($usr['haufen']+(5000*$datediff))) {$fail = 1; $errlog[] = "Haufen"; $error_row = $error_row<0?5:$error_row; $fail_count++;}
 					if ($heldenpower < $usr['heldenpower']||$heldenpower > ($usr['heldenpower']+5000)) {$fail = 1; $errlog[] = "Heldenpower"; $error_row = $error_row<0?6:$error_row; $fail_count++;}
 					if ($waffenpower < $usr['waffenpower'] || $waffenpower > ($usr['waffenpower']+5000)) {$fail = 1; $errlog[] = "Waffenpower"; $error_row = $error_row<0?7:$error_row; $fail_count++;}
 					if ($karten < $usr['karten']) {$fail = 1; $errlog[] = "Karten"; $error_row = $error_row<0?8:$error_row; $fail_count++;}
