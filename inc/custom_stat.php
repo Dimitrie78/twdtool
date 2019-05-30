@@ -92,13 +92,13 @@ foreach ($usrqry as $usr) {
 		WHERE uid ='.$uid.' '.(isSet($date1)&&$date1!=""?' AND Date like \''.$date1.'%\'  ':'').'
 		ORDER BY date DESC 
 		LIMIT 0 , 1';
- // echo $sql1.'<br/>';
+//  echo $sql1.'<br/>';
 	$sql2 = 'SELECT '.$felder.'
 		FROM  `'.$config->db_pre.'stats` 
 		WHERE uid ='.$uid.' '.(isSet($date2)&&$date2!=""?' AND Date like \''.$date2.'%\'  ':'').'
 		ORDER BY date DESC
 		LIMIT '.(isSet($date2)&&$date2!=""?'0':'1').' , 1';
- // echo $sql2.'<br/>';
+//  echo $sql2.'<br/>';
 	#reset variables
 
 	$s1 = array();
