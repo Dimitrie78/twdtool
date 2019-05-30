@@ -240,7 +240,7 @@ $i = 1;
 			}
 			else
 			{
-				echo '<td>'.$row['top'].'</td>';
+				echo '<td style="text-align: right;">'.$row['top'].'</td>';
 			}
 		  echo '</tr>';
 	$i++;
