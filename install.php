@@ -202,7 +202,7 @@ return (object) array(
 				  `DateDisable` date NULL,
 				  `active` bit(1) NULL DEFAULT b'1',
 				PRIMARY KEY (`Id`)
-				) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 				";
 
 				if ($conn->query($createqry))
