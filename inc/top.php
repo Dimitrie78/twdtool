@@ -22,7 +22,6 @@ function topqry($field)
 {
 global $config;
 global $and_grouplimit;
-if (isdev()){
 $out = "SELECT U.gid, U.ign, G.tag, max(S.".$field.") as top
 FROM  `".$config->db_pre."users` U
 INNER JOIN ".$config->db_pre."stats S ON U.id = S.uid
@@ -30,15 +29,6 @@ INNER JOIN ".$config->db_pre."groups G ON G.id = U.gid
 WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY top DESC";
-}
-else{
-$out = "SELECT U.gid, U.ign, max(S.".$field.") as top
-FROM  `".$config->db_pre."users` U
-INNER JOIN ".$config->db_pre."stats S ON U.id = S.uid
-WHERE U.active = 1 ".$and_grouplimit."
-GROUP BY S.uid
-ORDER BY top DESC";	
-}
 return $out;	
 }
 
@@ -218,7 +208,7 @@ $row = $avg->fetch();
   <thead>
     <tr>
       <th scope="col" style="text-align: right;">#</th>
-	  <?php if (isdev()){?><th scope="col">Grp</th> <?php }?>
+	  <th scope="col">Grp</th>
       <th scope="col">Name</th>
       <th scope="col">Wert</th>
     </tr>
@@ -229,18 +219,16 @@ $i = 1;
     foreach ($pdo->query($qry) as $row)
 	{
 	echo '<tr>
-			  <th scope="row" style="text-align: right;">'.$i.'</th>';
-              if (isdev()){echo'
-			  <td>'.$row['tag'].'</td>';
-			  }
-			 echo '<td>'.$row['ign'].'</td>';
+			  <th scope="row" style="text-align: right;">'.$i.'</th>
+              <td>'.$row['tag'].'</td>
+			  <td>'.$row['ign'].'</td>';
 			if($_POST['mode']=="lastlogin"){
 				$lastlogin = (($row['top']) <>  "" ? date("d.m.Y H:i:s", strtotime($row['top'])) : "Kein Login");
 			  echo '<td>'.$lastlogin.'</td>';
 			}
 			else
 			{
-				echo '<td style="text-align: right;">'.$row['top'].'</td>';
+				echo '<td>'.$row['top'].'</td>';
 			}
 		  echo '</tr>';
 	$i++;
