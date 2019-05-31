@@ -232,8 +232,8 @@ echo $thead.$tbody.$tfoot;
         $("#sortTable").tablesorter({
             headers: { 1: { sorter: 'fancyNumber'} },
             widgets: ['zebra'],
-            sortInitialOrder: "desc"
-
+            sortInitialOrder: "desc",
+            sortList : [[1,1]]
         });
 
     }); 
