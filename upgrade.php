@@ -109,6 +109,8 @@ CREATE TABLE IF NOT EXISTS `".$config->db_pre."openStats` (
 
 ALTER TABLE `".$config->db_pre."ocr` ENGINE = MYISAM;
 
+ALTER TABLE  `".$config->db_pre."namefix` ADD  `gid` INT( 10 ) NOT NULL AFTER  `id` ;
+
 ALTER TABLE  `".$config->db_pre."news` ADD `gid` INT( 10 ) NOT NULL AFTER  `id` ;
 
 ALTER TABLE  `".$config->db_pre."news` DROP `validuntil`;
