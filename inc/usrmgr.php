@@ -2,12 +2,25 @@
 include "verify.php";
 msgbox($_GET['msg']);
 $uid =0;
-$uid = ((isset($_POST['edituid'])&&$_POST['edituid'] > "") ?$_POST['edituid'] : (isset($_GET['uid'])?$_GET['uid']:0)); 
+$uid = ((isset($_POST['edituid'])&&$_POST['edituid'] > "") ?$_POST['edituid'] : (isset($_GET['uid'])?$_GET['uid']:'0')); 
+$sgid = ((isset($_POST['sgid'])&&$_POST['sgid'] > "") ?$_POST['sgid'] : (isset($_GET['sgid'])?$_GET['sgid']:0)); 
+$uid = preg_replace('/\D/', '', $uid);
 
-if (isset($_GET['uid']) & !user_exists($uid)){
-	echo '<div class="alert alert-danger">
-  <strong>Abbruch</strong> Gewählte User-ID <b>'.$uid.'</b> existiert nicht. Funktion nicht ausführbar</div>	<a href="?action=usrmgr" name="back" class="btn btn-info" role="button">Zurück</a>'; exit();
+if (isset($_GET['uid']) && !user_exists($uid)){
+	failmsg('<strong>Abbruch</strong> Gewählte User-ID <b>'.$uid.'</b> existiert nicht.'); 
+	?><a href="?action=usrmgr" name="back" class="btn btn-info" role="button">Zurück</a><?php
+	exit();
+}
 
+if (!isdev()){
+	$statement = $pdo->prepare("SELECT gid FROM ".$config->db_pre."users WHERE id = :id");
+	$result = $statement->execute(array('id' => $uid));
+	$udat = $statement->fetch();
+	if ($udat['gid'] != $_SESSION['gid']){
+		failmsg('Du bist nicht berechtigt diesen User zu bearbeiten!');
+		?><a href="?action=usrmgr" name="back" class="btn btn-info" role="button">Zurück</a><?php
+		exit();
+	}
 }
 
 $filter = '';
@@ -21,81 +34,79 @@ $gidselected = '';
 $selected = '';
 
 if (!isdev()){
-$gidfilter = 'gid = '.$_SESSION['gid'];
-$where_grouplimit = ' WHERE '.$gidfilter;
-$and_grouplimit = ' AND '.$gidfilter;
+	$gidfilter = 'gid = '.$_SESSION['gid'];
+	$where_grouplimit = ' WHERE '.$gidfilter;
+	$and_grouplimit = ' AND '.$gidfilter;
 }
 
-if (isdev() && $_POST['gid']){
-if (is_numeric($_POST['gid'])){
-$and_grouplimit = ' AND gid = '.$_POST['gid'];
-$where_grouplimit = ' WHERE gid = '.$_POST['gid'];
-}
-if ($_POST['gid'] == "allgrp"){
-$and_grouplimit = '';	
-}
+if (isdev() && $sgid){
+	if (is_numeric($sgid)){
+		$and_grouplimit = ' AND gid = '.$sgid;
+		$where_grouplimit = ' WHERE gid = '.$sgid;
+	}
+	if ($sgid == "allgrp"){
+		$and_grouplimit = '';	
+	}
 
-if ($_POST['gid'] == "uc"){
-$and_grouplimit =  ' AND gid = 0';
-$where_grouplimit = ' WHERE gid = 0';
+	if ($sgid == "uc"){
+		$and_grouplimit =  ' AND gid = 0';
+		$where_grouplimit = ' WHERE gid = 0';
+	}
 }
-}
-
 
 if ($_POST['optactive'] == "all"){
-$filter = $where_grouplimit;
-$optall = "checked";
+	$filter = $where_grouplimit;
+	$optall = "checked";
 }
-
 elseif ($_POST['optactive'] == "active" OR !$_POST){
-$filter = 'WHERE active = 1'.$and_grouplimit;
-$optactive = "checked";
+	$filter = 'WHERE active = 1'.$and_grouplimit;
+	$optactive = "checked";
 }
 elseif ($_POST['optactive'] == "inactive"){
-$filter = 'WHERE active = 0'.$and_grouplimit;
-$optinactive = "checked";
+	$filter = 'WHERE active = 0'.$and_grouplimit;
+	$optinactive = "checked";
 }
-
 
 $cqry = $pdo->query('SELECT count(id) as cnt FROM `'.$config->db_pre.'users` '.$filter.' ORDER BY ign ASC');
 $anz = $cqry->fetchColumn();
-
-
 ?>
 
-
 <form class="form-vertical" role="form" method = "POST" action = "?action=usrmgr" >
-    <div class="form-group">
-<label class="radio-inline"><input type="radio" value = "all" name="optactive" <?=$optall;?> onchange="this.form.submit()">Alle</label>
-<label class="radio-inline"><input type="radio" value = "active" name="optactive" <?=$optactive;?> onchange="this.form.submit()">Aktive</label>
-<label class="radio-inline"><input type="radio" value = "inactive" name="optactive" <?=$optinactive;?> onchange="this.form.submit()">Inaktive</label>
-<span style="padding-left:5px">[<?=$anz;?> User]</span>
-</div>
+	<div class="form-group">
+		<label class="radio-inline"><input type="radio" value = "all" name="optactive" <?=$optall;?> onchange="this.form.submit()">Alle</label>
+		<label class="radio-inline"><input type="radio" value = "active" name="optactive" <?=$optactive;?> onchange="this.form.submit()">Aktive</label>
+		<label class="radio-inline"><input type="radio" value = "inactive" name="optactive" <?=$optinactive;?> onchange="this.form.submit()">Inaktive</label>
+		<span style="padding-left:5px">[<?=$anz;?> User]</span>
+	</div>
 
- <div class="row">
+	<div class="row">
 <?php if (isdev()) {
+if ($sgid == 'allgrp'){$selall = 'selected';}
+elseif ($sgid == 'uc'){$seluc = 'selected';}
 
  ?>
+
+
 	<div class="form-group col-xs-6" style="width:auto;">
 	<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
-      <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
-	 <option value="allgrp" <?php if ($_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
-	 <option value="uc" <?php if ($_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+      <select onchange="this.form.submit()" id="inputGroup" name = "sgid" class = "form-control" style="width:auto;min-width:200px;">
+	  <option value="allgrp" <?php echo $selall; ?>>--Alle--</option>
+	  <option value="uc" <?php echo $seluc; ?>>--Ohne Gruppe--</option>
 	<?php
 	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
 	
 	
     foreach ($pdo->query($sql) as $row) {
-		if ($_POST['gid'] == $row['id'])
-	{
-	$gidselected = ' selected';
-	}
+		if ($sgid == $row['id'])
+		{
+			$gidselected = ' selected';
+		}
        echo '<option value="'.$row['id'].'" '.$gidselected.'>['.$row['tag'].'] '.$row['name'].'</option>';
 	    $gidselected = '';
     }
 	?>
-	
-	 </select> </div>
+	  </select>
+	</div>
  <?php } ?>
 
 <div class="form-group col-xs-6" style="width:auto;">
@@ -115,17 +126,13 @@ $anz = $cqry->fetchColumn();
     }
 	?>
 	
-	 </select> </div></div>
-
-
-  
-
-
-
+	 </select> 
+</div>
+    </div>
 </form>
 
 <?php
-if($uid >""){
+if($uid > 0){
 $statement = $pdo->prepare("SELECT id,gid,ign,notes,telegram,role,created_at,updated_at,active FROM ".$config->db_pre."users WHERE id = :id");
 
 $result = $statement->execute(array('id' => $uid));
@@ -136,6 +143,7 @@ $user = $statement->fetch();
  
 <form action="?action=usrmgr" method = "POST" autocomplete="no">
   <input type = "hidden" name = "edituid" type="text" value = "<?php echo ($uid);?>">
+  <input type = "hidden" name = "sgid" type="text" value = "<?php echo ($_POST['sgid']);?>">
   <div class="form-group">
     <label for="telegram">Ingame-Name:</label>
     <input type="text" class="form-control" id="ign" name = "ign"  value = "<?php echo $user['ign']; ?>">
@@ -221,7 +229,6 @@ if ((ismod() & $user['role'] == 3) OR isadmin()){
 if(isset($_POST['updateuser']) && is_numeric($_POST['edituid'])){
 
 $curr_datetime =date("Y-m-d H:i:s");
-
 #ist dev - darf alles
 #hat pw geändert
 if (isdev()){
@@ -372,6 +379,9 @@ else
 }
 }
 
-header('Refresh: 0; URL=?action=usrmgr&uid='.$_POST['edituid'].'&msg=updatesuccess');
+if (isdev()){
+$giddata = '&sgid='.$_POST['sgid'];
+}
+header('Refresh: 0; URL=?action=usrmgr&uid='.$_POST['edituid'].$giddata.'&msg=updatesuccess');
 }
 ?>
