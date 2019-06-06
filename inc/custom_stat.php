@@ -12,9 +12,9 @@ if(isSet($createOpenKey)&&$createOpenKey==1){
 	$openKey = $pdo->lastInsertId();
 }
 
-
+$dateDisable  = date('');
 if(isSet($openKey)&&$openKey>0){
-	$oKeyqry = $pdo->query('SELECT gid, Query, DateVon, DateBis, (active=1 AND DateDisable > CURRENT_DATE()) as Aktiv FROM '.$config->db_pre.'openStats WHERE ID = '.$openKey);
+	$oKeyqry = $pdo->query('SELECT gid, Query, DateVon, DateBis, (active=1 AND DateDisable > CURRENT_DATE()) as Aktiv, DateDisable FROM '.$config->db_pre.'openStats WHERE ID = '.$openKey);
 	$oKeyqry->execute();
 	$c = 0;
 	if($oKeyqry){
@@ -27,6 +27,7 @@ if(isSet($openKey)&&$openKey>0){
 	  	$date1	= $oKey["DateVon"];
 	  	$date2	= $oKey["DateBis"];
 	  	$group  = $oKey["gid"];
+	  	$dateDisable = $oKey["DateDisable"];
 	  	$c = $felder!=""?1:0;
 	  }
 	}
@@ -78,7 +79,7 @@ if(!(isSet($openKey)&&$openKey>0)){
 	foreach ($dateqry as $dat) {
 	 $datepicker .= '<option value="'.$dat['Datum'].'">'.$dat['Tag'].' '.((new DateTime($dat['Datum']))->format('d.m.Y')).' ('.$dat['Anzahl'].')</option>';
 	}
-}	
+}
 $count = 0;
 $missed = 0;
 foreach ($usrqry as $usr) {
@@ -162,8 +163,28 @@ if(!(isSet($openKey)&&$openKey>0)){
 	<div class="table-responsive"> 
 	<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select>
 	&nbsp;&nbsp;&nbsp;Bis: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select><button type="submit" class="btn btn-success">Laden</button></form>';
-}
 $thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
+}else{
+	$thead .= '<span style="font-weight:bold">';
+	if($group > 0){
+		$gqry = $pdo->query('SELECT c.name Name FROM '.$config->db_pre.'groups c WHERE c.id = '.$group);
+		$gqry->execute();
+
+		foreach ($gqry as $_gro) {
+		 $thead .= $_gro['Name'].'&nbsp;&nbsp;&nbsp;';
+		}
+	}
+
+	$thead .= str_replace('Monday', 'Mo',
+			  str_replace('Tuesday', 'Di',
+			  str_replace('Wednesday', 'Mi',
+			  str_replace('Thursday', 'Do',
+			  str_replace('Friday', 'Fr',
+			  str_replace('Saturday', 'Sa',
+			  str_replace('Sunday', 'So',
+			   '('.date('l d.m.', strtotime($date2)).' - '.date('l d.m.Y', strtotime($date1)).($datediff?' [ '.$datediff.' Tage ] ':'').')<br/><br />')))))));
+	$thead .= '</span>';
+}
 //table-fixed
 $thead .=	'<table class="table table-hover  datatable table-bordered" id="sortTable" style="width:auto">
 	  <thead>
@@ -188,7 +209,10 @@ if($s1Missed||$s2Missed)
 if(isSet($openKey)&&$openKey>0){
   $l = (isset($_SERVER['HTTPS']) && 'on' === $_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].explode('?', $_SERVER['REQUEST_URI'], 2)[0];	
 //  echo $l.'<br />';
-  $tfoot .= '<br /><br /><center><a href="'.$l.'?openKey='.$openKey.'" target="_new">öffentlicher Link zu dieser Statistik</a> <input type="hidden" name="oKeyLink" id="oKeyLink" value="'.$l.'?openKey='.$openKey.'" /><!--<button onclick="var o = document.getElementById(\"oKeyLink\"); if(o!=null) window.clipboardData.setData(\"Text\", o.value);"> kopieren </button>--></center><br />';
+  $tfoot .= '<br /><br /><center><a href="'.$l.'?openKey='.$openKey.'" target="_new">öffentlicher Link zu dieser Statistik</a> <input type="hidden" name="oKeyLink" id="oKeyLink" value="'.$l.'?openKey='.$openKey.'" /><!--<button onclick="var o = document.getElementById(\"oKeyLink\"); if(o!=null) window.clipboardData.setData(\"Text\", o.value);"> kopieren </button>--><br />';
+  $dateDisdiff = round(abs(strtotime($dateDisable)-strtotime(date('Y-m-d')))/86400);
+  $tfoot .= '<small>(Der Link läuft in '.$dateDisdiff.' Tagen ab.)</small></center>';
+// $tfoot .= ''.date('Y-m-d');
 }else{
   if($date1&&$date2)
   $tfoot .= '<br /><br /><form target="_blank" method="post" action="index.php?action=custom_stat">
