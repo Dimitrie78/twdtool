@@ -161,8 +161,8 @@ $thead = '';
 if(!(isSet($openKey)&&$openKey>0)){
 	$thead .= '
 	<div class="table-responsive"> 
-	<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select>
-	&nbsp;&nbsp;&nbsp;Bis: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select><button type="submit" class="btn btn-success">Laden</button></form>';
+	<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select>
+	&nbsp;&nbsp;&nbsp;Bis: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select> <button type="submit" class="btn btn-success">Laden</button></form>';
 $thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
 }else{
 	$thead .= '<span style="font-weight:bold">';
@@ -171,7 +171,7 @@ $thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
 		$gqry->execute();
 
 		foreach ($gqry as $_gro) {
-		 $thead .= $_gro['Name'].'&nbsp;&nbsp;&nbsp;';
+		 $thead .= $_gro['Name'].'<br />';
 		}
 	}
 
@@ -182,11 +182,11 @@ $thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
 			  str_replace('Friday', 'Fr',
 			  str_replace('Saturday', 'Sa',
 			  str_replace('Sunday', 'So',
-			   '('.date('l d.m.', strtotime($date2)).' - '.date('l d.m.Y', strtotime($date1)).($datediff?' [ '.$datediff.' Tage ] ':'').')<br/><br />')))))));
+			   ''.date('l d.m.', strtotime($date2)).' - '.date('l d.m.Y', strtotime($date1)).($datediff?' ( '.$datediff.' Tage ) ':'').'<br/><br />')))))));
 	$thead .= '</span>';
 }
 //table-fixed
-$thead .=	'<table class="table table-hover  datatable table-bordered" id="sortTable" style="width:auto">
+$thead .=	'<table class="tablesorter table table-hover  datatable table-bordered" id="sortTable" style="width:auto">
 	  <thead>
 	    <tr>
 		  <th scope="col" style="min-width: 120px;">Spieler/in</th>
@@ -241,25 +241,9 @@ echo $thead.$tbody.$tfoot;
 	    */
 	?>
 
-	 $(document).ready(function () {
-        jQuery.tablesorter.addParser({
-            id: "fancyNumber",
-            is: function (s) {
-                return /^[0-9]?[0-9,\.]*$/.test(s);
-            },
-            format: function (s) {
-                return jQuery.tablesorter.formatFloat(s.replace(/\./g, ''));
-            },
-            type: "numeric"
-        });
-
-        $("#sortTable").tablesorter({
-            headers: { 1: { sorter: 'fancyNumber'} },
-            widgets: ['zebra'],
-            sortInitialOrder: "desc",
-            sortList : [[1,1]]
-        });
-
-    }); 
+$(function() {
+  $("#sortTable").tablesorter({ sortList: [[1,1]] });
+});
+ 
 
 </script>
