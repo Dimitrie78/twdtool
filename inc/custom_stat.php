@@ -242,7 +242,7 @@ echo $thead.$tbody.$tfoot;
 	?>
 
 $(function() {
-  $("#sortTable").tablesorter({ sortList: [[1,1]] });
+  $("#sortTable").tablesorter({ sortList: [[1,1]], widgets: ['zebra'] });
 });
  
 
