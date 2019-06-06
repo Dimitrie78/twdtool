@@ -92,7 +92,7 @@ foreach ($usrqry as $usr) {
 		WHERE uid ='.$uid.' '.(isSet($date1)&&$date1!=""?' AND Date like \''.$date1.'%\'  ':'').'
 		ORDER BY date DESC 
 		LIMIT 0 , 1';
- // echo $sql1.'<br/>';
+ //echo $sql1.'<br/>';
 	$sql2 = 'SELECT '.$felder.'
 		FROM  `'.$config->db_pre.'stats` 
 		WHERE uid ='.$uid.' '.(isSet($date2)&&$date2!=""?' AND Date like \''.$date2.'%\'  ':'').'
@@ -186,7 +186,7 @@ if($s1Missed||$s2Missed)
   echo '<br /><div style="border:2px dashed silver; padding:10px; background-color:#111111; font-weight:bold;">Folgende User-Stats fehlen:<br />'.($s1Missed?'Datum 1: <span style="color:red;">'.$s1Missed.'</span><br />':'').($s2Missed?'Datum2: <span style="color:red;">'.$s2Missed.'</span><br />':'').'</div><br />';
 
 if(isSet($openKey)&&$openKey>0){
-  $l = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].explode('?', $_SERVER['REQUEST_URI'], 2)[0];	
+  $l = (isset($_SERVER['HTTPS']) && 'on' === $_SERVER['HTTPS']?'https':'http').'://'.$_SERVER['HTTP_HOST'].explode('?', $_SERVER['REQUEST_URI'], 2)[0];	
 //  echo $l.'<br />';
   $tfoot .= '<br /><br /><center><a href="'.$l.'?openKey='.$openKey.'" target="_new">öffentlicher Link zu dieser Statistik</a> <input type="hidden" name="oKeyLink" id="oKeyLink" value="'.$l.'?openKey='.$openKey.'" /><!--<button onclick="var o = document.getElementById(\"oKeyLink\"); if(o!=null) window.clipboardData.setData(\"Text\", o.value);"> kopieren </button>--></center><br />';
 }else{
