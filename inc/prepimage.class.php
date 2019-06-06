@@ -104,11 +104,12 @@ class prepimage {
 	private function filetimebyname() {
 		if ( strpos(strtolower($this->rfile), 'screenshot') !== false ) {
 			$str = strtolower($this->rfile);
-			$w = array('screenshot','-','_',$_SESSION['userid']);
+			$w = array('screenshot','-','_');
 			$str = str_replace($w,'',$str);
-			$str = substr($str, 0, 14);
-			$str = strtotime($str);
-			touch("2ocr/".$this->rfile,$str);
+			$str = substr($str, strlen($_SESSION['userid']), 14);
+			if (($str = strtotime($str)) !== false) {
+        touch("2ocr/".$this->rfile,$str);
+      }
 		}
 	}
 }

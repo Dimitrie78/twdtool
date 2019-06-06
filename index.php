@@ -285,48 +285,62 @@ if (!isset($_GET["action"])){
 
 	$result = $statement->execute(array('uid' => $_SESSION['userid']));
 	$group = $statement->fetch();
-		
+	$ugrpcnt = $statement->rowCount();
+	if ($ugrpcnt > 0) {
+	$grpname = ', bei <b>['.$group['tag'].'] '.$group['name'].'</b>';
+	}
+	else
+	{
+	$grpname = '. Dein Account befindet sich momentan in keiner Gruppe.';
+	}
+
+	
 	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0 AND gid = ".$_SESSION['gid']."")->fetch();
 	
-	##todo: joinen, brauchen die gid für das korrekte datum!
-	$stats = $pdo->query("SELECT max(date) as statupdate from ".$config->db_pre."stats")->fetch();
-	if($stats['statupdate'] != "0000-00-00 00:00:00" AND $stats['statupdate'] != ""){
-		$datetime = new DateTime($stats['statupdate']);
-		$lstatupdate = "<br>Die letzten Statistiken wurden am: " .$datetime->format('d.m.Y H:i:s') ." übertragen.";
-		unset($datetime);
+	$devstats = $pdo->query('SELECT MAX( DATE_FORMAT( date,  "%d.%m.%Y %H:%i:%s" ) ) AS statupdate
+							FROM '.$config->db_pre.'stats')->fetch();
+
+	$stat = $pdo->prepare('SELECT MAX( DATE_FORMAT( S.date,  "%d.%m.%Y %H:%i:%s" ) ) AS statupdate
+	FROM  `'.$config->db_pre.'stats` S
+	INNER JOIN  `'.$config->db_pre.'users` U ON S.uid = U.id
+	WHERE U.gid ='.$_SESSION['gid'])->fetch;
+
+	if(isset($stats['statupdate'])) {
+		$lstatupdate = "Die letzten Statistiken wurden am: ". $stats['statupdate'] ." übertragen.";
 	}
 	else{
-		$lstatupdate = '<br>Es wurden noch keine Statistiken übertragen.';
+		$lstatupdate = 'Es wurden noch keine Statistiken übertragen.';
 	}
 		
 	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE gid = ".$_SESSION['gid']." AND active = 1")->fetch();
 	
 ?>
 
-	<p>Willkommen <b><?php echo $_SESSION['ign'];?></b>, bei <b>[<?php echo $group['tag'];?>] <?php echo $group['name'];?></b>
-	<br><br>Wir haben derzeit: <?php echo $user['anz']; ?> Spieler in der Gruppe.<br>
+	<p>Willkommen <b><?php echo $_SESSION['ign'];?></b><?php echo $grpname;?>
+	<br><br>Es sind derzeit: <b><?php echo $user['anz']; ?></b> Spieler/innen in Deiner Gruppe.<br>
+	<?php echo $lstatupdate; ?>
 	<?php if (isdev()){ ?>
-	DEV-Stats [ User gesamt: <b><?php echo $totalusers['anz'];?></b>
-	davon aktiv: <b><?php echo $totalactiveusers['anz'];?></b>
-	in <b><?php echo $groupcount['anz'];?></b> Gruppe/n ]<br>
-	<?php }
-	echo $lstatupdate; ?>
 	<br><br>
+    <u>DEV-Stats:</u> <br>User gesamt: <b><?php echo $totalusers['anz'];?></b>
+	davon aktiv: <b><?php echo $totalactiveusers['anz'];?></b>
+	in <b><?php echo $groupcount['anz'];?></b> Gruppe/n<br>
+	Letzter Stat-Eintrag: 	<?php echo (isset($devstats['statupdate']) ? $devstats['statupdate'] : 'Keiner')?><br>
+	<?php } if (isset($news['text'])){?>
+	<hr><u>News/Claninfo:</u><br>
 	<?php echo nl2br($news['text']);
+	}
 	}
 } 
 
 ?>
 
 	</div>
-</div> 
-<div class="well">
-V 1.8.3 Multigroup Beta
-</div>
+  </div> 
+<div class="well">V 1.8.4 Multigroup Beta</div>
 </div>
 <script src="inc/js/bootstrap.min.js"></script>
 <script src="inc/js/bootstrap-tabs.js"></script>
 <script src="inc/js/highcharts.js"></script>
 <script src="inc/js/twd.js"></script>
-  </body>
+ </body>
 </html>

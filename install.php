@@ -113,6 +113,7 @@ return (object) array(
 				echo '<div class="alert alert-success">Verbindung ok, config.php geschrieben, erstelle Tabellen...</div>';
 				$createqry = "CREATE TABLE IF NOT EXISTS `".$pre."namefix` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
+				  `gid` int(10) NOT NULL,
 				  `searchfor` varchar(255) NOT NULL,
 				  `replacement` varchar(255) NOT NULL,
 				  PRIMARY KEY (`id`)
@@ -202,7 +203,7 @@ return (object) array(
 				  `DateDisable` date NULL,
 				  `active` bit(1) NULL DEFAULT b'1',
 				PRIMARY KEY (`Id`)
-				) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 				";
 
 				if ($conn->query($createqry))

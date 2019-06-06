@@ -34,7 +34,7 @@ if ($_POST["do"] == "upgrade") {
 //Evtl. vorhandene Clan-Information aus alter Config auslesen
 $clantag = (isset($config->clantag)) ? $config->clantag : 'TWD';
 $clanname = (isset($config->clanname)) ? $config->clanname : 'twdclan';
-$customstats = (isset($config->customstats)) ? $config->customstats : 'streuner+menschen kills,round((streuner+menschen)/$days) per day, abgeschlossene_missonen missions, waffenpower+heldenpower as upgrades, haufen crates, gerettete survivors';
+$customstats = (isset($config->customstats)) ? $config->customstats : 'streuner+menschen as kills,round((streuner+menschen)/$days) as day, abgeschlossene_missonen as missions, waffenpower+heldenpower as upgrades, haufen as crates, gerettete as survivors';
 
 //Config neu schreiben
 if (is_writable($configfile)) {
@@ -105,9 +105,11 @@ CREATE TABLE IF NOT EXISTS `".$config->db_pre."openStats` (
 				  `DateDisable` date NULL,
 				  `active` bit(1) NULL DEFAULT b'1',
 				PRIMARY KEY (`Id`)
-				) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 ALTER TABLE `".$config->db_pre."ocr` ENGINE = MYISAM;
+
+ALTER TABLE  `".$config->db_pre."namefix` ADD  `gid` INT( 10 ) NOT NULL AFTER  `id` ;
 
 ALTER TABLE  `".$config->db_pre."news` ADD `gid` INT( 10 ) NOT NULL AFTER  `id` ;
 

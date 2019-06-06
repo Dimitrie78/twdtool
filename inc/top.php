@@ -22,6 +22,7 @@ function topqry($field)
 {
 global $config;
 global $and_grouplimit;
+if (isdev()){
 $out = "SELECT U.gid, U.ign, G.tag, max(S.".$field.") as top
 FROM  `".$config->db_pre."users` U
 INNER JOIN ".$config->db_pre."stats S ON U.id = S.uid
@@ -29,6 +30,15 @@ INNER JOIN ".$config->db_pre."groups G ON G.id = U.gid
 WHERE U.active = 1 ".$and_grouplimit."
 GROUP BY S.uid
 ORDER BY top DESC";
+}
+else{
+$out = "SELECT U.gid, U.ign, max(S.".$field.") as top
+FROM  `".$config->db_pre."users` U
+INNER JOIN ".$config->db_pre."stats S ON U.id = S.uid
+WHERE U.active = 1 ".$and_grouplimit."
+GROUP BY S.uid
+ORDER BY top DESC";	
+}
 return $out;	
 }
 
@@ -195,6 +205,8 @@ switch ($_POST['mode']) {
 		$avgqry = $avg['streuner'];
 						}
 
+$qry = $pdo->query($qry);
+if($qry->rowCount()){
 if($_POST['mode']!="lastlogin"){
 $avg = $pdo->query($avgqry);
 $avg->execute(); 
@@ -203,12 +215,15 @@ $row = $avg->fetch();
 <p><span style = "margin-left:1em;"> Ø <?php echo $row['avg']; ?></span></p>
 <?php
 }
+
+
+
 ?>
  <table class="table table-hover datatable table-bordered" style="width:auto;min-width:200px">
   <thead>
     <tr>
       <th scope="col" style="text-align: right;">#</th>
-	  <th scope="col">Grp</th>
+	  <?php if (isdev()){?><th scope="col">Grp</th> <?php }?>
       <th scope="col">Name</th>
       <th scope="col">Wert</th>
     </tr>
@@ -216,22 +231,29 @@ $row = $avg->fetch();
   <tbody>
 <?php
 $i = 1;
-    foreach ($pdo->query($qry) as $row)
+    foreach ($qry as $row)
 	{
 	echo '<tr>
-			  <th scope="row" style="text-align: right;">'.$i.'</th>
-              <td>'.$row['tag'].'</td>
-			  <td>'.$row['ign'].'</td>';
+			  <th scope="row" style="text-align: right;">'.$i.'</th>';
+              if (isdev()){echo'
+			  <td>'.$row['tag'].'</td>';
+			  }
+			 echo '<td>'.$row['ign'].'</td>';
 			if($_POST['mode']=="lastlogin"){
 				$lastlogin = (($row['top']) <>  "" ? date("d.m.Y H:i:s", strtotime($row['top'])) : "Kein Login");
 			  echo '<td>'.$lastlogin.'</td>';
 			}
 			else
 			{
-				echo '<td>'.$row['top'].'</td>';
+				echo '<td style="text-align: right;">'.$row['top'].'</td>';
 			}
 		  echo '</tr>';
 	$i++;
+	}
+	}
+	else
+	{
+	echo 'Keine Daten verfügbar';
 	}
 ?>
    </tbody>
