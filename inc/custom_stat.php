@@ -242,7 +242,18 @@ echo $thead.$tbody.$tfoot;
 	?>
 
 $(function() {
-  $("#sortTable").tablesorter({ sortList: [[1,1]], widgets: ['zebra'] });
+
+        jQuery.tablesorter.addParser({
+            id: "fancyNumber",
+            is: function (s) {
+                return /^[0-9]?[0-9,\.]*$/.test(s);
+            },
+            format: function (s) {
+                return jQuery.tablesorter.formatFloat(s.replace(/\./g, ''));
+            },
+            type: "numeric"
+        });	
+  $("#sortTable").tablesorter({ headers: { 1: { sorter: 'fancyNumber'} }, sortList: [[1,1]], widgets: ['zebra'] });
 });
  
 
