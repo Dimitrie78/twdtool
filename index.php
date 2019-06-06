@@ -84,6 +84,7 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 		}
 		else
 		{
+			session_regenerate_id();
 			$_SESSION['userid'] = $user['id'];
 			$_SESSION['role'] = $user['role'];
 			$_SESSION['ign'] = $user['ign'];
@@ -297,19 +298,27 @@ if (!isset($_GET["action"])){
 	
 	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0 AND gid = ".$_SESSION['gid']."")->fetch();
 	
-	$devstats = $pdo->query('SELECT MAX( DATE_FORMAT( date,  "%d.%m.%Y %H:%i:%s" ) ) AS statupdate
-							FROM '.$config->db_pre.'stats')->fetch();
+	$devstats = $pdo->query('SELECT DATE_FORMAT(`date`, "%d.%m.%Y %H:%i:%s") AS statupdate
+							FROM `'.$config->db_pre.'stats`
+							WHERE `date` = ( 
+							SELECT MAX(`date`) 
+							FROM `'.$config->db_pre.'stats` )')->fetch();
 
-	$stat = $pdo->prepare('SELECT MAX( DATE_FORMAT( S.date,  "%d.%m.%Y %H:%i:%s" ) ) AS statupdate
-	FROM  `'.$config->db_pre.'stats` S
-	INNER JOIN  `'.$config->db_pre.'users` U ON S.uid = U.id
-	WHERE U.gid ='.$_SESSION['gid'])->fetch;
 
-	if(isset($stats['statupdate'])) {
-		$lstatupdate = "Die letzten Statistiken wurden am: ". $stats['statupdate'] ." übertragen.";
+	$grpstat = $pdo->query('SELECT DATE_FORMAT(  `date` ,  "%d.%m.%Y %H:%i:%s" ) AS statupdate
+							FROM `'.$config->db_pre.'stats`
+							WHERE  `date` = ( 
+							SELECT MAX( S.date ) 
+							FROM  `'.$config->db_pre.'stats` S
+							INNER JOIN  `users` U ON S.uid = U.id
+							WHERE U.gid ='.$_SESSION['gid'].' )')->fetch();
+
+	
+	if(isset($grpstat['statupdate'])) {
+		$lstatupdate = "Die letzten Statistiken wurden am: ". $grpstat['statupdate'] ." übertragen.";
 	}
 	else{
-		$lstatupdate = 'Es wurden noch keine Statistiken übertragen.';
+	$lstatupdate = 'Es wurden noch keine Statistiken übertragen.';
 	}
 		
 	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE gid = ".$_SESSION['gid']." AND active = 1")->fetch();
