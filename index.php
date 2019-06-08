@@ -299,20 +299,16 @@ if (!isset($_GET["action"])){
 	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0 AND gid = ".$_SESSION['gid']."")->fetch();
 	
 	$devstats = $pdo->query('SELECT DATE_FORMAT(`date`, "%d.%m.%Y %H:%i:%s") AS statupdate
-							FROM `'.$config->db_pre.'stats`
-							WHERE `date` = ( 
-							SELECT MAX(`date`) 
-							FROM `'.$config->db_pre.'stats` )')->fetch();
+							FROM  `'.$config->db_pre.'stats`
+							ORDER BY `date` DESC 
+							LIMIT 1')->fetch();
 
-
-	$grpstat = $pdo->query('SELECT DATE_FORMAT(  `date` ,  "%d.%m.%Y %H:%i:%s" ) AS statupdate
-							FROM `'.$config->db_pre.'stats`
-							WHERE  `date` = ( 
-							SELECT MAX( S.date ) 
+	$grpstat = $pdo->query('SELECT DATE_FORMAT(S.`date`, "%d.%m.%Y %H:%i:%s") AS statupdate
 							FROM  `'.$config->db_pre.'stats` S
-							INNER JOIN  `users` U ON S.uid = U.id
-							WHERE U.gid ='.$_SESSION['gid'].' )')->fetch();
-
+							INNER JOIN  `'.$config->db_pre.'users` U ON S.uid = U.id
+							WHERE U.gid ='.$_SESSION['gid'].'
+							ORDER BY S.date DESC 
+							LIMIT 1')->fetch();
 	
 	if(isset($grpstat['statupdate'])) {
 		$lstatupdate = "Die letzten Statistiken wurden am: ". $grpstat['statupdate'] ." übertragen.";
