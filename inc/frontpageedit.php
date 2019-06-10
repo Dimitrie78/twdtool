@@ -1,6 +1,6 @@
 <?php
 include "verify.php";
-$showfilter = 1;
+$showfilter = 0;
 $selng      = '';
 $seldn      = '';
 $nid        = '';
