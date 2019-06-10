@@ -125,6 +125,7 @@ return (object) array(
 				  `ndate` datetime NOT NULL,
 				  `text` text NOT NULL,
 				  `active` tinyint(1) NOT NULL,
+				  `devnews` tinyint(1) NOT NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
