@@ -84,6 +84,7 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 		}
 		else
 		{
+			session_regenerate_id();
 			$_SESSION['userid'] = $user['id'];
 			$_SESSION['role'] = $user['role'];
 			$_SESSION['ign'] = $user['ign'];
@@ -193,84 +194,7 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
       <div class="panel-body">
 	  
 <?php
-## NUR FÜR DEV
-
-if (isdev()){
-  if (isset($_GET["action"]))
-switch ($_GET['action']) {
-	case "groupedit":
-    $file = "inc/".$_GET['action'].".php";
-    if(is_file($file)) {
-		include($file);
-	}
-	break;
-  }
-} ## Ende DEV
-
-
-# Nur für ADMIN
-if (isadmin()){
-  if (isset($_GET["action"]))
-switch ($_GET['action']) {
-	case "setHandyType":
-	case "uploadimg":
-	case "prepimg":
-    case "import":
-    case "ocrfix":
-    case "frontpageedit":
-    $file = "inc/".$_GET['action'].".php";
-    if(is_file($file)) {
-		include($file);
-	}
-	break;
-  }
-} ## Ende Admin
-
-
-
-# FÜR ADMIN+MOD
-if (isadminormod()){
-  if (isset($_GET["action"]))
-	switch ($_GET['action']) {	
-	case "alldata":
-	case "createnewuser":
-	case "usrmgr":
-	case "doremovestat":
-	case "notes":
-	case "editstat":
-	case "doeditstat":
-	case "removestat":
-	case "addstat":
-	case "doaddstat":
-	case "removeusr":
-	case 'doremoveuser':
-	#Auslesefehler beheben
-	case "fails":
-	case "editfail":
-	$file = "inc/".$_GET['action'].".php";
-	if(is_file($file)) {
-		include($file);
-	}
-	break;
-  }
-} 
-
-#FÜR die User
-if (isset($_GET["action"]))
-switch ($_GET['action']) {
-    case "myprofile":
-    case "stats":
-    case "top":
-    case "levelingnumbers":
-    case "currentstats":
-    case "avg":
-    case "custom_stat":
-	$file = "inc/".$_GET['action'].".php";
-	if(is_file($file)) {
-		include($file);
-	}
-	break;
-} 
+include ("inc/routing.php");
 
 if (!isset($_GET["action"])){
 	
@@ -297,22 +221,36 @@ if (!isset($_GET["action"])){
 	
 	$user = $pdo->query("SELECT COUNT(id) as anz FROM ".$config->db_pre."users WHERE active > 0 AND gid = ".$_SESSION['gid']."")->fetch();
 	
-	$devstats = $pdo->query('SELECT MAX( DATE_FORMAT( date,  "%d.%m.%Y %H:%i:%s" ) ) AS statupdate
-							FROM '.$config->db_pre.'stats')->fetch();
+	$devstats = $pdo->query('SELECT DATE_FORMAT(`date`, "%d.%m.%Y %H:%i:%s") AS statupdate
+							FROM  `'.$config->db_pre.'stats`
+							ORDER BY `date` DESC 
+							LIMIT 1')->fetch();
 
-	$stat = $pdo->prepare('SELECT MAX( DATE_FORMAT( S.date,  "%d.%m.%Y %H:%i:%s" ) ) AS statupdate
-	FROM  `'.$config->db_pre.'stats` S
-	INNER JOIN  `'.$config->db_pre.'users` U ON S.uid = U.id
-	WHERE U.gid ='.$_SESSION['gid'])->fetch;
+	$grpstat = $pdo->query('SELECT DATE_FORMAT(S.`date`, "%d.%m.%Y %H:%i:%s") AS statupdate
+							FROM  `'.$config->db_pre.'stats` S
+							INNER JOIN  `'.$config->db_pre.'users` U ON S.uid = U.id
+							WHERE U.gid ='.$_SESSION['gid'].'
+							ORDER BY S.date DESC 
+							LIMIT 1')->fetch();
 
-	if(isset($stats['statupdate'])) {
-		$lstatupdate = "Die letzten Statistiken wurden am: ". $stats['statupdate'] ." übertragen.";
+
+	if(isset($grpstat['statupdate'])) {
+		$lstatupdate = "Die letzten Statistiken wurden am: ". $grpstat['statupdate'] ." übertragen.";
 	}
 	else{
-		$lstatupdate = 'Es wurden noch keine Statistiken übertragen.';
+	$lstatupdate = 'Es wurden noch keine Statistiken übertragen.';
 	}
-		
-	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news WHERE gid = ".$_SESSION['gid']." AND active = 1")->fetch();
+
+	$devnews = $pdo->query("SELECT `text`, `ndate` FROM ".$config->db_pre."news
+	WHERE `devnews` = 1 AND `active` = 1
+	ORDER BY `ndate` DESC LIMIT 1")->fetch();
+
+if($_SESSION['gid'] > 0)
+{
+	$news = $pdo->query("SELECT text, ndate FROM ".$config->db_pre."news
+	WHERE gid = ".$_SESSION['gid']." AND active = 1
+	ORDER BY ndate DESC LIMIT 1")->fetch();
+}
 	
 ?>
 
@@ -329,8 +267,11 @@ if (!isset($_GET["action"])){
 	<hr><u>News/Claninfo:</u><br>
 	<?php echo nl2br($news['text']);
 	}
+	} if (isset($devnews['text'])){?>
+	<hr><u>DEV-News:</u><br>
+	<?php echo nl2br($devnews['text']);
 	}
-} 
+	}
 
 ?>
 

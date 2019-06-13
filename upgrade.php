@@ -117,6 +117,8 @@ ALTER TABLE  `".$config->db_pre."news` DROP `validuntil`;
 
 ALTER TABLE  `".$config->db_pre."news` CHANGE `active` `active` TINYINT( 1 ) NOT NULL;
 
+ALTER TABLE `".$config->db_pre."news ADD  devnews TINYINT( 1 ) NOT NULL AFTER  active ;
+
 ALTER TABLE  `".$config->db_pre."users` ADD `gid` INT( 10 ) NOT NULL AFTER  `id` ;
 
 INSERT INTO `".$config->db_pre."groups` (`tag`, `name`) VALUES
