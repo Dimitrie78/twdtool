@@ -38,7 +38,7 @@ if(isSet($openKey)&&$openKey>0){
 }else{
 include "verify.php";
 
-$felder = (isSet($config->customstats)&&$config->customstats?$config->customstats:' streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete ');
+$felder = (isSet($config->customstats)&&$config->customstats?$config->customstats:' `streuner` as `_Streuner`, `menschen` as `_Menschen`, (`streuner`+`menschen`) as `Kills`,round((`streuner`+`menschen`)/$days) as `pro Tag`, `gespielte_missionen` as `_gesp. Mis.`, `abgeschlossene_missonen` as `abg. Mis.`, `gefeuerte_schuesse` as `_Schüsse`, `haufen` as `Kisten`, `heldenpower` as `_Helden`, `waffenpower` as `_Waffen`, `waffenpower`+`heldenpower` as `Upgrades`, `karten` as `_Karten` , `gerettete` as `Gerettete`');
 
 }
 
