@@ -141,7 +141,7 @@ $q_str = "
 			    , (@lastGerett := `gerettete`) as _calc5
 			    , (@lastDate := `date`) as _calc6
 
-			    FROM cbr_stats WHERE uid = 1 AND fail = 0 ORDER BY `date` ASC
+			    FROM cbr_stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC
 			) as e ORDER BY `_date` DESC
 		";
 $query_stat = $pdo->prepare($q_str);
