@@ -76,7 +76,11 @@ if(!(isSet($openKey)&&$openKey>0)){
 	$dateqry->execute();
 
 	$datepicker = '';
+	$dcounter = 0;
 	foreach ($dateqry as $dat) {
+	  $dcounter++;
+	  if($dcounter==1&&!isSet($date1)) $date1 = $dat['Datum'];
+	  if($dcounter==2&&!isSet($date2)) $date2 = $dat['Datum'];
 	 $datepicker .= '<option value="'.$dat['Datum'].'">'.$dat['Tag'].' '.((new DateTime($dat['Datum']))->format('d.m.Y')).' ('.$dat['Anzahl'].')</option>';
 	}
 }
