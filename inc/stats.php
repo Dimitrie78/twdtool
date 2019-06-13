@@ -25,12 +25,13 @@ else
 	$stattype = 'Spieler/in:';	
 }
 
+$and_grouplimit = "";
 if (!isdev()){
 $gidfilter = 'gid = '.$_SESSION['gid'];
 $and_grouplimit = ' AND '.$gidfilter;
 }
 
-if (isdev() && $_POST['gid']){
+if (isdev() && isSet($_POST['gid'])){
 if (is_numeric($_POST['gid'])){
 $and_grouplimit = ' AND gid = '.$_POST['gid'];
 }
@@ -82,7 +83,7 @@ $sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE activ
 		
 	       echo '<option value="">--Wähle--</option>';
 foreach ($pdo->query($sql) as $row) {
-		
+	$selected = '';
 	if ($sUser == $row['id']) {
 		$selected = ' selected';
 	
@@ -101,7 +102,6 @@ foreach ($pdo->query($sql) as $row) {
 	}
 		
     echo '<option value="'.$row['id'].'" '.$selected.'>'.$row['ign'].'</option>';
-	$selected = '';
 }
 echo '</select></div> 
 	  <div class="pull-right">'.$btnnotes.$telegram.$editusr.'</div></div></div>';
@@ -113,17 +113,61 @@ if (isset($_POST['limit']) && $_POST['limit']>""){
 else{
 	$sel_limit = $config->statlimit;  //Wert aus config
 }	
+$q_str = "	SET @lastKills = 0, @lastGespielt = 0, @lastAbgeschl = 0, @lastGerett = 0, @lastDate = '2000-01-01', @actTage = 0, @actKills = 0;";
+$query_stat2 = $pdo->prepare($q_str);
+$query_stat2->execute();
+$q_str = "
+			SELECT * FROM 
+(			    SELECT 
+			      `id` as _id
+ 				, `date` as _date
+			    , DATE_FORMAT(`date`, '%d.%m.%Y') as Datum
+			    , (@actTage := CASE WHEN IFNULL(@lastDate, '2000-01-01') = '2000-01-01' THEN 0 ELSE DATEDIFF(`date`, @lastDate) END) as Tage
+			    , `exp` as EP, `streuner` as Streuner, `menschen`as Menschen
+			    , (@actKills := CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE ((`streuner`+`menschen`)-@lastKills) END) as Diff_Kills
+			    , (CASE WHEN @actTage < 1 THEN 0 ELSE round(@actKills/@actTage, 0) END) as ProTag
+			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/@actKills, 0) END) as SchKill
+				,  `gespielte_missionen` as GespMis
+			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as Diff_GM
+			    , `abgeschlossene_missonen` as AbgeMis
+			    , CASE WHEN IFNULL(@lastAbgeschl, 0) = 0 THEN 0 ELSE (`abgeschlossene_missonen`-@lastAbgeschl) END as Diff_AM
+			    , `gefeuerte_schuesse` as Schüsse, `haufen` as Haufen, `waffenpower` as Waffen, `heldenpower` as Helden, `karten` as Karten, `gerettete` as Gerettete
+			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END as Diff_Gerettet
+			    
 
+			    , (@lastKills := (`streuner`+`menschen`)) as _calc2
+			    , (@lastGespielt := `gespielte_missionen`) as _calc3
+			    , (@lastAbgeschl := `abgeschlossene_missonen`) as _calc4
+			    , (@lastGerett := `gerettete`) as _calc5
+			    , (@lastDate := `date`) as _calc6
 
+			    FROM cbr_stats WHERE uid = 1 AND fail = 0 ORDER BY `date` ASC
+			) as e ORDER BY `_date` DESC
+		";
+$query_stat = $pdo->prepare($q_str);
+$query_stat->execute();
+// echo $query_stat->rowCount().'zeilen<br />';
+
+// $cq = $pdo->query($q_str);
+// $cq->execute();
+$c = array();
+$total_column = 0;
+// if (count($c)<1)
+{
+  $total_column = 0;
+  $total_column = $query_stat->columnCount();
+  // echo 'TEST:'.$total_column;
+  for ($counter = 0; $counter < $total_column; $counter ++) {
+    $meta = $query_stat->getColumnMeta($counter);
+    // echo $meta['name'].'TEST<br />';
+    if((strlen($meta['name'])>0)&&(substr($meta['name'],0, 1)!='_'))
+      $c[] = $meta['name'];
+  }
+}
 
 $query1 = $pdo->prepare('SELECT count(id) as anz FROM '.$config->db_pre.'stats WHERE uid = :uid and `fail` = 0');
 $query1->execute(array(':uid' => $sUser));
 $total_stats = $query1->fetchColumn();
-
-$calc_gespmis = array();
-$calc_abgespmis = array();
-$diff_gespmis = array();
-$diff_abgespmis = array();
 
 if($total_stats > 0){
 
@@ -135,50 +179,7 @@ if($total_stats > 0){
 
 
 		
-	#if($_POST['uid']>"" OR $_GET['uid']>""){
 	if ($sUser > ""){
-	#if ((isuser() && $_GET['user'] == $_SESSION['ign']) or isadminormod()){
-	
-
-
-		#Wenn normale User nur die letzten 2 Uploads sehen dürfen hier entkommentieren
-		#if (isuser() AND ($_SESSION['ign'] <> $_POST['uid'])) {$limit = ' LIMIT 0,2';}
-
-
-		#if (is_numeric($statlimit)){$limit = ' LIMIT 0,'.$statlimit;}
-		if (is_numeric($sel_limit)){$limit = ' LIMIT 0,'.$sel_limit;}
-
-
-
-		#daten abfragen für subtraktion - AndyMOD
-		$querydiff = $pdo->prepare('SELECT gespielte_missionen,abgeschlossene_missonen FROM '.$config->db_pre.'stats WHERE uid = :uid and `fail` = 0 ORDER BY date DESC'. $limit);
-		$querydiff->execute(array(':uid' => $sUser));
-		$data = $querydiff->fetchAll(); #is maybe faster
-
-		#daten in ein array setzen
-		foreach($data as $row) {
-			$calc_gespmis[] = $row['gespielte_missionen'];
-			$calc_abgespmis[] = $row['abgeschlossene_missonen'];
-		}
-		unset($row);
-
-		#array mit for schleife durch iterator steuerbar machen
-		#berechnung durchführe und Ergebnis in neues array formatiert einsetzen
-		for($i=0; $i<count($calc_gespmis); $i++) {
-			if(isset($calc_gespmis[$i+1])) {
-				$diff_gespmis[] 	= $calc_gespmis[$i]-$calc_gespmis[$i+1];
-				$diff_abgespmis[] 	= $calc_abgespmis[$i]-$calc_abgespmis[$i+1];
-			} else {
-				$diff_gespmis[] 	= $calc_gespmis[$i];
-				$diff_abgespmis[] 	= $calc_abgespmis[$i];
-			}
-		}
-
-   
-		$query = $pdo->prepare('SELECT * FROM '.$config->db_pre.'stats WHERE uid = :uid and `fail` = 0 ORDER BY date DESC'. $limit);
-		$query->execute(array(':uid' => $sUser));
-  
- 
    
 ?>
 <div id="container"></div>
@@ -187,7 +188,13 @@ if($total_stats > 0){
    <table id="stats" class="table table-striped table-bordered nowrap table-hover table-condensed datatable" style="width:100%">
         <thead class="thead-dark">
             <tr>
-                <th>Datum</th>
+                <?php 
+			  		for($h=0; $h<count($c);$h++){
+			  		  echo '<th>'.$c[$h].'</th>';
+			  		}
+
+                ?>
+<!--                <th>Datum</th>
 				<th>LVL</th>
                 <th>EP</th>
                 <th>Streuner</th>
@@ -203,6 +210,7 @@ if($total_stats > 0){
 				<th>Waffen</th>
 				<th>Karten</th>
 			    <th>Gerettet</th>
+			-->
 				<?php if (isadminormod()){ ?>
 				<th>Edit</th>
 				<?php } ?>
@@ -213,43 +221,43 @@ if($total_stats > 0){
 <?php
 #iterator für das differenzarray initialisieren
 $i = 0;
-foreach ($query as $row) {
-	$datetime = new DateTime($row['date']);
-	$year = $datetime->format('Y');
-	$month = $datetime->format('m')-1; #highcharts monat fängt bei 0 an zu zählen!
-	$day = $datetime->format('j');
-	$fulldate = $datetime->format('d.m.Y H:i');
-	$streuner[] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['streuner'].'],'; 
-	$menschen[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['menschen'].'],'; 
-	$heldenpower[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['heldenpower'].'],'; 
-	$waffenpower[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['waffenpower'].'],'; 
-	$gerettete[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['gerettete'].'],'; 
-	unset($datetime);
+$chart = array();
+foreach ($query_stat as $row) {
+	// $datetime = new DateTime($row['date']);
+	// $year = $datetime->format('Y');
+	// $month = $datetime->format('m')-1; #highcharts monat fängt bei 0 an zu zählen!
+	// $day = $datetime->format('j');
+	// $fulldate = $datetime->format('d.m.Y H:i');
+	// $streuner[] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['streuner'].'],'; 
+	// $menschen[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['menschen'].'],'; 
+	// $heldenpower[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['heldenpower'].'],'; 
+	// $waffenpower[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['waffenpower'].'],'; 
+	// $gerettete[] =  '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row['gerettete'].'],'; 
+	// unset($datetime);
 	#$schuestr = $row['gefeuerte_schuesse']/$row['streuner']
-	$schuestr = ($row['streuner']>0 & $row['gefeuerte_schuesse']>0) ? round($row['gefeuerte_schuesse']/$row['streuner'],4) : 0;
-	echo '<tr>
-					<td style="text-align: right;"><nobr>'.$fulldate.'</nobr></td>
-					<td style="text-align: right;">'. leveldata($row['exp']) .'</td>
-					<td style="text-align: right;">'. $row['exp'] .'</td>
-					<td style="text-align: right;">'. $row['streuner'] .'</td>
-					<td style="text-align: right;">'. $row['menschen'] .'</td>
-					<td style="text-align: right;">'. $schuestr .'</td>
-					<td style="text-align: right;">'. $row['gespielte_missionen'] . '</td>
-					<td style="text-align: right;">'. $diff_gespmis[$i] . '</td>
-					<td style="text-align: right;">'. $row['abgeschlossene_missonen'] . '</td>
-					<td style="text-align: right;">'. $diff_abgespmis[$i] . '</td>
-					<td style="text-align: right;">'. $row['gefeuerte_schuesse'] . '</td>
-					<td style="text-align: right;">'. $row['haufen'] . '</td>
-					<td style="text-align: right;">'. $row['heldenpower'] . '</td>
-					<td style="text-align: right;">'. $row['waffenpower'] . '</td>
-					<td style="text-align: right;">'. $row['karten'] . '</td>	
-					<td style="text-align: right;">'. $row['gerettete'] . '</td>';		
-				
+	echo '<tr>';
+	for($h=0; $h<count($c);$h++){
+		if ($c[$h] == 'EP')
+		    echo '<td style="text-align: right;">'.leveldata($row[$c[$h]]).'</td>';
+		else {
+			if(strpos($c[$h], 'Diff')!==false){
+				$datetime = new DateTime($row['_date']);
+				$year = $datetime->format('Y');
+				$month = $datetime->format('m')-1; #highcharts monat fängt bei 0 an zu zählen!
+				$day = $datetime->format('j');
+				if (!isSet($chart[$h])) $chart[$h] = array();
+				$chart[$h][$i] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row[$c[$h]].']'; 
+				unset($datetime);
+			}
+		    echo '<td style="text-align: right;">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+		}
+	}
+
 	if (isadminormod()){ 
-		echo '<td style="text-align: center;"><a href="?action=editstat&id='.$row['id'].'&uid='.$sUser.'" role="button" title="Diese Statistik bearbeiten"><span class="fas fa-edit"></span></a></td>';
+		echo '<td style="text-align: center;"><a href="?action=editstat&id='.$row['_id'].'&uid='.$sUser.'" role="button" title="Diese Statistik bearbeiten"><span class="fas fa-edit"></span></a></td>';
 	} 
 					
-	echo "<tr>";
+	// echo "<tr>";
 	$i++;
 }
 
@@ -281,66 +289,23 @@ $(function () {
             text: 'Legende'
         }
     },
-  series: [{
-        name: "Streunerkills",
-        data: [
-<?php
-		// for ($i = 5; $i >= 1; $i--) {
-	for ($x = count($streuner); $x >= 0; $x--)
-{
-    echo $streuner[$x];
-}
-?>
 
-        ]
-    }, {
-        name: "Menschen",
-        data: [
-<?php
-		
-	for ($x = count($menschen); $x >= 0; $x--)
-{
-    echo $menschen[$x];
-}
-?>
+    <?php
+      echo 'series: [';
+	  for($h=0; $h<count($c);$h++){
+	  	if(isSet($chart[$h])&&count($chart[$h])>0)
+	  	{
+		  	echo ($h>0?'':'').'{
+	        name: "'.$c[$h].'",
+	        data: [';
+			for ($x = $i; $x >= 0; $x--)
+	    	  if(isSet($chart[$h][$x]))	
+	    		echo $chart[$h][$x].',';
+  	  	echo ']},';
+    	}
+	  }
+	?>
 
-        ]
-    }, {
-        name: "Heldenstärke",
-        data: [
-<?php
-		
-	for ($x = count($heldenpower); $x >= 0; $x--)
-{
-    echo $heldenpower[$x];
-}
-?>
-        ]
-    }
-	, {
-        name: "Waffenstärke",
-        data: [
-<?php
-		
-	for ($x = count($waffenpower); $x >= 0; $x--)
-{
-    echo $waffenpower[$x];
-}
-?>
-        ]
-    },
-	  {
-        name: "Überlebende",
-        data: [
-<?php
-		
-	for ($x = count($gerettete); $x >= 0; $x--)
-{
-    echo $gerettete[$x];
-}
-?>
-        ]
-    }
 	
 	]
 });
