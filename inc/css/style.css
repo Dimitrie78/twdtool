@@ -467,3 +467,7 @@ body.loading .modal {
   margin-left:10px; 
   /*border: 1px solid silver;*/
 }
+
+.hidden{
+  display:none;
+}

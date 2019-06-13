@@ -314,6 +314,7 @@ function uploadToApi($target_file){
 			if($usr){ 
 				for($i = 0; $i < 2; $i++){
 					//Abstand Tage berechnen --> könnte ggfls. benutzt werden, um die Werte besser zu validieren. z.B. $haufen > ($user['haufen']+(1000*$datediff)) sprich Fehler bei mehr als 1k Kisten am Tag.
+					 $error_row = -1;
 					 $datediff = round(abs(strtotime(date("Y-m-d", filemtime($target_file)))-strtotime(substr($usr['date'],0,10)))/86400);
 					 if ($datediff<2) $datediff = 2;
 

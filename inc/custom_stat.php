@@ -145,14 +145,17 @@ foreach ($usrqry as $usr) {
 	// if((!$streuner1)||(!$streuner2)) continue;
 
 	for($h=0; $h<count($c);$h++){
-		$e[] = (isSet($s1[$h])&&$s1[$h]&&isSet($s2[$h])&&$s2[$h])?$s1[$h]-$s2[$h]:0;
+    			$e[] = (isSet($s1[$h])&&$s1[$h]&&isSet($s2[$h])&&$s2[$h])?$s1[$h]-$s2[$h]:0;
 	}
 
 	$tbody .=  '<tr '.($missed==1?'style="color:#ff4000;"':'').'>
 		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'">'.$uname.'</a></td>';
 
 	for($h=0; $h<count($c);$h++){
-    	$tbody .= '<td style="text-align: right;">'.number_format(round((isSet($e[$h])?$e[$h]:0)/(isSet($avgTage)&&$avgTage?$datediff:1)),0, ",", ".").'</td>';
+    	$tbody .= '<td style="text-align: right;" class="'.($c[$h][0]=='_'?'hidden':'').' col'.$h.'">'.
+number_format(round((isSet($e[$h])?$e[$h]:0)/(isSet($avgTage)&&$avgTage?$datediff:1)),0, ",", ".")
+    			.'</td>';
+
 	}
 	$tbody .= '</tr>';
 		
@@ -189,12 +192,13 @@ $thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
 $thead .=	'<table class="tablesorter table table-hover  datatable table-bordered" id="sortTable" style="width:auto">
 	  <thead>
 	    <tr>
-		  <th scope="col" style="min-width: 120px;">Spieler/in</th>
+		  <th scope="col" style="min-width: 120px;" class="">Spieler/in</th>
 	';
 
 
 for($h=0; $h<count($c);$h++){
-  $thead .= '<th scope="col">'.$c[$h].'</th>';
+  if(isSet($c[$h])&&$c[$h]!='')
+  $thead .= '<th scope="col" id="col'.$h.'" class="'.($c[$h][0]=='_'?'hidden':'').' col'.$h.'">'.($c[$h][0]=='_'?substr($c[$h], 1, strlen($c[$h])):$c[$h]).'</th>';
 }
 $thead .= '</tr>
   </thead>
@@ -203,6 +207,17 @@ $thead .= '</tr>
 	
 $tfoot = '</tbody>
 </table></div>';
+
+$tfoot .= '<div style="margin-left: auto; margin-right: auto; padding-left:30px;"><div style="float:left; width:33%;">';
+$half = ceil(count($c)/3);
+for($h=0; $h<count($c);$h++){
+	if ($half == $h || ($half*2) == $h) $tfoot .= '</div><div style="float:left; width:33%;">';
+	$tfoot .= '<label><input type="checkbox" id="chk_col_'.$h.'" onchange="if(this.checked) $(\'.col'.$h.'\').removeClass(\'hidden\'); else $(\'.col'.$h.'\').addClass(\'hidden\');" '.($c[$h][0]!='_'?'checked=checked':'').' /> '.($c[$h][0]=='_'?substr($c[$h], 1, strlen($c[$h])):$c[$h]).'</label><br />';
+}
+
+$tfoot .= '</div></div>';
+$tfoot .= '<div style="clear:both;">&nbsp;</div>';
+
 if($s1Missed||$s2Missed)
   echo '<br /><div style="border:2px dashed silver; padding:10px; background-color:#111111; font-weight:bold;">Folgende User-Stats fehlen:<br />'.($s1Missed?'Datum 1: <span style="color:red;">'.$s1Missed.'</span><br />':'').($s2Missed?'Datum2: <span style="color:red;">'.$s2Missed.'</span><br />':'').'</div><br />';
 
