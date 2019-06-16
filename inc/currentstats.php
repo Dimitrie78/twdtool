@@ -43,7 +43,7 @@ $and_grouplimit =  ' AND U.gid = 0';
 <?php 
 }
 
-$out = 'SELECT s1. * , U.gid, G.tag, U.ign
+$out = 'SELECT s1. * , U.gid, G.tag, U.ign, U.id as uid
 FROM '.$config->db_pre.'stats AS s1
 RIGHT JOIN '.$config->db_pre.'users U ON s1.uid = U.id
 RIGHT JOIN '.$config->db_pre.'groups G ON G.id = U.gid
@@ -76,8 +76,6 @@ else{
 			<?php }?>
 			    <th style="min-width: 120px;">IGN</th>
                 <th style="min-width: 100px;">DAT</th>
-                <th style="min-width: 120px;">EP</th>
-				<th>LVL</th>
                 <th>STR</th>
 				<th>MEN</th>
                 <th>GMIS</th>
@@ -99,10 +97,8 @@ foreach ($query as $row) {
 				echo'
 				<td style="min-width: 50px; text-align: left;">'. $row['tag'].'</td>';
 				 }echo'
-		        <td style="min-width: 120px; text-align: left;">'.$row['ign'].'</td>
+		        <td style="min-width: 120px; text-align: left;"><a href = "?action=stats&uid='.$row['uid'].'">'.$row['ign'].'</a></td>
                 <td style="min-width: 100px; text-align: right;">'.date( 'd.m.y H:i:s', strtotime($row['date'])).'</td>
-				<td style="min-width: 120px; text-align: right;">'.$row['exp'].'</td>
-				<td style="text-align: right;">'. leveldata($row['exp']) .'</td>
 				<td style="text-align: right;">'.$row['streuner'].'</td>
                 <td style="text-align: right;">'.$row['menschen'].'</td>
 				<td style="text-align: right;">'.$row['gespielte_missionen'].'</td>
