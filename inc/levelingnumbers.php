@@ -1,4 +1,6 @@
 <?php
+$mode = 'icons'; // wähle icons oder noicons für die Gestaltung des Tabellenkopfs
+
 include "verify.php";
 $and_grouplimit = '';
 if (!isdev())
@@ -79,7 +81,7 @@ foreach ($usrqry as $usr)
 	LIMIT 1 , 1';
     
     //reset variables
-	$date1                    = '';
+    $date1                    = '';
     $streuner1                = '';
     $menschen1                = '';
     $gespielte_missionen1     = '';
@@ -93,7 +95,7 @@ foreach ($usrqry as $usr)
     
     foreach ($pdo->query($sql1) as $row1)
     {
-	    $date1                    = date( 'd.m.y', strtotime($row1['date']));
+        $date1                    = date('d.m.y', strtotime($row1['date']));
         $streuner1                = $row1['streuner'];
         $menschen1                = $row1['menschen'];
         $gespielte_missionen1     = $row1['gespielte_missionen'];
@@ -107,7 +109,7 @@ foreach ($usrqry as $usr)
     }
     
     //reset variables
-	$date2                    = '';
+    $date2                    = '';
     $streuner2                = '';
     $menschen2                = '';
     $gespielte_missionen2     = '';
@@ -121,7 +123,7 @@ foreach ($usrqry as $usr)
     
     foreach ($pdo->query($sql2) as $row2)
     {
-	    $date2                    = date( 'd.m.y', strtotime($row2['date']));
+        $date2                    = date('d.m.y', strtotime($row2['date']));
         $streuner2                = $row2['streuner'];
         $menschen2                = $row2['menschen'];
         $gespielte_missionen2     = $row2['gespielte_missionen'];
@@ -134,12 +136,12 @@ foreach ($usrqry as $usr)
         $gerettete2               = $row2['gerettete'];
     }
     
-	$tage = floor((strtotime($row1['date'])-strtotime($row2['date']))/86400);
+    $tage                    = floor((strtotime($row1['date']) - strtotime($row2['date'])) / 86400);
     $streuner                = ($streuner1 && $streuner2) ? $streuner1 - $streuner2 : 0;
     $menschen                = ($menschen1 && $menschen2) ? $menschen1 - $menschen2 : 0;
     $gespielte_missionen     = ($gespielte_missionen1 && $gespielte_missionen2) ? $gespielte_missionen1 - $gespielte_missionen2 : 0;
-    $abgeschlossene_missonen = ($abgeschlossene_missonen1 && $abgeschlossene_missonen2) ? $abgeschlossene_missonen1 - 	
-                                $abgeschlossene_missonen2 : 0;	
+    $abgeschlossene_missonen = ($abgeschlossene_missonen1 && $abgeschlossene_missonen2) ? $abgeschlossene_missonen1 - 
+	                            $abgeschlossene_missonen2 : 0;
     $gefeuerte_schuesse      = ($gefeuerte_schuesse1 && $gefeuerte_schuesse2) ? $gefeuerte_schuesse1 - $gefeuerte_schuesse2 : 0;
     $haufen                  = ($haufen1 && $haufen2) ? $haufen1 - $haufen2 : 0;
     $heldenpower             = ($heldenpower1 && $heldenpower2) ? $heldenpower1 - $heldenpower2 : 0;
@@ -149,7 +151,7 @@ foreach ($usrqry as $usr)
     $streuner_pro_mission    = number_format((float) $streuner / ($abgeschlossene_missonen ?: 1), 2, '.', '');
     $karten_pro_mission      = number_format((float) $karten / ($abgeschlossene_missonen ?: 1), 2, '.', '');
     $schuesse_pro_mission    = number_format((float) $gefeuerte_schuesse / ($abgeschlossene_missonen ?: 1), 2, '.', '');
-
+    
     $tbody .= '<tr>';
     if (isdev())
     {
@@ -181,9 +183,12 @@ $thead .= '<div class="table-responsive">
     <tr>';
 if (isdev())
 {
-    $thead .= '<th scope="col">GRP</th>';
+    $thead .= '<th nowrap><i class="gi gi-users"></i> GRP</th>';
 }
-$thead .= '
+
+if ($mode == 'noicons')
+{
+    $thead .= '
       <th>IGN</th>
 	  <th>DAT1</th>
 	  <th>DAT2</th>
@@ -204,6 +209,31 @@ $thead .= '
     </tr>
   </thead>
   <tbody>';
+}
+elseif ($mode == 'icons')
+{
+    $thead .= '
+      <th nowrap><i class="gi gi-id-card"></i> IGN</th>
+	  <th nowrap><i class="gi gi-clock-o"></i> #1</th>
+	  <th nowrap><i class="gi gi-clock-o"></i> #2</th>
+	  <th nowrap><span class="glyphicon glyphicon-calendar"></span> TG</th>
+	  <th nowrap><i class="gi gi-poison"></i> STR</th>
+      <th nowrap><i class="gi gi-heartbeat"></i> MEN</th>
+	  <th nowrap><i class="gi gi-caution"></i> GMIS</th>
+	  <th nowrap><i class="gi gi-check-square-o"></i> AMIS</th>
+      <th nowrap><i class="gi gi-ammo"></i> SCHS</th>
+      <th nowrap><i class="gi gi-briefcase"></i> KST</th>
+      <th nowrap><i class="gi gi-user-military"></i> HLD</th>
+	  <th nowrap><i class="gi gi-gun"></i> WAF</th>
+	  <th nowrap><i class="gi gi-dogtags"></i> KRT</th>
+	  <th nowrap><i class="fab fa-creative-commons-by"></i> GRT</th>
+	  <th nowrap><i class="gi gi-poison"></i>/M</th>
+	  <th nowrap><i class="gi gi-briefcase"></i>/M</th>
+	  <th nowrap><i class="gi gi-ammo"></i>/M</th>
+    </tr>
+  </thead>
+  <tbody>';
+}
 
 $tfoot = '</tbody>
  </table>
