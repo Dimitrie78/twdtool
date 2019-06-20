@@ -66,19 +66,20 @@ foreach ($usrqry as $usr)
     $uid   = $usr['uid'];
     $uname = $usr['ign'];
     
-    $sql1 = 'SELECT streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete 
+    $sql1 = 'SELECT date, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete 
 	FROM  `' . $config->db_pre . 'stats`
 	WHERE uid =' . $uid . '
 	ORDER BY date DESC 
 	LIMIT 0 , 1';
     
-    $sql2 = 'SELECT streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete
+    $sql2 = 'SELECT date, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete
 	FROM  `' . $config->db_pre . 'stats` 
 	WHERE uid =' . $uid . '
 	ORDER BY date DESC
 	LIMIT 1 , 1';
     
     //reset variables
+	$date1                    = '';
     $streuner1                = '';
     $menschen1                = '';
     $gespielte_missionen1     = '';
@@ -92,6 +93,7 @@ foreach ($usrqry as $usr)
     
     foreach ($pdo->query($sql1) as $row1)
     {
+	    $date1                    = date( 'd.m.y', strtotime($row1['date']));
         $streuner1                = $row1['streuner'];
         $menschen1                = $row1['menschen'];
         $gespielte_missionen1     = $row1['gespielte_missionen'];
@@ -105,6 +107,7 @@ foreach ($usrqry as $usr)
     }
     
     //reset variables
+	$date2                    = '';
     $streuner2                = '';
     $menschen2                = '';
     $gespielte_missionen2     = '';
@@ -118,6 +121,7 @@ foreach ($usrqry as $usr)
     
     foreach ($pdo->query($sql2) as $row2)
     {
+	    $date2                    = date( 'd.m.y', strtotime($row2['date']));
         $streuner2                = $row2['streuner'];
         $menschen2                = $row2['menschen'];
         $gespielte_missionen2     = $row2['gespielte_missionen'];
@@ -130,6 +134,7 @@ foreach ($usrqry as $usr)
         $gerettete2               = $row2['gerettete'];
     }
     
+	$tage = floor((strtotime($row1['date'])-strtotime($row2['date']))/86400);
     $streuner                = ($streuner1 && $streuner2) ? $streuner1 - $streuner2 : 0;
     $menschen                = ($menschen1 && $menschen2) ? $menschen1 - $menschen2 : 0;
     $gespielte_missionen     = ($gespielte_missionen1 && $gespielte_missionen2) ? $gespielte_missionen1 - $gespielte_missionen2 : 0;
@@ -151,6 +156,9 @@ foreach ($usrqry as $usr)
         $tbody .= '<td style="text-align: left;">' . $usr['tag'] . '</td>';
     }
     $tbody .= '<td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid=' . $uid . '">' . $uname . '</a></td>
+          <td style="text-align: right;">' . $date2 . '</td>
+          <td style="text-align: right;">' . $date1 . '</td>
+		  <td style="text-align: right;">' . $tage . '</td>
 		  <td style="text-align: right;">' . $streuner . '</td>
 		  <td style="text-align: right;">' . $menschen . '</td>
 		  <td style="text-align: right;">' . $gespielte_missionen . '</td>
@@ -177,8 +185,11 @@ if (isdev())
 }
 $thead .= '
       <th>IGN</th>
-	  <th scope="col">STR</th>
-      <th scope="col">MEN</th>
+	  <th>DAT1</th>
+	  <th>DAT2</th>
+	  <th>TG</th>
+	  <th>STR</th>
+      <th>MEN</th>
 	  <th>GMIS</th>
 	  <th>AMIS</th>
       <th>SCHS</th>
