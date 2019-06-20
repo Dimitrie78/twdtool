@@ -1,6 +1,25 @@
 <?php
 include "verify.php";
 
+$and_grouplimit = '';
+if (!isdev())
+{
+    $and_grouplimit = ' AND U.gid = ' . $_SESSION['gid'];
+}
+
+if (isdev() && $_POST['gid'])
+{
+    if (is_numeric($_POST['gid']))
+    {
+        $and_grouplimit = ' AND U.gid = ' . $_POST['gid'];
+    }
+    
+    if ($_POST['gid'] == "uc")
+    {
+        $and_grouplimit = ' AND U.gid = 0';
+    }
+}
+
 
 if (isset($_POST['abfrage'])) {
 	$abfrage = $_POST['abfrage'];
@@ -34,15 +53,16 @@ $arr_wochen = array(1 => '1 Woche',
 
 $tbody = '';
 $thead = '
-<div class="table-responsive"> <table id="avg" class="table table-hover table-fixed datatable table-bordered" style="width:auto">
+<div class="table-responsive"> <table id="avg" class="table table-striped table-condensed datatable table-bordered nowrap table-hover table-fixed" style="width:auto">
   <thead>
     <tr>
+	  <th scope="col">Grp</th>
 	  <th scope="col" style="min-width: 120px;">Name</th>
-	  <th scope="col" style="text-align: right;">Diff<br>Messung</th>
-	  <th scope="col" style="text-align: right;">Diff<br>Woche</th>
-	  <th scope="col" style="text-align: right; min-width: 140px;">Startdatum</th>
-	  <th scope="col" style="text-align: right; min-width: 140px;">Enddatum</th>
-	  <th scope="col" style="text-align: right;">Anz.<br>Tage</th>
+	  <th scope="col" style="text-align: right;">&Delta; Messung</th>
+	  <th scope="col" style="text-align: right;">&Delta; Woche</th>
+	  <th scope="col" style="text-align: right;">Datum1</th>
+	  <th scope="col" style="text-align: right;">Datum2</th>
+	  <th scope="col" style="text-align: right;">#Tage</th>
       	  <th scope="col" style="text-align: right;">Start</th>
           <th scope="col" style="text-align: right;">Ende</th>
 	  <th scope="col" style="text-align: right;">#Stats</th>
@@ -57,9 +77,45 @@ $tfoot = '</tbody>
 
 echo 'Anzahl der durchschnittlichen '.$abfragen[$abfrage].' pro Woche in letzten '.$wochen.' Wochen<br>';
 
-echo '<div class="row">
-		<form class="form-vertical" role="form" method="POST" action="?action=avg">
-		<div class="form-group col-xs-6" style="width:auto;max-width:200px;">
+echo '<form class="form-vertical" role="form" method="POST" action="?action=avg">';
+
+if (isdev())
+{
+?>
+<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
+      <select onchange="this.form.submit()" id="inputGroup" name = "gid" class="form-control" style="width:auto;min-width:200px;">
+	 <option value="allgrp" <?php
+    if ($_POST['gid'] == 'allgrp')
+    {
+        echo ' selected';
+    }
+?>>--Alle--</option>
+	 <option value="uc" <?php
+    if ($_POST['gid'] == 'uc')
+    {
+        echo ' selected';
+    }
+?>>--Ohne Gruppe--</option>
+<?php
+    $sql = 'SELECT id, tag, name FROM `' . $config->db_pre . 'groups` ORDER BY name ASC';
+    foreach ($pdo->query($sql) as $row)
+    {
+        if ($_POST['gid'] == $row['id'])
+        {
+            $gidselected = ' selected';
+        }
+        echo '<option value="' . $row['id'] . '" ' . $gidselected . '>[' . $row['tag'] . '] ' . $row['name'] . '</option>';
+        $gidselected = '';
+    }
+    
+?>
+     </select>
+<?php
+}	
+
+#<div class="row"><div class="form-group col-xs-6" style="width:auto;max-width:200px;">test</div></div>';
+	
+echo'<div class="row"><div class="form-group col-xs-6" style="width:auto;max-width:200px;">
 			<label for="abfrage" class="control-label"> </label>
 			<select onchange="this.form.submit()" id="abfrage" name="abfrage" class="form-control">';
 
@@ -79,14 +135,16 @@ foreach( $arr_wochen as $key => $value) {
 }
 echo '</select></div></form></div>';
 
+
 #echo  'name - diff - anz_stats - startdatum - endatum - startwert - endwert<br>';
 
 
-$sqlgetuser = "SELECT U.id AS uid, U.ign AS ign, count( S.uid ) AS anzstats, min( date ) AS mindate, max( date ) AS maxdate, min( ".$abfrage." ) AS minval, max( ".$abfrage." ) AS maxval
+$sqlgetuser = "SELECT G.tag, U.id AS uid, U.ign AS ign, count( S.uid ) AS anzstats, min( date ) AS mindate, max( date ) AS maxdate, min( ".$abfrage." ) AS minval, max( ".$abfrage." ) AS maxval
 	FROM ".$config->db_pre."stats AS S
 	INNER JOIN ".$config->db_pre."users AS U ON ( S.uid = U.id )
+	INNER JOIN ".$config->db_pre."groups G ON G.id = U.gid
 	WHERE U.active =1
-	AND DATE(date) >= DATE(NOW( ) - INTERVAL ".$wochen." WEEK)
+	AND DATE(date) >= DATE(NOW( ) - INTERVAL ".$wochen." WEEK) ".$and_grouplimit."
 	GROUP BY S.uid
 	HAVING COUNT( S.uid ) >1
 	ORDER BY U.ign";
@@ -116,14 +174,15 @@ foreach ($pdo->query($sqlgetuser) as $user) {
 	$style = "";
 	if ($_SESSION['userid'] == $user['uid']){$style = ' style="font-weight: bold;"';}
 	$tbody .=  '<tr'.$style.'>
+	  <td text-align: left;">'.$user['tag'].'</td>
 	  <td style="min-width: 120px; text-align: left;"><a href="?action=stats&uid='.$user['uid'].'">'.$user['ign'].'</a></td>
-	  <td style="text-align: right;">'.$diff['diff'].'</td>
-	  <td style="text-align: right;">'.$diff['diffWoche'].'</td>
-	  <td style="min-width: 140px; text-align: right;">'.$mindt->format('d.m.Y H:i').'</td>
-	  <td style="min-width: 140px; text-align: right;">'.$maxdt->format('d.m.Y H:i').'</td>
-	  <td style="text-align: right;">'.$diff['TageDiff'].'</td>
-	  <td style="text-align: right;">'.$user['minval'].'</td>
-	  <td style="text-align: right;">'.$user['maxval'].'</td>					
+	  <td style="text-align: right;">'.number_format($diff['diff'], 0, ',', '.').'</td>
+	  <td style="text-align: right;">'.number_format($diff['diffWoche'], 0, ',', '.').'</td>
+	  <td style="text-align: right;">'.$mindt->format('d.m.Y').'</td>
+	  <td style="text-align: right;">'.$maxdt->format('d.m.Y').'</td>
+	  <td style="text-align: right;">'.ceil($diff['TageDiff']).'</td>
+	  <td style="text-align: right;">'.number_format($user['minval'], 0, ',', '.').'</td>
+	  <td style="text-align: right;">'.number_format($user['maxval'], 0, ',', '.').'</td>					
 	  <td style="text-align: right;">'.$user['anzstats'].'</td>
 	</tr>';
 }
