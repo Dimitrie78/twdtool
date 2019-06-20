@@ -471,3 +471,7 @@ body.loading .modal {
 .hidden{
   display:none;
 }
+
+th{
+  white-space:nowrap;
+}
