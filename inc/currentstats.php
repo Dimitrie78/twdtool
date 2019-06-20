@@ -18,6 +18,7 @@ $and_grouplimit =  ' AND U.gid = 0';
 }
 
 ?>  
+
 <?php if (isdev()){?>
 <div class ="form-group">
 <form class="form-vertical" role="form" method = "POST" action = "?action=currentstats" >
@@ -72,21 +73,21 @@ else{
         <thead>
 			<tr>
 			<?php if (isdev()){ ?>
-				<th style="min-width: 50px;">GRP</th>
+				<th style="min-width: 51px;"><i class="gi gi-users"></i>&nbsp;Grp.</th>
 			<?php }?>
-			    <th style="min-width: 120px;">IGN</th>
-                <th style="min-width: 100px;">DAT</th>
-                <th>STR</th>
-				<th>MEN</th>
-                <th>GMIS</th>
-                <th>AMIS</th>
-                <th>SCHS</th>
-                <th>KST</th>
-				<th>HLD</th>
-				<th>WAF</th>
-				<th>KRT</th>
-			    <th>GRT</th>
-				<th>Edit</th>
+			    <th style="min-width: 120px;"><i class="gi gi-id-card"></i>&nbsp;Name</th>
+                <th style="min-width: 120px;text-align: center;"><i class="gi gi-tables">/<i class="gi gi-clock-o"></i></th>
+                <th style="text-align: center;">Walkers&nbsp;<i class="gi gi-poison"></i></th>
+				<th><i class="gi gi-heartbeat"></i>&nbsp;Humans</th>
+                <th><i class="gi gi-caution"></i>&nbsp;Played</th>
+                <th><i class="gi gi-check-square-o"></i>&nbsp;Compl.</th>
+                <th><i class="gi gi-ammo"></i>&nbsp;Shots</th>
+                <th><i class="gi gi-briefcase"></i>&nbsp;Coll.d</th>
+				<th>Power&nbsp;<i class="gi gi-user-military"></i></th>
+				<th>Power&nbsp;<i class="gi gi-gun"></i></th>
+				<th><i class="gi gi-dogtags"></i>&nbsp;Cards</th>
+			    <th style="text-align: center;"><i class="fab fa-creative-commons-by"></i>&nbsp;Resc.</th>
+				<th><i class="gi gi-tools"></i></th>
             </tr>
         </thead>
         <tbody>
@@ -95,10 +96,10 @@ foreach ($query as $row) {
 	echo '<tr>';
 				if (isdev()){
 				echo'
-				<td style="min-width: 50px; text-align: left;">'. $row['tag'].'</td>';
+				<td style="min-width: 51px; text-align: left;">'. $row['tag'].'</td>';
 				 }echo'
 		        <td style="min-width: 120px; text-align: left;"><a href = "?action=stats&uid='.$row['uid'].'">'.$row['ign'].'</a></td>
-                <td style="min-width: 100px; text-align: right;">'.date( 'd.m.y H:i:s', strtotime($row['date'])).'</td>
+                <td style="min-width: 120px; text-align: right;">'.date( 'd.m.y H:i:s', strtotime($row['date'])).'</td>
 				<td style="text-align: right;">'.$row['streuner'].'</td>
                 <td style="text-align: right;">'.$row['menschen'].'</td>
 				<td style="text-align: right;">'.$row['gespielte_missionen'].'</td>
