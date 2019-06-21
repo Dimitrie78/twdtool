@@ -1,5 +1,23 @@
 <?php
 include "verify.php";
+//to be moved in inc/functions
+
+function array_orderby()
+{
+    $args = func_get_args();
+    $data = array_shift($args);
+    foreach ($args as $n => $field) {
+        if (is_string($field)) {
+            $tmp = array();
+            foreach ($data as $key => $row)
+                $tmp[$key] = $row[$field];
+            $args[$n] = $tmp;
+            }
+    }
+    $args[] = &$data;
+    call_user_func_array('array_multisort', $args);
+    return array_pop($args);
+}
 
 $and_grouplimit = '';
 if (!isdev())
@@ -165,29 +183,48 @@ foreach ($pdo->query($sqlgetuser) as $user) {
 	FROM ".$config->db_pre."stats
 	WHERE DATE(date) >= DATE(NOW( ) - INTERVAL ".$wochen." WEEK)
 	AND uid = ".$user['uid']."")->fetch();  
+	
+	$data[] = array('tag' => $user['tag'],
+					'uid' => $user['uid'],
+					'ign' => $user['ign'],
+					'diff' => $diff['diff'],
+					'diffWoche' => $diff['diffWoche'],
+					'mindate' =>$user['mindate'],
+					'maxdate' => $user['maxdate'],
+					'TageDiff' => ceil($diff['TageDiff']),
+					'minval' => $user['minval'],
+					'maxval' => $user['maxval'],
+					'anzstats' => $user['anzstats']);
 
 	$difftotal += $diff['diff'];
         $diffWochetotal += $diff['diffWoche'];
 
-	$mindt = new DateTime($user['mindate']);
-	$maxdt = new DateTime($user['maxdate']);
+
 	$style = "";
 	if ($_SESSION['userid'] == $user['uid']){$style = ' style="font-weight: bold;"';}
-	$tbody .=  '<tr'.$style.'>
-	  <td text-align: left;">'.$user['tag'].'</td>
-	  <td style="min-width: 120px; text-align: left;"><a href="?action=stats&uid='.$user['uid'].'">'.$user['ign'].'</a></td>
-	  <td style="text-align: right;">'.number_format($diff['diff'], 0, ',', '.').'</td>
-	  <td style="text-align: right;">'.number_format($diff['diffWoche'], 0, ',', '.').'</td>
-	  <td style="text-align: right;">'.$mindt->format('d.m.Y').'</td>
-	  <td style="text-align: right;">'.$maxdt->format('d.m.Y').'</td>
-	  <td style="text-align: right;">'.ceil($diff['TageDiff']).'</td>
-	  <td style="text-align: right;">'.number_format($user['minval'], 0, ',', '.').'</td>
-	  <td style="text-align: right;">'.number_format($user['maxval'], 0, ',', '.').'</td>					
-	  <td style="text-align: right;">'.$user['anzstats'].'</td>
-	</tr>';
 }
 
 if ($i > 0){
+$sorted = array_orderby($data, 'tag', SORT_ASC, 'diff', SORT_DESC);
+
+        foreach ($sorted as $usr)
+        { 
+         	$mindt = new DateTime($usr['mindate']);
+	$maxdt = new DateTime($usr['maxdate']);
+	$tbody .=  '<tr'.$style.'>
+	  <td text-align: left;">'.$usr['tag'].'</td>
+	  <td style="min-width: 120px; text-align: left;"><a href="?action=stats&uid='.$usr['uid'].'">'.$usr['ign'].'</a></td>
+	  <td style="text-align: right;">'.$usr['diff'].'</td>
+	  <td style="text-align: right;">'.$usr['diffWoche'].'</td>
+	  <td style="text-align: right;">'.$mindt->format('d.m.Y').'</td>
+	  <td style="text-align: right;">'.$maxdt->format('d.m.Y').'</td>
+	  <td style="text-align: right;">'.$usr['TageDiff'].'</td>
+	  <td style="text-align: right;">'.$usr['minval'].'</td>
+	  <td style="text-align: right;">'.$usr['maxval'].'</td>					
+	  <td style="text-align: right;">'.$usr['anzstats'].'</td>
+	   </tr>';
+	}
+
 echo $thead.$tbody.$tfoot.'<br>Clandurchschnitt (Messung): '. ceil($difftotal/$i);
 echo '<br>Clandurchschnitt (Woche): '. ceil($diffWochetotal/$i);
 }
