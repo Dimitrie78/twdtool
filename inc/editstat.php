@@ -9,9 +9,9 @@ if (!isset($_GET['id']) && is_numeric($_GET['id'])) {
 	$uid = preg_replace('/[^0-9]/','',$_GET['uid']);
 
 $statement = $pdo->prepare('SELECT U.id as uid, G.id AS gid, G.tag, U.ign, DATE_FORMAT( S.date,  "%d.%m.%Y %H:%i:%s" ) AS datum, S.id, S.exp, S.streuner, S.menschen, S.gespielte_missionen, S.abgeschlossene_missonen, S.gefeuerte_schuesse, S.haufen, S.heldenpower, S.waffenpower, S.karten, S.gerettete
-FROM  `bogstats` S
-LEFT JOIN `bogusers` U ON S.uid = U.id
-LEFT JOIN `boggroups` G ON G.id = U.gid
+FROM  `'.$config->db_pre.'stats` S
+LEFT JOIN `'.$config->db_pre.'users` U ON S.uid = U.id
+LEFT JOIN `'.$config->db_pre.'groups` G ON G.id = U.gid
 WHERE S.`id` = :id');
 $result = $statement->execute(array('id' => $id));
 $stat = $statement->fetch();
