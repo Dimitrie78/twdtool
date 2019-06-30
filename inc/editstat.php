@@ -1,30 +1,43 @@
 <?php
-
+//todo: zurück button, stat_exists entfernen
 include "verify.php";
 
-if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+if (!isset($_GET['id']) && is_numeric($_GET['id'])) {
+	exit();
+}
 	$id = preg_replace('/[^0-9]/','',$_GET['id']);
 	$uid = preg_replace('/[^0-9]/','',$_GET['uid']);
 
-	if (!stat_exists($id)){
-		echo '<div class="alert alert-danger">
-	  <strong>Abbruch</strong> Gewählte Statistik-ID <b>'.$uid.'</b> existiert nicht. Aufrufen nicht möglich</div>	<a href="?action=stats" name="back" class="btn btn-info" role="button">Zurück</a>';
+$statement = $pdo->prepare('SELECT U.id as uid, G.id AS gid, G.tag, U.ign, DATE_FORMAT( S.date,  "%d.%m.%Y %H:%i:%s" ) AS datum, S.id, S.exp, S.streuner, S.menschen, S.gespielte_missionen, S.abgeschlossene_missonen, S.gefeuerte_schuesse, S.haufen, S.heldenpower, S.waffenpower, S.karten, S.gerettete
+FROM  `bogstats` S
+LEFT JOIN `bogusers` U ON S.uid = U.id
+LEFT JOIN `boggroups` G ON G.id = U.gid
+WHERE S.`id` = :id');
+$result = $statement->execute(array('id' => $id));
+$stat = $statement->fetch();
+
+if (!$stat){
+	failmsg('Gewählte Statistik-ID <b>'.$uid.'</b> existiert nicht. Aufrufen nicht möglich.');
+	?><a href="?action=usrmgr" name="back" class="btn btn-info" role="button">Zurück</a><?php
+     exit();
+}
+
+if (!isdev()){
+	if ($stat['gid'] != $_SESSION['gid']){
+		failmsg('Du bist nicht berechtigt diesen User und dessen Statistik zu bearbeiten');
+		?><a href="?action=usrmgr" name="back" class="btn btn-info" role="button">Zurück</a><?php
 		exit();
 	}
-
-	$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."stats WHERE id = :id");
-	$result = $statement->execute(array('id' => $_GET['id']));
-	$stat = $statement->fetch();
-	$datetime = new DateTime($stat['date']);
+}
 
 ?>
-Statistik Nr <?= $id ?>  <?php if($uid > 0){echo 'von '.getuname($uid); }?> <br>
+<b>User:</b> [<?php echo $stat['tag']; ?>]<?php echo $stat['ign']; ?> | STAT-ID: <?php echo $stat['id']; ?><br><br>
 <form action="?action=doeditstat&id=<?php echo $id;?>" method = "POST" autocomplete="no">
-  <input type="hidden" name="editid" type="text" value="<?php echo ($id);?>">
-  <input type="hidden" name="uid" type="text" value="<?php echo ($uid);?>">
+  <input type="hidden" name="editid" type="text" value="<?php echo $stat['id']; ?>">
+  <input type="hidden" name="uid" type="text" value="<?php echo $stat['uid']; ?>">
   <div class="form-group">
     <label for="date">Datum / Zeit:</label>
-    <input type="text" class="form-control" id="date" name = "date"  value = "<?php echo $datetime->format('d.m.Y H:i:s'); ?>">
+    <input type="text" class="form-control" id="date" name = "date"  value = "<?php echo $stat['datum']; ?>">
   </div>
    
    <div class="form-group">
@@ -92,7 +105,3 @@ Statistik Nr <?= $id ?>  <?php if($uid > 0){echo 'von '.getuname($uid); }?> <br>
 	  </div>
   </div>
 </form>
-
-<?php
-} // End IF
-?>
