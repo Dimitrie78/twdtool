@@ -159,16 +159,17 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="fa fa-cog"></span>  ADMIN <span class="caret"></span></a>
               <ul class="dropdown-menu">
-				<li><a href="?action=uploadimg"><span style="margin-right:5px;" class="fas fa-upload"></span> 1. Bilder hochladen</a></li>
-				<li><a href="?action=prepimg"><span style="margin-right:5px;" class="fas fa-bolt"></span> 2. Bilder konvertieren</a></li>
-				<li><a href="2ocr/" target="_new"><span style="margin-right:5px;" class="fas fa-search"></span> 3. Konvertierte aufrufen</a></li>
-				<li><a href="?action=import"><span style="margin-right:5px;" class="fas fa-save"></span> 4. Auslesen und speichern</a></li> 
-				<li><a href="?action=fails"><span style="margin-right:5px;" class="fas fa-bug"></span> 5. Auslesefehler fixen &nbsp;&nbsp;<span class="badge badge-warning"><?php echo $fails['anz']; ?></span></a></li> 
-				<li><a href="?action=ocrfix"><span style="margin-right:5px;" class="fas fa-rocket"></span> 6. OCR-Verbessern</a></li> 
-				<li><a href="?action=frontpageedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 7. Startseiten Editor</a></li> 
-				<li><a href="?action=setHandyType"><span style="margin-right:5px;" class="fas fa-edit"></span> 8. Handy Screen Editor</a></li>
+				<li><a href="?action=uploadimg"><span style="margin-right:5px;" class="fas fa-upload"></span> Bilder hochladen</a></li>
+				<li><a href="?action=prepimg"><span style="margin-right:5px;" class="fas fa-bolt"></span> Bilder konvertieren</a></li>
+				<li><a href="2ocr/" target="_new"><span style="margin-right:5px;" class="fas fa-search"></span> Konvertierte aufrufen</a></li>
+				<li><a href="?action=import"><span style="margin-right:5px;" class="fas fa-save"></span> Auslesen und speichern</a></li> 
+				<li><a href="?action=fails"><span style="margin-right:5px;" class="fas fa-bug"></span> Auslesefehler beheben &nbsp;&nbsp;<span class="badge badge-warning"><?php echo $fails['anz']; ?></span></a></li> 
+				<li><a href="?action=ocrfix"><span style="margin-right:5px;" class="fas fa-rocket"></span> OCR-Verbessern</a></li> 
+				<li><a href="?action=frontpageedit"><span style="margin-right:5px;" class="fas fa-edit"></span> Startseiten Editor</a></li> 
+				<li><a href="?action=setHandyType"><span style="margin-right:5px;" class="fas fa-edit"></span> Handy Screen Editor</a></li>
 				<?php if (isdev()){ ?>
-				  <li><a href="?action=groupedit"><span style="margin-right:5px;" class="fas fa-edit"></span> 9. Gruppen Editor</a></li> 
+				  <li><a href="?action=groupedit"><span style="margin-right:5px;" class="fas fa-edit"></span> Gruppen Editor</a></li> 
+				  <li><a href="?action=groupmove"><span style="margin-right:5px;" class="fas fa-edit"></span> Nutzer umgruppieren</a></li> 
 				<?php } ?>
 					
               </ul>

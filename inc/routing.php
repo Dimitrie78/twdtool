@@ -51,6 +51,7 @@ if (isadminormod()){
 	case "addstat":
 	case "doaddstat":
 	case "removeusr":
+	case "groupmove":
 	case 'doremoveuser':
 	#Auslesefehler beheben
 	case "fails":
