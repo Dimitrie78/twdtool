@@ -106,7 +106,9 @@ foreach ($uqry as $row) {
 else{
 	if(isset($_POST["mvid"])){
    $qryids = implode(',', $_POST["mvid"]);
-   $uqry = $pdo->query('UPDATE `'.$config->db_pre.'users` SET gid = '.$_POST['targetGroup'].' WHERE id IN ('.$qryids.')');
+   $tgid = ($_POST['targetGroup'] == 'uc') ? '0' : $_POST['targetGroup'];
+   $uqry = $pdo->query('UPDATE `'.$config->db_pre.'users` SET gid = '.$tgid.' WHERE id IN ('.$qryids.')');
+   
 	   if ($uqry->execute()){
 		?> Ausführung abgeschlossen!<br>
 		 <a href="?action=groupmove" class="btn btn-success btn-lg active" role="button" >Zurück - OK</a>
