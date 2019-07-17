@@ -136,7 +136,7 @@ foreach ($usrqry as $usr)
         $gerettete2               = $row2['gerettete'];
     }
     
-    $tage                    = floor((strtotime($row1['date']) - strtotime($row2['date'])) / 86400);
+    $tage                    = ceil((strtotime($row1['date']) - strtotime($row2['date'])) / 86400);
     $streuner                = ($streuner1 && $streuner2) ? $streuner1 - $streuner2 : 0;
     $menschen                = ($menschen1 && $menschen2) ? $menschen1 - $menschen2 : 0;
     $gespielte_missionen     = ($gespielte_missionen1 && $gespielte_missionen2) ? $gespielte_missionen1 - $gespielte_missionen2 : 0;
