@@ -88,9 +88,13 @@ $count = $uqry->rowCount();
 if ($count === 0){
 echo 'Es wurden noch keine Statistiken hochgeladen!';
 }
+
+
 foreach ($uqry as $row) {
 	echo '<tr>
-			  <th><input type="checkbox" class="form-check-input" name="mvid[]" value = "'.$row['id'].'"></th>
+			  <th style="text-align: center;"><input id = "id'.$row['id'].'" type="checkbox" class="form-check-input" name="mvid[]" value = "'.$row['id'].'">
+			  <label for="id'.$row['id'].'"><span></span></label>
+</th>
 			  <td>'.($row['tag'] ? $row['tag'] : 'Ohne').'</td>
 			  <td>'.$row['ign'].'</td>
          </tr>';
