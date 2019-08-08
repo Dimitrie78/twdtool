@@ -12,10 +12,11 @@ if (isset($_GET['uid']) && !user_exists($uid)){
 	exit();
 }
 
-if (!isdev()){
+if (!isdev() && !empty($uid)){
 	$statement = $pdo->prepare("SELECT gid FROM ".$config->db_pre."users WHERE id = :id");
 	$result = $statement->execute(array('id' => $uid));
 	$udat = $statement->fetch();
+
 	if ($udat['gid'] != $_SESSION['gid']){
 		failmsg('Du bist nicht berechtigt diesen User zu bearbeiten!');
 		?><a href="?action=usrmgr" name="back" class="btn btn-info" role="button">Zurück</a><?php

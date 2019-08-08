@@ -471,3 +471,27 @@ body.loading .modal {
 .hidden{
   display:none;
 }
+
+th{
+  white-space:nowrap;
+}
+
+
+input[type="checkbox"][name="mvid[]"] {
+    display:none;
+}
+
+
+input[type="checkbox"][name="mvid[]"] + label span {
+    display:inline-block;
+    width:19px;
+    height:19px;
+    margin:-2px 0px 0 0;
+    vertical-align:middle;
+    background:url(../img/ui-checkbox-e.svg) top no-repeat;
+    cursor:pointer;
+}
+
+input[type="checkbox"][name="mvid[]"]:checked + label span {
+    background:url(../img/ui-checkbox-c.svg) top no-repeat;
+}

@@ -67,7 +67,10 @@ switch ($_GET['action']) {
         break;				
     case "frontpageedit":
         $panelhead = "Startseiteneditor";
-        break;				
+        break;
+    case "groupmove":
+        $panelhead = "Spieler in andere Gruppen verschieben";		
+        break;
     default:
         $panelhead = "News";
 }
