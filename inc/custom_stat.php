@@ -38,7 +38,7 @@ if(isSet($openKey)&&$openKey>0){
 }else{
 include "verify.php";
 
-$felder = (isSet($config->customstats)&&$config->customstats?$config->customstats:' `streuner` as `_Streuner`, `menschen` as `_Menschen`, (`streuner`+`menschen`) as `Kills`,round((`streuner`+`menschen`)/$days) as `pro Tag`, `gespielte_missionen` as `_gesp. Mis.`, `abgeschlossene_missonen` as `abg. Mis.`, `gefeuerte_schuesse` as `_Schüsse`, `haufen` as `Kisten`, `heldenpower` as `_Helden`, `waffenpower` as `_Waffen`, `waffenpower`+`heldenpower` as `Upgrades`, `karten` as `_Karten` , `gerettete` as `Gerettete`');
+$felder = (isSet($config->customstats)&&$config->customstats?$config->customstats:' (`streuner`+`menschen`) as `Kills (Streuner+Menschen)`, round((`streuner`+`menschen`)/$days) as `pro Tag (Kills)`, `streuner` as `_Streuner`, `menschen` as `_Menschen`, `gespielte_missionen` as `_gesp. Mis.`, `abgeschlossene_missonen` as `abg. Mis.`, `gefeuerte_schuesse` as `_Schüsse`, `haufen` as `Kisten`, `heldenpower` as `_Helden`, `waffenpower` as `_Waffen`, `waffenpower`+`heldenpower` as `Upgrades (Helden+Waffen)`, `karten` as `_Karten` , `gerettete` as `Gerettete`');
 
 }
 
@@ -201,8 +201,11 @@ $thead .=	'<table class="tablesorter table table-hover  datatable table-bordered
 
 
 for($h=0; $h<count($c);$h++){
-  if(isSet($c[$h])&&$c[$h]!='')
-  $thead .= '<th scope="col" id="col'.$h.'" class="'.($c[$h][0]=='_'?'hidden':'').' col'.$h.'">'.($c[$h][0]=='_'?substr($c[$h], 1, strlen($c[$h])):$c[$h]).'</th>';
+  if(isSet($c[$h])&&$c[$h]!=''){
+  	$_h = substr($c[$h], 0, (strpos($c[$h], '(', 0)===false)?strlen($c[$h]):strpos($c[$h], '(', 0));
+  	$_h = trim(($_h[0]=='_'?substr($_h, 1, strlen($_h)):$_h));
+    $thead .= '<th scope="col" id="col'.$h.'" class="'.($c[$h][0]=='_'?'hidden':'').' col'.$h.'">'.$_h.'</th>';
+  }
 }
 $thead .= '</tr>
   </thead>
