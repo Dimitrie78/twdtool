@@ -174,9 +174,37 @@ if((!isset($do)) || (!$do)){
 				      <select id="inputUser" id="name" name = "name" class = "form-control" style="width:auto;min-width:200px; display:inline-block;" onchange="var mysel = document.getElementById('correct'); if (mysel!=null) if(this.options[this.selectedIndex].value == '-NEW-') mysel.style.display='block'; else mysel.style.display='none';">
 
 <?php	    
-	$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` ORDER BY ign ASC';
+  echo '<option value="">--Wähle--</option>';
+  echo '<option value="-NEW-">Benutzer anlegen</option>';
+  if ($stats['uid'] < 1){
+
+	$sql2 = 'CREATE TEMPORARY TABLE nearUser SELECT s.uid, u.ign, max(s.streuner) as streuner FROM `'.$config->db_pre.'stats` as s LEFT JOIN `'.$config->db_pre.'users` as u ON u.id = s.uid WHERE u.active = 1 GROUP BY s.uid;';
+	$query_nearUser = $pdo->prepare($sql2);
+	$query_nearUser->execute();
+	$sql2 = 'SELECT uid, ign, streuner from nearUser WHERE streuner < '.$stats['streuner'].' ORDER BY streuner DESC LIMIT 3';
+	$query_nearUser = $pdo->prepare($sql2);
+	$query_nearUser->execute();
+	echo '<optgroup label="Vorschläge">';
+	foreach ($query_nearUser as $row) {
+		echo '<option value="'.$row['ign'].'" >'.$row['ign'].'</option>';
+	}
+	echo '</optgroup>';
+}
+
+	$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 1 ORDER BY ign ASC';
 	
-	echo '<option value="">--Wähle--</option>';
+    echo '<optgroup label="Aktive">';
+	foreach ($pdo->query($sql) as $row) {
+		if ($stats['uid'] == $row['id']){
+			$selected = ' selected';
+		}
+		echo '<option value="'.$row['ign'].'" '.$selected.'>'.$row['ign'].'</option>';
+		$selected = '';
+    }
+	echo '</optgroup>';
+
+	$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 0 ORDER BY ign ASC';
+	echo '<optgroup label="Inaktiv">';		
     foreach ($pdo->query($sql) as $row) {
 		if ($stats['uid'] == $row['id']){
 			$selected = ' selected';
@@ -184,7 +212,10 @@ if((!isset($do)) || (!$do)){
 		echo '<option value="'.$row['ign'].'" '.$selected.'>'.$row['ign'].'</option>';
 		$selected = '';
     }
-	echo '<option value="-NEW-">Benutzer anlegen</option>';
+	echo '</optgroup>';
+
+
+
     echo '</select>';
     echo '<div  name="NewUser" onclick="var mysel = document.getElementById(\'inputUser\'); if (mysel!=null) mysel.value = \'-NEW-\'; var mysel2 = document.getElementById(\'correct\'); if (mysel2!=null) mysel2.style.display=\'block\'; " style="font-size:50px;color:green;font-weight:bold; padding:0px 5px; height:30px; display:inline-block; cursor:pointer; margin:0px 10px;line-height: 30px; text-align: center; vertical-align: middle;">+</div>';
 	echo '<input type="text" name="correction" value="'.$stats['name'].'" style="display:none; margin-top:10px;" id="correct" />';
