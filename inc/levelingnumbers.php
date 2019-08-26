@@ -183,7 +183,7 @@ $thead .= '<div class="table-responsive">
     <tr>';
 if (isdev())
 {
-    $thead .= '<th nowrap><i class="gi gi-users"></i> GRP</th>';
+    $thead .= '<th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Gruppe"><i class="gi gi-users"></i> GRP</a></th>';
 }
 
 if ($mode == 'noicons')
@@ -212,24 +212,25 @@ if ($mode == 'noicons')
 }
 elseif ($mode == 'icons')
 {
+	
     $thead .= '
-      <th nowrap><i class="gi gi-id-card"></i> IGN</th>
-	  <th nowrap><i class="gi gi-clock-o"></i> #1</th>
-	  <th nowrap><i class="gi gi-clock-o"></i> #2</th>
-	  <th nowrap><span class="glyphicon glyphicon-calendar"></span> TG</th>
-	  <th nowrap><i class="gi gi-poison"></i> STR</th>
-      <th nowrap><i class="gi gi-heartbeat"></i> MEN</th>
-	  <th nowrap><i class="gi gi-caution"></i> GMIS</th>
-	  <th nowrap><i class="gi gi-check-square-o"></i> AMIS</th>
-      <th nowrap><i class="gi gi-ammo"></i> SCHS</th>
-      <th nowrap><i class="gi gi-briefcase"></i> KST</th>
-      <th nowrap><i class="gi gi-user-military"></i> HLD</th>
-	  <th nowrap><i class="gi gi-gun"></i> WAF</th>
-	  <th nowrap><i class="gi gi-dogtags"></i> KRT</th>
-	  <th nowrap><i class="fab fa-creative-commons-by"></i> GRT</th>
-	  <th nowrap><i class="gi gi-poison"></i>/M</th>
-	  <th nowrap><i class="gi gi-briefcase"></i>/M</th>
-	  <th nowrap><i class="gi gi-ammo"></i>/M</th>
+      <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Ingame Name"><i class="gi gi-id-card"></i> IGN</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Datum von"><i class="gi gi-clock-o"></i> #1</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Datum bis"><i class="gi gi-clock-o"></i> #2</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Anzahl Tage"><span class="glyphicon glyphicon-calendar"></span> TG</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Streuner"><i class="gi gi-poison"></i> STR</a></th>
+      <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Menschen"><i class="gi gi-heartbeat"></i> MEN</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Gespielte Missionen"><i class="gi gi-caution"></i> GMIS</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Abgeschlossene Missionen"><i class="gi gi-check-square-o"></i> AMIS</a></th>
+      <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Schüsse"><i class="gi gi-ammo"></i> SCHS</a></th>
+      <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Kisten"><i class="gi gi-briefcase"></i> KST</a></th>
+      <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Helden"><i class="gi gi-user-military"></i> HLD</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Waffen"><i class="gi gi-gun"></i> WAF</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Karten"><i class="gi gi-dogtags"></i> KRT</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Gerettet"><i class="fab fa-creative-commons-by"></i> GRT</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Streuner pro Mission"><i class="gi gi-poison"></i>/M</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Krten pro Mission"><i class="gi gi-briefcase"></i>/M</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Schüsse pro Mission"><i class="gi gi-ammo"></i>/M</a></th>
     </tr>
   </thead>
   <tbody>';
