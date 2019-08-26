@@ -141,9 +141,10 @@ $q_str = "
 			    , (@lastGerett := `gerettete`) as _calc5
 			    , (@lastDate := `date`) as _calc6
 
-			    FROM cbr_stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC
+			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC
 			) as e ORDER BY `_date` DESC
 		";
+
 $query_stat = $pdo->prepare($q_str);
 $query_stat->execute();
 // echo $query_stat->rowCount().'zeilen<br />';
