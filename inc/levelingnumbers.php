@@ -95,7 +95,7 @@ foreach ($usrqry as $usr)
     
     foreach ($pdo->query($sql1) as $row1)
     {
-        $date1                    = date('d.m.y', strtotime($row1['date']));
+        $date1                    = $row1['date'];
         $streuner1                = $row1['streuner'];
         $menschen1                = $row1['menschen'];
         $gespielte_missionen1     = $row1['gespielte_missionen'];
@@ -123,7 +123,7 @@ foreach ($usrqry as $usr)
     
     foreach ($pdo->query($sql2) as $row2)
     {
-        $date2                    = date('d.m.y', strtotime($row2['date']));
+        $date2                    = $row2['date'];
         $streuner2                = $row2['streuner'];
         $menschen2                = $row2['menschen'];
         $gespielte_missionen2     = $row2['gespielte_missionen'];
@@ -136,7 +136,7 @@ foreach ($usrqry as $usr)
         $gerettete2               = $row2['gerettete'];
     }
     
-    $tage                    = ceil((strtotime($row1['date']) - strtotime($row2['date'])) / 86400);
+    $tage                    = ($date1 && $date2) ? ceil((strtotime($date1) - strtotime($date2)) / 86400) : 0;
     $streuner                = ($streuner1 && $streuner2) ? $streuner1 - $streuner2 : 0;
     $menschen                = ($menschen1 && $menschen2) ? $menschen1 - $menschen2 : 0;
     $gespielte_missionen     = ($gespielte_missionen1 && $gespielte_missionen2) ? $gespielte_missionen1 - $gespielte_missionen2 : 0;
@@ -158,8 +158,8 @@ foreach ($usrqry as $usr)
         $tbody .= '<td style="text-align: left;">' . $usr['tag'] . '</td>';
     }
     $tbody .= '<td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid=' . $uid . '">' . $uname . '</a></td>
-          <td style="text-align: right;">' . $date2 . '</td>
-          <td style="text-align: right;">' . $date1 . '</td>
+          <td style="text-align: right;">' . date('d.m.y', strtotime($date2)) . '</td>
+          <td style="text-align: right;">' . date('d.m.y', strtotime($date1)) . '</td>
 		  <td style="text-align: right;">' . $tage . '</td>
 		  <td style="text-align: right;">' . $streuner . '</td>
 		  <td style="text-align: right;">' . $menschen . '</td>
