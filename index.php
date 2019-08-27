@@ -46,7 +46,7 @@ $rights = array("3" => "User",
 <script src="inc/js/jquery.ui.touch-punch.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/<?=$config->theme;?>/bootstrap.min.css">
-<link rel="stylesheet" href="https://unpkg.com/govicons@latest/css/govicons.min.css">
+<link rel="stylesheet" href="inc/css/govicons/css/govicons.min.css">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 <link href="inc/css/style.css" rel="stylesheet">
 <link type="text/css" rel="stylesheet" media="only screen and (max-width: 720px)" href="inc/css/resp.css" />
