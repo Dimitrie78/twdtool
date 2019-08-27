@@ -44,13 +44,6 @@ return $out;
 
 
 
-$top['lastlogin'] = "SELECT u.ign, u.lastlogin as top, g.tag
-FROM ".$config->db_pre."users u
-INNER JOIN ".$config->db_pre."groups as g on (u.gid = g.id)
-WHERE u.active = 1 ".$and_grouplimit_nojoin."
-ORDER BY u.lastlogin DESC";
-
-
 $top['streuner'] = topqry('streuner');
 
 $avg['streuner'] = "SELECT round(avg(top)) as avg
@@ -102,6 +95,11 @@ $top['gerettete'] = topqry('gerettete');
 $avg['gerettete'] = "SELECT round(avg(top)) as avg
 FROM ({$top['gerettete']}) as avgtab";
 
+$top['lastlogin'] = "SELECT u.ign, u.lastlogin as top, g.tag
+FROM ".$config->db_pre."users u
+INNER JOIN ".$config->db_pre."groups as g on (u.gid = g.id)
+WHERE u.active = 1 ".$and_grouplimit_nojoin."
+ORDER BY u.lastlogin DESC";
 
 ?>
     <form class="form-vertical" role="form" method = "POST" action = "?action=top" >
@@ -142,8 +140,13 @@ foreach($top as $key => $value)
 	{
 	$selected = ' selected';
 	}
-	
- echo '<option value="'.$key.'" '.$selected.'>'.ucfirst($key).'</option>';
+
+$listtype = str_replace('schuesse','Schüsse',$key);
+$listtype = str_replace('lastlogin','Letzer Login',$listtype);
+$listtype = explode('_',$listtype);
+
+
+echo '<option value="'.$key.'" '.$selected.'>'.ucwords($listtype[0]).' '.ucwords($listtype[1]).'</option>';
  $selected = '';
 }
 ?>
@@ -240,7 +243,7 @@ $i = 1;
 			  }
 			 echo '<td>'.$row['ign'].'</td>';
 			if($_POST['mode']=="lastlogin"){
-				$lastlogin = (($row['top']) <>  "" ? date("d.m.Y H:i:s", strtotime($row['top'])) : "Kein Login");
+				$lastlogin = (($row['top']) <>  "0000-00-00 00:00:00" ? date("d.m.Y H:i:s", strtotime($row['top'])) : "Kein Login");
 			  echo '<td>'.$lastlogin.'</td>';
 			}
 			else
