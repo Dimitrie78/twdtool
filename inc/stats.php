@@ -16,6 +16,15 @@ $sUser = preg_replace('/[^0-9]/','',$sUser);
 if (isset($_GET['uid']) & !user_exists($sUser)){echo '<div class="alert alert-danger">
   <strong>Abbruch</strong> Gewählte User-ID <b>'.$sUser.'</b> existiert nicht. Funktion nicht ausführbar</div>	<a href="?action=stats" name="back" class="btn btn-info" role="button">Zurück</a>'; exit();}
 
+
+if (isdev()){
+$query = $pdo->prepare('SELECT gid FROM '.$config->db_pre.'users WHERE id = :uid');
+$query->execute(array(':uid' => $sUser));
+$user_gid = $query->fetchColumn();
+$target_gid = ($_POST['gid'] ? $_POST['gid'] : $user_gid);
+}
+
+
 if ($sUser == $_SESSION['userid'])
 {
 	$stattype = 'Deine Statistik';	
@@ -41,6 +50,11 @@ $and_grouplimit =  ' AND gid = 0';
 }
 }
 
+if (isdev() && is_numeric($_GET['uid'])){
+$and_grouplimit = ' AND gid = '.$user_gid;
+}
+
+
 ?>  
 <form class="form-vertical" role="form" method = "POST" action = "?action=stats" >
 <input  type = "hidden" name = "suid" type="text" value = "<? echo $sUser; ?>">
@@ -49,14 +63,13 @@ $and_grouplimit =  ' AND gid = 0';
 <div class ="form-group">
 <label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
       <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
-	 <option value="allgrp" <?php if ($_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
-	 <option value="uc" <?php if ($_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+	 <option value="allgrp" <?php if ($target_gid  == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if ($target_gid  == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
 <?php
 	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
-	
-	
+
     foreach ($pdo->query($sql) as $row) {
-		if ($_POST['gid'] == $row['id'])
+		if ($target_gid == $row['id'])
 	{
 	$gidselected = ' selected';
 	}
