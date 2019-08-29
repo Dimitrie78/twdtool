@@ -283,7 +283,7 @@ if(!$_POST) {
 		  </div>
 		  <div class="form-group">
 			<label for="dbname">Datenbank Präfix (Optional):</label>
-			<input type="text" class="form-control" id="db_pre" name="db_pre" required> 
+			<input type="text" class="form-control" id="db_pre" name="db_pre"> 
 		  </div>
 		  <div class="form-group">
 			<label for="ocrspace_apikey"><a href="https://ocr.space" target="_new">OCR.Space API KEY:</a></label>
