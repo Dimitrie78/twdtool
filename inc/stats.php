@@ -87,16 +87,18 @@ foreach ($pdo->query($sql) as $row) {
 	if ($sUser == $row['id']) {
 		$selected = ' selected';
 	
-		if ($row['notes'] > "" & isadminormod()){
+		if ($row['notes'] > ""){
 			$btnnotes = '<a href="?action=notes&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-paperclip"></span> Notizen</a> ';
 		}
 		
 		if ($row['telegram'] > ""){
 			$telegram = '<a href="https://t.me/'.$row['telegram'].'" target = "_new" class="btn btn-info" role="button"><span class = "fab fa-telegram-plane"></span> Telegram</a> ';
 		}
-								  
+
+$editusr .= '<a href="?action=classicstats&uid='.$sUser.'" class="btn btn-info" role="button"><span class = "fas fa-chart-line"></span> Classic Stats</a>';								  
 		if (isadminormod()){
-			$editusr = '<a href="?action=usrmgr&uid='.$sUser.'" class="btn btn-warning" role="button"><span class = "fas fa-edit"></span> Edit User </a> <a href="?action=addstat&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Stat hinzu</a> ';
+			$editusr .= '<a href="?action=usrmgr&uid='.$sUser.'" class="btn btn-warning" role="button"><span class = "fas fa-edit"></span> Edit User </a>
+			<a href="?action=addstat&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Stat hinzu</a> ';
 		}
 
 	}
@@ -105,14 +107,26 @@ foreach ($pdo->query($sql) as $row) {
 }
 echo '</select></div> 
 	  <div class="pull-right">'.$btnnotes.$telegram.$editusr.'</div></div></div>';
+	  
+$query1 = $pdo->prepare('SELECT count(id) as anz FROM '.$config->db_pre.'stats WHERE uid = :uid and `fail` = 0');
+$query1->execute(array(':uid' => $sUser));
+$total_stats = $query1->fetchColumn();
 
+if($total_stats > 0){
 
+$limit = '';
+if ($config->statlimit){
 if (isset($_POST['limit']) && $_POST['limit']>""){
 	$sel_limit = preg_replace('/[^0-9]/','',$_POST['limit']);
 }
 else{
 	$sel_limit = $config->statlimit;  //Wert aus config
 }	
+
+if (is_numeric($sel_limit)){$limit = ' LIMIT 0,'.$sel_limit;}
+}
+
+
 $q_str = "	SET @lastKills = 0, @lastGespielt = 0, @lastAbgeschl = 0, @lastGerett = 0, @lastDate = '2000-01-01', @actTage = 0, @actKills = 0;";
 $query_stat2 = $pdo->prepare($q_str);
 $query_stat2->execute();
@@ -141,7 +155,7 @@ $q_str = "
 			    , (@lastGerett := `gerettete`) as _calc5
 			    , (@lastDate := `date`) as _calc6
 
-			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC
+			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC ".$limit."
 			) as e ORDER BY `_date` DESC
 		";
 
@@ -166,17 +180,13 @@ $total_column = 0;
   }
 }
 
-$query1 = $pdo->prepare('SELECT count(id) as anz FROM '.$config->db_pre.'stats WHERE uid = :uid and `fail` = 0');
-$query1->execute(array(':uid' => $sUser));
-$total_stats = $query1->fetchColumn();
-
-if($total_stats > 0){
-
+if ($config->statlimit){
 	echo'<div class="slidecontainer">
 		   Die letzten <label for="inputUser" class = "control-label"> <span id="demo"></span> von '.$total_stats.' </label> Einträgen
 	  <input onchange="this.form.submit()" type="range" min="1" max="'.$total_stats.'" value="'.$sel_limit.'" step="1" class="slider" id="myRange" name="limit">
 	</div>
 	</form>';
+}
 
 
 		

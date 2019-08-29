@@ -204,13 +204,13 @@ function uploadToApi($target_file){
 			"url" => $imageurl,
 		);
 	}
-	
 	$ch = curl_init();
 	curl_setopt_array($ch, array(
-		CURLOPT_URL => "https://api.ocr.space/parse/image",
+	   #CURLOPT_URL => "https://api.ocr.space/parse/image",        #<- free api
+		CURLOPT_URL => "https://apipro2.ocr.space/parse/image",	   #<- pro api
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_POST => 1,
-		CURLOPT_HTTPHEADER => array('Content-Type:multipart/form-data', 'apikey:apikey:'.$config->ocrspace_apikey.''),
+		CURLOPT_HTTPHEADER => array('Content-Type:multipart/form-data', 'apikey:'.$config->ocrspace_apikey.''),
 		CURLOPT_POSTFIELDS => $data,
 	));
 
