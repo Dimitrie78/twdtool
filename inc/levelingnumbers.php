@@ -229,7 +229,7 @@ elseif ($mode == 'icons')
 	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Karten"><i class="gi gi-dogtags"></i> KRT</a></th>
 	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Gerettet"><i class="fab fa-creative-commons-by"></i> GRT</a></th>
 	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Streuner pro Mission"><i class="gi gi-poison"></i>/M</a></th>
-	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Krten pro Mission"><i class="gi gi-briefcase"></i>/M</a></th>
+	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Karten pro Mission"><i class="gi gi-briefcase"></i>/M</a></th>
 	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Schüsse pro Mission"><i class="gi gi-ammo"></i>/M</a></th>
     </tr>
   </thead>
