@@ -44,7 +44,6 @@ if (isadminormod()){
 	case "createnewuser":
 	case "usrmgr":
 	case "doremovestat":
-	case "notes":
 	case "editstat":
 	case "doeditstat":
 	case "removestat":
@@ -68,6 +67,8 @@ if (isadminormod()){
 if (isset($_GET["action"]))
 switch ($_GET['action']) {
     case "myprofile":
+	case "notes":
+	case "classicstats":
     case "stats":
     case "top":
     case "levelingnumbers":
