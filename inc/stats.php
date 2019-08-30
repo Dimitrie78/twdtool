@@ -160,16 +160,13 @@ $q_str = "
 			    , CASE WHEN IFNULL(@lastAbgeschl, 0) = 0 THEN 0 ELSE (`abgeschlossene_missonen`-@lastAbgeschl) END as Diff_AM
 			    , `gefeuerte_schuesse` as Schüsse, `haufen` as Haufen, `waffenpower` as Waffen, `heldenpower` as Helden, `karten` as Karten, `gerettete` as Gerettete
 			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END as Diff_Gerettet
-			    
-
 			    , (@lastKills := (`streuner`+`menschen`)) as _calc2
 			    , (@lastGespielt := `gespielte_missionen`) as _calc3
 			    , (@lastAbgeschl := `abgeschlossene_missonen`) as _calc4
 			    , (@lastGerett := `gerettete`) as _calc5
 			    , (@lastDate := `date`) as _calc6
-
-			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC ".$limit."
-			) as e ORDER BY `_date` DESC
+			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC 
+			) as e ORDER BY `_date` DESC ".$limit."
 		";
 
 $query_stat = $pdo->prepare($q_str);
