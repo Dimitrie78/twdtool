@@ -1,24 +1,85 @@
 <?php
 include "verify.php";
 
-$sUser = ($_POST['uid']>"") ? $_POST['uid']: $_GET['uid'];
-if(!$sUser){$sUser = $_POST['suid'];}
+if (isset($_POST['uid'])) {
+	$sUser = $_POST['uid'];
+} else {
+	$sUser = $_GET['uid'];
+}
+
+if(!$sUser) {
+	$sUser = $_POST['suid'];
+}
 $sUser = preg_replace('/[^0-9]/','',$sUser);
 
 
 if (isset($_GET['uid']) & !user_exists($sUser)){echo '<div class="alert alert-danger">
   <strong>Abbruch</strong> Gewählte User-ID <b>'.$sUser.'</b> existiert nicht. Funktion nicht ausführbar</div>	<a href="?action=classicstats" name="back" class="btn btn-info" role="button">Zurück</a>'; exit();}
 
-if ($_GET['uid'] == $_SESSION['userid'])
+
+if (isdev()){
+$query = $pdo->prepare('SELECT gid FROM '.$config->db_pre.'users WHERE id = :uid');
+$query->execute(array(':uid' => $sUser));
+$user_gid = $query->fetchColumn();
+$target_gid = ($_POST['gid'] ? $_POST['gid'] : $user_gid);
+}
+
+
+if ($sUser == $_SESSION['userid'])
 {
-$stattype = 'Deine Statistik';	
+	$stattype = 'Deine Statistik';	
 }
 else
 {
-	
-$stattype = 'Spieler/in:';	
+	$stattype = 'Spieler/in:';	
 }
-  
+
+$and_grouplimit = "";
+if (!isdev()){
+$gidfilter = 'gid = '.$_SESSION['gid'];
+$and_grouplimit = ' AND '.$gidfilter;
+}
+
+if (isdev() && isSet($_POST['gid'])){
+if (is_numeric($_POST['gid'])){
+$and_grouplimit = ' AND gid = '.$_POST['gid'];
+}
+
+if ($_POST['gid'] == "uc"){
+$and_grouplimit =  ' AND gid = 0';
+}
+}
+
+if (isdev() && is_numeric($_GET['uid'])){
+$and_grouplimit = ' AND gid = '.$user_gid;
+}
+?>  
+<form class="form-vertical" role="form" method = "POST" action = "?action=classicstats" >
+<input  type = "hidden" name = "suid" type="text" value = "<? echo $sUser; ?>">
+
+<?php if (isdev()){?>
+<div class ="form-group">
+<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
+      <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
+	 <option value="allgrp" <?php if ($target_gid  == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if ($target_gid  == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+<?php
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+
+    foreach ($pdo->query($sql) as $row) {
+		if ($target_gid == $row['id'])
+	{
+	$gidselected = ' selected';
+	}
+       echo '<option value="'.$row['id'].'" '.$gidselected.'>['.$row['tag'].'] '.$row['name'].'</option>';
+	    $gidselected = '';
+    }
+
+?>
+     </select>
+	 </div>
+<?php 
+} 
 echo '<label for="inputUser" class = "control-label">'.$stattype.'</label>
 <form class="form-vertical" role="form" method = "POST" action = "?action=classicstats" >
 <input  type = "hidden" name = "suid" type="text" value = "'.$sUser.'">
@@ -28,33 +89,32 @@ echo '<label for="inputUser" class = "control-label">'.$stattype.'</label>
       <select onchange="this.form.submit()" id="inputUser" name = "uid" class = "form-control" style="width:auto;min-width:200px;">';
 
 			    
-	$sql = 'SELECT id,ign,telegram,notes FROM `users` WHERE active = 1 ORDER BY ign ASC';
+	$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 1 '.$and_grouplimit.' ORDER BY ign ASC';
 		
 	       echo '<option value="">--Wähle--</option>';
     foreach ($pdo->query($sql) as $row) {
 		
-	if ($sUser == $row['id'])
-	{
-	$selected = ' selected';
+	$selected = '';
+	if ($sUser == $row['id']) {
+		$selected = ' selected';
 	
 		if ($row['notes'] > ""){
-	$btnnotes = '<a href="?action=notes&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-paperclip"></span> Notizen</a> ';
-							   }
+			$btnnotes = '<a href="?action=notes&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-paperclip"></span> Notizen</a> ';
+		}
 		
 		if ($row['telegram'] > ""){
 			$telegram = '<a href="https://t.me/'.$row['telegram'].'" target = "_new" class="btn btn-info" role="button"><span class = "fab fa-telegram-plane"></span> Telegram</a> ';
-								  }
+		}
 
-			$editusr .= '<a href="?action=stats&uid='.$sUser.'" class="btn btn-info" role="button"><span class = "fas fa-chart-line"></span> New Stats</a>';
-								  
+$editusr .= '<a href="?action=classicstats&uid='.$sUser.'" class="btn btn-info" role="button"><span class = "fas fa-chart-line"></span> Classic Stats</a>';								  
 		if (isadminormod()){
-			$editusr .= '<a href="?action=usrmgr&uid='.$sUser.'" class="btn btn-warning" role="button"><span class = "fas fa-edit"></span> Edit User </a> <a href="?action=addstat&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Stat hinzu</a> ';
-						 }
+			$editusr .= '<a href="?action=usrmgr&uid='.$sUser.'" class="btn btn-warning" role="button"><span class = "fas fa-edit"></span> Edit User </a>
+			<a href="?action=addstat&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Stat hinzu</a> ';
+		}
 
 	}
 		
-       echo '<option value="'.$row['id'].'" '.$selected.'>'.$row['ign'].'</option>';
- $selected = '';
+    echo '<option value="'.$row['id'].'" '.$selected.'>'.$row['ign'].'</option>';
     }
       echo '</select></div> 
 	  
@@ -77,11 +137,13 @@ $total_stats = $query1->fetchColumn();
 if($total_stats > 0){
   
 	
-echo'<div class="slidecontainer">
-	   Die letzten <label for="inputUser" class = "control-label"> <span id="demo"></span> von '.$total_stats.' </label> Einträgen
-  <input onchange="this.form.submit()" type="range" min="1" max="'.$total_stats.'" value="'.$sel_limit.'" step="1" class="slider" id="myRange" name = "limit">
-</div>
-</form>';
+if ($config->statlimit){
+	echo'<div class="slidecontainer">
+		   Die letzten <label for="inputUser" class = "control-label"> <span id="demo"></span> von '.$total_stats.' </label> Einträgen
+	  <input onchange="this.form.submit()" type="range" min="1" max="'.$total_stats.'" value="'.$sel_limit.'" step="1" class="slider" id="myRange" name="limit">
+	</div>
+	</form>';
+}
 
 
 		
@@ -291,6 +353,13 @@ $(function () {
 });
 });
 
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
 
 </script>
    
