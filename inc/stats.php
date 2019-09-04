@@ -7,6 +7,16 @@ if (isset($_POST['uid'])) {
 	$sUser = $_GET['uid'];
 }
 
+
+if (isset($_GET['mode'])) {
+	$mode = $_GET['mode'];
+} else {
+  if (isSet($config->useClassicStat)&&($config->useClassicStat==1))
+	$mode = 'classic';
+  else
+	$mode = '';
+}
+
 if(!$sUser) {
 	$sUser = $_POST['suid'];
 }
@@ -108,7 +118,7 @@ foreach ($pdo->query($sql) as $row) {
 			$telegram = '<a href="https://t.me/'.$row['telegram'].'" target = "_new" class="btn btn-info" role="button"><span class = "fab fa-telegram-plane"></span> Telegram</a> ';
 		}
 
-$editusr .= '<a href="?action=classicstats&uid='.$sUser.'" class="btn btn-info" role="button"><span class = "fas fa-chart-line"></span> Classic Stats</a>';								  
+$editusr .= '<a href="?action=stats&uid='.$sUser.'&mode='.(isSet($mode)&&$mode=='classic'?'':'classic').'" class="btn btn-info" role="button"><span class = "fas fa-chart-line"></span> '.(isSet($mode)&&$mode=='classic'?'Standard Stats':'Classic Stats').'</a>';								  
 		if (isadminormod()){
 			$editusr .= '<a href="?action=usrmgr&uid='.$sUser.'" class="btn btn-warning" role="button"><span class = "fas fa-edit"></span> Edit User </a>
 			<a href="?action=addstat&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Stat hinzu</a> ';
@@ -140,9 +150,10 @@ if (is_numeric($sel_limit)){$limit = ' LIMIT 0,'.$sel_limit;}
 }
 
 
-$q_str = "	SET @lastKills = 0, @lastGespielt = 0, @lastAbgeschl = 0, @lastGerett = 0, @lastDate = '2000-01-01', @actTage = 0, @actKills = 0;";
+$q_str = "	SET @lastKills = 0, @lastGespielt = 0, @lastAbgeschl = 0, @lastGerett = 0, @lastDate = '2000-01-01', @actTage = 0, @actKills = 0, @actGerett = 0;";
 $query_stat2 = $pdo->prepare($q_str);
 $query_stat2->execute();
+if(!(isSet($mode)&&$mode=='classic')){
 $q_str = "
 			SELECT * FROM 
 (			    SELECT 
@@ -150,16 +161,24 @@ $q_str = "
  				, `date` as _date
 			    , DATE_FORMAT(`date`, '%d.%m.%Y') as Datum
 			    , (@actTage := CASE WHEN IFNULL(@lastDate, '2000-01-01') = '2000-01-01' THEN 0 ELSE DATEDIFF(`date`, @lastDate) END) as Tage
-			    , `exp` as EP, `streuner` as Streuner, `menschen`as Menschen
+			    , `exp` as LVL, `streuner` as Streuner, `menschen` as Menschen
 			    , (@actKills := CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE ((`streuner`+`menschen`)-@lastKills) END) as Diff_Kills
 			    , (CASE WHEN @actTage < 1 THEN 0 ELSE round(@actKills/@actTage, 0) END) as ProTag
-			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/@actKills, 0) END) as SchKill
+			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/(`streuner`+`menschen`), 0) END) as SchKill
 				,  `gespielte_missionen` as GespMis
 			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as Diff_GM
 			    , `abgeschlossene_missonen` as AbgeMis
 			    , CASE WHEN IFNULL(@lastAbgeschl, 0) = 0 THEN 0 ELSE (`abgeschlossene_missonen`-@lastAbgeschl) END as Diff_AM
 			    , `gefeuerte_schuesse` as Schüsse, `haufen` as Haufen, `waffenpower` as Waffen, `heldenpower` as Helden, `karten` as Karten, `gerettete` as Gerettete
 			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END as Diff_Gerettet
+			    , (@actGerett := CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END) as _Diff_Gerett
+			    , (`streuner`) as chart_Streuner
+			    , (`menschen`) as chart_Menschen
+			    , (`gerettete`) as chart_Gerettete
+			    , (`streuner`+`menschen`) as chart_Kills
+			    , CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE(round(@actKills/@actTage, 0)*7) END as chart_Kills_pro_Woche
+			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (round(@actGerett/@actTage, 0)*7) END as chart_Gerettete_pro_Woche
+
 			    , (@lastKills := (`streuner`+`menschen`)) as _calc2
 			    , (@lastGespielt := `gespielte_missionen`) as _calc3
 			    , (@lastAbgeschl := `abgeschlossene_missonen`) as _calc4
@@ -168,7 +187,35 @@ $q_str = "
 			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC 
 			) as e ORDER BY `_date` DESC ".$limit."
 		";
-
+}else{
+$q_str = "
+			SELECT * FROM 
+(			    SELECT 
+			      `id` as _id
+ 				, `date` as _date
+			    , DATE_FORMAT(`date`, '%d.%m.%Y') as Datum
+			    , (@actTage := CASE WHEN IFNULL(@lastDate, '2000-01-01') = '2000-01-01' THEN 0 ELSE DATEDIFF(`date`, @lastDate) END) as _Tage
+			    ,  `exp` as LVL,`exp` as EP, `streuner` as Streuner, `menschen` as Menschen
+			    , (round(`gefeuerte_schuesse`/`streuner`, 0)) as Schü_pro_Str
+				,  `gespielte_missionen` as GespMis
+			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as Diff_GM
+			    , `abgeschlossene_missonen` as AbgeMis
+			    , CASE WHEN IFNULL(@lastAbgeschl, 0) = 0 THEN 0 ELSE (`abgeschlossene_missonen`-@lastAbgeschl) END as Diff_AM
+			    , `gefeuerte_schuesse` as Schüsse, `haufen` as Haufen, `waffenpower` as Waffen, `heldenpower` as Helden, `karten` as Karten, `gerettete` as Gerettete
+			    , (`streuner`) as chart_Streunerkills
+			    , (`menschen`) as chart_Menschen
+			    , (`heldenpower`) as chart_Heldenstärke
+			    , (`waffenpower`) as chart_Waffenstärke
+			    , (`gerettete`) as chart_Überlebende
+			    , (@lastKills := (`streuner`+`menschen`)) as _calc2
+			    , (@lastGespielt := `gespielte_missionen`) as _calc3
+			    , (@lastAbgeschl := `abgeschlossene_missonen`) as _calc4
+			    , (@lastGerett := `gerettete`) as _calc5
+			    , (@lastDate := `date`) as _calc6
+			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC 
+			) as e ORDER BY `_date` DESC ".$limit."
+		";
+}
 $query_stat = $pdo->prepare($q_str);
 $query_stat->execute();
 // echo $query_stat->rowCount().'zeilen<br />';
@@ -211,7 +258,8 @@ if ($config->statlimit){
             <tr>
                 <?php 
 			  		for($h=0; $h<count($c);$h++){
-			  		  echo '<th>'.$c[$h].'</th>';
+					  if(!(strpos($c[$h], 'chart_')!==false))
+			  		    echo '<th>'.str_replace('_pro_', '\\', $c[$h]).'</th>';
 			  		}
 
                 ?>
@@ -258,10 +306,10 @@ foreach ($query_stat as $row) {
 	#$schuestr = $row['gefeuerte_schuesse']/$row['streuner']
 	echo '<tr>';
 	for($h=0; $h<count($c);$h++){
-		if ($c[$h] == 'EP')
+		if ($c[$h] == 'LVL')
 		    echo '<td style="text-align: right;">'.leveldata($row[$c[$h]]).'</td>';
 		else {
-			if(strpos($c[$h], 'Diff')!==false){
+			if((strpos($c[$h], 'chart_')!==false) && $row[$c[$h]]<>0 ) {
 				$datetime = new DateTime($row['_date']);
 				$year = $datetime->format('Y');
 				$month = $datetime->format('m')-1; #highcharts monat fängt bei 0 an zu zählen!
@@ -269,8 +317,8 @@ foreach ($query_stat as $row) {
 				if (!isSet($chart[$h])) $chart[$h] = array();
 				$chart[$h][$i] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row[$c[$h]].']'; 
 				unset($datetime);
-			}
-		    echo '<td style="text-align: right;">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+			}//else
+  		    	echo '<td style="text-align: right;">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
 		}
 	}
 
@@ -317,7 +365,7 @@ $(function () {
 	  	if(isSet($chart[$h])&&count($chart[$h])>0)
 	  	{
 		  	echo ($h>0?'':'').'{
-	        name: "'.$c[$h].'",
+	        name: "'.str_replace('_pro_', '\\\\', substr($c[$h], 6)).'",
 	        data: [';
 			for ($x = $i; $x >= 0; $x--)
 	    	  if(isSet($chart[$h][$x]))	
