@@ -164,7 +164,7 @@ $q_str = "
 			    , `exp` as LVL, `streuner` as Streuner, `menschen` as Menschen
 			    , (@actKills := CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE ((`streuner`+`menschen`)-@lastKills) END) as Diff_Kills
 			    , (CASE WHEN @actTage < 1 THEN 0 ELSE round(@actKills/@actTage, 0) END) as ProTag
-			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/(`streuner`+`menschen`), 0) END) as Schü_pro_Kill
+			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/(`streuner`+`menschen`), 2) END) as Schü_pro_Kill
 				,  `gespielte_missionen` as GespMis
 			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as Diff_GM
 			    , `abgeschlossene_missonen` as AbgeMis
@@ -172,12 +172,12 @@ $q_str = "
 			    , `gefeuerte_schuesse` as Schüsse, `haufen` as Haufen, `waffenpower` as Waffen, `heldenpower` as Helden, `karten` as Karten, `gerettete` as Gerettete
 			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END as Diff_Gerettet
 			    , (@actGerett := CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END) as _Diff_Gerett
+			    , CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE(round(@actKills/@actTage, 0)*7) END as chart_Kills_pro_Woche
+			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (round(@actGerett/@actTage, 0)*7) END as chart_Gerettete_pro_Woche
 			    , (`streuner`) as chart_Streuner
 			    , (`menschen`) as chart_Menschen
 			    , (`gerettete`) as chart_Gerettete
 			    , (`streuner`+`menschen`) as chart_Kills
-			    , CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE(round(@actKills/@actTage, 0)*7) END as chart_Kills_pro_Woche
-			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (round(@actGerett/@actTage, 0)*7) END as chart_Gerettete_pro_Woche
 
 			    , (@lastKills := (`streuner`+`menschen`)) as _calc2
 			    , (@lastGespielt := `gespielte_missionen`) as _calc3
@@ -196,7 +196,7 @@ $q_str = "
 			    , DATE_FORMAT(`date`, '%d.%m.%Y') as Datum
 			    , (@actTage := CASE WHEN IFNULL(@lastDate, '2000-01-01') = '2000-01-01' THEN 0 ELSE DATEDIFF(`date`, @lastDate) END) as _Tage
 			    ,  `exp` as LVL,`exp` as EP, `streuner` as Streuner, `menschen` as Menschen
-			    , (round(`gefeuerte_schuesse`/`streuner`, 0)) as Schü_pro_Str
+			    , (round(`gefeuerte_schuesse`/`streuner`, 2)) as Schü_pro_Str
 				,  `gespielte_missionen` as GespMis
 			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as Diff_GM
 			    , `abgeschlossene_missonen` as AbgeMis
@@ -307,7 +307,7 @@ foreach ($query_stat as $row) {
 	echo '<tr>';
 	for($h=0; $h<count($c);$h++){
 		if ($c[$h] == 'LVL')
-		    echo '<td style="text-align: right;">'.leveldata($row[$c[$h]]).'</td>';
+		    echo '<td style="text-align: right;">'.number_format(leveldata($row[$c[$h]]), 2, ",", ".").'</td>';
 		else {
 			if((strpos($c[$h], 'chart_')!==false) && $row[$c[$h]]<>0 ) {
 				$datetime = new DateTime($row['_date']);
@@ -317,8 +317,12 @@ foreach ($query_stat as $row) {
 				if (!isSet($chart[$h])) $chart[$h] = array();
 				$chart[$h][$i] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row[$c[$h]].']'; 
 				unset($datetime);
-			}else
+			}else{
+			  if((strpos(strtolower($c[$h]), 'datum')!==false)||(strpos(strtolower($c[$h]), 'date')!==false)||(strpos(strtolower($c[$h]), 'ep')!==false)||(strpos(strtolower($c[$h]), 'xp')!==false))
   		    	echo '<td style="text-align: right;">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+  		   	  else
+  		    	echo '<td style="text-align: right;">'.number_format($row[$c[$h]], (strpos($row[$c[$h]], '.')!==false?2:0), ",", ".")./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+  		    }
 		}
 	}
 
@@ -339,6 +343,7 @@ $(function () {
     $('#container').highcharts({
         chart: {
             type: 'spline'
+            
         },
         title: {
             text: 'Aktivität'
@@ -358,8 +363,35 @@ $(function () {
             text: 'Legende'
         }
     },
+    plotOptions: {
+        series: {
+            events: {
+                legendItemClick: function (chart) {
+				    // if (!this.visible)
+				        // return false;
+
+				    var seriesIndex = this.index;
+				    var series = this.chart.series;
+
+				    for (var i = 0; i < series.length; i++)
+				    {
+				        if (series[i].index != seriesIndex)
+				        {
+				            if (series[i].visible)				            
+				              series[i].hide();
+				            
+				        } else if (!series[i].visible){
+				          // series[i].show();
+				        }
+				    }
+				     return true;                  
+                }
+            }
+        }
+    },
 
     <?php
+      $first = 1;
       echo 'series: [';
 	  for($h=0; $h<count($c);$h++){
 	  	if(isSet($chart[$h])&&count($chart[$h])>0)
@@ -370,7 +402,10 @@ $(function () {
 			for ($x = $i; $x >= 0; $x--)
 	    	  if(isSet($chart[$h][$x]))	
 	    		echo $chart[$h][$x].',';
-  	  	echo ']},';
+  	  	echo '],';
+  	  	if($first==0) echo 'visible: false';
+  	  	$first = 0;
+  	  	echo '},';
     	}
 	  }
 	?>
