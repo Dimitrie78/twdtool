@@ -118,7 +118,7 @@ foreach ($pdo->query($sql) as $row) {
 			$telegram = '<a href="https://t.me/'.$row['telegram'].'" target = "_new" class="btn btn-info" role="button"><span class = "fab fa-telegram-plane"></span> Telegram</a> ';
 		}
 
-$editusr .= '<a href="?action=stats&uid='.$sUser.'&mode='.(isSet($mode)&&$mode=='classic'?'':'classic').'" class="btn btn-info" role="button"><span class = "fas fa-chart-line"></span> '.(isSet($mode)&&$mode=='classic'?'Standard Stats':'Classic Stats').'</a>';								  
+$editusr .= '<a href="?action=stats&uid='.$sUser.'&mode='.(isSet($mode)&&$mode=='classic'?'':'classic').'" class="btn btn-info" role="button"><span class = "fas fa-chart-line"></span> '.(isSet($mode)&&$mode=='classic'?'Standard Stats':'Classic Stats').'</a>&nbsp;';								  
 		if (isadminormod()){
 			$editusr .= '<a href="?action=usrmgr&uid='.$sUser.'" class="btn btn-warning" role="button"><span class = "fas fa-edit"></span> Edit User </a>
 			<a href="?action=addstat&uid='.$sUser.'" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Stat hinzu</a> ';
@@ -317,7 +317,7 @@ foreach ($query_stat as $row) {
 				if (!isSet($chart[$h])) $chart[$h] = array();
 				$chart[$h][$i] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row[$c[$h]].']'; 
 				unset($datetime);
-			}//else
+			}else
   		    	echo '<td style="text-align: right;">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
 		}
 	}
