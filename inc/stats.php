@@ -164,7 +164,7 @@ $q_str = "
 			    , `exp` as LVL, `streuner` as Streuner, `menschen` as Menschen
 			    , (@actKills := CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE ((`streuner`+`menschen`)-@lastKills) END) as Diff_Kills
 			    , (CASE WHEN @actTage < 1 THEN 0 ELSE round(@actKills/@actTage, 0) END) as ProTag
-			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/(`streuner`+`menschen`), 0) END) as SchKill
+			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/(`streuner`+`menschen`), 0) END) as Schü_pro_Kill
 				,  `gespielte_missionen` as GespMis
 			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as Diff_GM
 			    , `abgeschlossene_missonen` as AbgeMis
