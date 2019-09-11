@@ -407,7 +407,7 @@ function readOCRArray($array, $target_file){
 			$arr[] = $menschen; //2
 			$arr[] = $gespielte_missionen;//3
 			$arr[] = $abgeschlossene_missonen;//4
-			$arr[] = $gefeuerte_schuesse//5
+			$arr[] = $gefeuerte_schuesse;//5
 			$arr[] = $haufen;//6
 			$arr[] = $heldenpower;//7
 			$arr[] = $waffenpower;//8
