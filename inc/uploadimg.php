@@ -256,7 +256,7 @@ input[type="submit"]:active {
 			  <div class="form-group text-center">
 			  <input type="hidden" name="bigfile" id="bigfile" value="0" />
 			   <button type="submit" name="action" value="prepimg" class="btn btn-success">Bilder konvertieren</button>';
-			if($count<28)
+			if($count>1&&$count<28)
 			  echo '&nbsp;&nbsp;&nbsp;<button type="submit" name="action" value="prepimg" class="btn btn-success" onclick="document.getElementByID(\'bigfile\').value=1;">Bilder mit BigFile konvertieren</button>';
 			echo '
 			  </div>
