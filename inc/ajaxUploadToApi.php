@@ -15,7 +15,7 @@ if(isset($_POST['data'])) {
 		if (strlen(trim($target_file)) > 0){
 			$hasfiles = true;
 //			echo $target_file." - ";
-			echo uploadToApi('../'.$target_file);
+			uploadToApi('../'.$target_file);
 		}
 	}
 }

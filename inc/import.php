@@ -6,19 +6,34 @@ include "verify.php";
 #$target_file = "ocr_foo.jpg";
 $hasfiles = False;
 $data = array();
+$bigfile = "2ocr/bigfile/bigfile.jpg";
+if (file_exists($bigfile)) {
+  echo 'bigfile gefunden!<br />';
+  $screens = glob("2ocr/bigfile/*.{jpg,png}", GLOB_BRACE);
 
-$screens = glob("2ocr/*.{jpg,png}", GLOB_BRACE);
-foreach ($screens as $target_file) {
-	if (strlen(trim($target_file)) > 0){
-    $file   = substr($target_file, strrpos($target_file, '/')+1, strlen($target_file));
-    $fileid = explode("_", $file);
-    if($_SESSION['userid']==$fileid[0]){
-      $hasfiles = true;
-      $data[] = $target_file;
-//		echo $target_file." - ";
-//		uploadToApi($target_file);
+  foreach ($screens as $target_file) {
+    if (strlen(trim($target_file)) > 0){
+        $hasfiles = true;
+        $data[] = $target_file;
+        // echo $target_file.'<br />';
     }
-	}
+  }
+}
+else{
+  $screens = glob("2ocr/*.{jpg,png}", GLOB_BRACE);
+
+  foreach ($screens as $target_file) {
+  	if (strlen(trim($target_file)) > 0){
+      $file   = substr($target_file, strrpos($target_file, '/')+1, strlen($target_file));
+      $fileid = explode("_", $file);
+      if($_SESSION['userid']==$fileid[0]){
+        $hasfiles = true;
+        $data[] = $target_file;
+  //		echo $target_file." - ";
+  //		uploadToApi($target_file);
+      }
+  	}
+  }
 }
 
 if ($hasfiles !== true ) {

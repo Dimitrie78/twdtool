@@ -179,27 +179,26 @@ function utf8_converter($array) {
 function uploadToApi($target_file){
 	global $pdo;
 	global $config;
-	
+	// echo 'uploadToApi:'.$target_file.'<br />';
 	list($width, $height, $type) = getimagesize($target_file);
 	$imageurl = getCurrentPath().'/'.$target_file;
-	
 	//2 is jpg, 3 is png
 	if($type == 2){
 		$data = array(
-			"language" => "ger",
+			"language" => "cht",
 			"isOverlayRequired" => "false",
 			"detectOrientation" => "false",
-			"scale" => "true",
+			"scale" => "false",
 			"filetype" => 'JPG',
 			"url" => $imageurl,
 		);
 	}
 	elseif($type == 3){
 		$data = array(
-			"language" => "ger",
+			"language" => "cht",
 			"isOverlayRequired" => "false",
 			"detectOrientation" => "false",
-			"scale" => "true",
+			"scale" => "false",
 			"filetype" => 'PNG',
 			"url" => $imageurl,
 		);
@@ -227,7 +226,7 @@ function uploadToApi($target_file){
 	else 
 	{
 		$ocrresult = $result_array->ParsedResults[0]->ParsedText;
-		
+		 echo 'Ergebnis:'.$ocrresult.'<br />-------|||||---------<br />';
 		//Entfernt überflüssige Zeichen
 		$ocrresult = str_replace(' ','',$ocrresult);
 		//Entfernt doppelte Zeilenschaltungen durch eine einzige
@@ -238,7 +237,99 @@ function uploadToApi($target_file){
 
 		//Geht nochmal über die einzelnen Postionen um wirklich alles Leerzeichen innerhalb der Elemente zu entfernen
 		$array=array_map('trim',$array);
-		
+		// $time = filemtime($target_file);
+		if(count($array)>15){ //BigFile?
+			//check&fix Double-Page-Effekt of OCR.Space
+			$fLine = $array[0];
+			// echo $fLine.'<br />';
+			if(!is_numeric($fLine))
+				for($i=1;$i<count($array);$i++){
+
+					if($array[$i]===$fLine){
+
+						array_splice($array, 0, $i);
+						break;
+					}
+				}
+			return readOCRBigArray($array);
+		}else
+		  return readOCRArray($array, $target_file);		
+  }
+}
+
+function readOCRBigArray($array){
+	echo 'Zeilen: '.count($array).'<br />';
+  $little = array();
+  $act_line = '';
+  $prior_line = '';
+  $c = 0;
+  $string_data = file_get_contents("../2ocr/bigfile/bigfile.txt");
+	$filelist = unserialize($string_data);
+
+  for($i = 0; $i < count($array); $i++){
+    $act_line = trim($array[$i]);
+
+    echo $i.'|'.$act_line.'<br />';
+    if($i > 3)
+	    if((((stripos($act_line, 'ep')===0) || (stripos($act_line, 'xp')===0)) &&
+	    	 (is_numeric(substr($act_line, 2, 1))) && 
+	    	 (is_numeric(substr($act_line, strlen($act_line)-1, 1)))) || ($i == (count($array)-1)))
+	    {
+	    
+	    	if ($i == (count($array)-1)){
+	    	  $little[] = $prior_line;
+	    	  $little[] = $act_line;
+	    	}
+	    	// echo ' - EP found';
+	     	if(count($little)>20){
+	     		echo ' - Fehler!1';
+	     		exit;
+	     	}else if (count($little)<1&&$i>3){
+	     		echo ' - Fehler!2';
+	     		exit;
+	     	}
+		   	if(count($little)>12){
+	    		//BUG OCR.Space --> doppelte Nummern filtern
+	    		$last = '';
+	    		for($h = count($little)-1; $h >= 0; $h--){
+	    			if($last!=''&&$last==$little[$h]){
+	    				array_splice($little, $h, 1);
+				   		echo '[Doppelte Zahlen] entfernt (OCR.Space):';
+	    				$last = '';
+	    				break;
+	    			}
+	    			$last = $little[$h];
+	    		}
+	    	}
+	     	$filename = $filelist[$c];
+	     	readOCRArray($little, '../'.$filename); 
+	     	$c++;
+	     	/*
+	     	
+	     	echo '------ '.$c.'<br />';
+	      for($k=0;$k<count($little);$k++){
+	      	echo $little[$k].'<br />';
+	      }
+				/**/
+
+	     	$little = array();
+	    }
+    if($prior_line!=''){
+    	$little[] = $prior_line;     
+  	}
+    $prior_line = $act_line;
+    // echo '<br />';
+  }
+	unlink("../2ocr/bigfile/bigfile.jpg");
+	unlink("../2ocr/bigfile/bigfile.txt");
+}
+
+function readOCRArray($array, $target_file){
+	// echo 'readOCRArray:'.$target_file.'<br />';
+	// echo 'fm:'.date("Y-m-d", filemtime($target_file)).'<br />';
+	global $pdo;
+	global $config;
+	if(count($array) > 10){
 		$q = $pdo->query("SELECT `searchfor`, `replacement` FROM `".$config->db_pre."namefix`;");
 		$r = $q->fetchAll(PDO::FETCH_KEY_PAIR);
 	
@@ -283,6 +374,17 @@ function uploadToApi($target_file){
 		if($usrid == 0) {
 			$fail = 1;
 			$errlog[] = "Name";
+			if($exp=='') $errlog[] = "EP";
+			if($streuner==0) $errlog[] = "Streuner";
+			if($menschen==0) $errlog[] = "Menschen";
+			if($gespielte_missionen==0) $errlog[] = "gespielte Missionen";
+			if($abgeschlossene_missonen==0) $errlog[] = "Abgeschl. Missonen";
+			if($gefeuerte_schuesse==0) $errlog[] = "Schüsse";
+			if($haufen==0) $errlog[] = "Kisten";
+			if($heldenpower==0) $errlog[] = "Weldenpower";
+			if($waffenpower==0) $errlog[] = "Waffenpower";
+			if($karten==0) $errlog[] = "Karten";
+			if($gerettete==0) $errlog[] = "Gerettete";
 		}
 		else
 		{
@@ -305,11 +407,12 @@ function uploadToApi($target_file){
 			$arr[] = $menschen; //2
 			$arr[] = $gespielte_missionen;//3
 			$arr[] = $abgeschlossene_missonen;//4
-			$arr[] = $haufen;//5
-			$arr[] = $heldenpower;//6
-			$arr[] = $waffenpower;//7
-			$arr[] = $karten;//8
-			$arr[] = $gerettete;//9
+			$arr[] = $gefeuerte_schuesse//5
+			$arr[] = $haufen;//6
+			$arr[] = $heldenpower;//7
+			$arr[] = $waffenpower;//8
+			$arr[] = $karten;//9
+			$arr[] = $gerettete;//10
 
 			if($usr){ 
 				for($i = 0; $i < 2; $i++){
@@ -323,24 +426,24 @@ function uploadToApi($target_file){
 					if(!strstr($exp, '/')){$fail = 1; $errlog[] = "Exp"; $error_row = $error_row<0?0:$error_row; $fail_count++;}
 					// else if(!strstr($exp, 'EP')){$fail = 1; $errlog[] = "Exp"; $error_row = $error_row<0?0:$error_row;  $fail_count++;}
 					#wenn die anzahl der ausgelesenen werte geringer ist als die zuvor ausgelesene dann fail..
-					if ($streuner < $usr['streuner']) {$fail = 1; $errlog[] = "Streuner"; $error_row = $error_row<0?0:$error_row; $fail_count++;}
-					if ($menschen < $usr['menschen']) {$fail = 1; $errlog[] = "Menschen"; $error_row = $error_row<0?1:$error_row; $fail_count++;}
-					if ($gespielte_missionen < $usr['gespielte_missionen']) {$fail = 1; $errlog[] = "Gespielte Missionen"; $error_row = $error_row<0?2:$error_row; $fail_count++;}
-					if (($abgeschlossene_missonen < $usr['abgeschlossene_missonen'])||($abgeschlossene_missonen > ($usr['abgeschlossene_missonen']+(2000*$datediff)))) {$fail = 1; $errlog[] = "Abgeschlossene Missionen"; $error_row = $error_row<0?3:$error_row; $fail_count++;}
+					if ($streuner < $usr['streuner']) {$fail = 1; $errlog[] = "Streuner"; $error_row = $error_row<0?1:$error_row; $fail_count++;}
+					if ($menschen < $usr['menschen']) {$fail = 1; $errlog[] = "Menschen"; $error_row = $error_row<0?2:$error_row; $fail_count++;}
+					if ($gespielte_missionen < $usr['gespielte_missionen']) {$fail = 1; $errlog[] = "Gespielte Missionen"; $error_row = $error_row<0?3:$error_row; $fail_count++;}
+					if (($abgeschlossene_missonen < $usr['abgeschlossene_missonen'])||($abgeschlossene_missonen > ($usr['abgeschlossene_missonen']+(2000*$datediff)))) {$fail = 1; $errlog[] = "Abgeschlossene Missionen"; $error_row = $error_row<0?4:$error_row; $fail_count++;}
 
-					if ($gefeuerte_schuesse < $usr['gefeuerte_schuesse']) {$fail = 1; $errlog[] = "Gefeuerte Schüsse"; $error_row = $error_row<0?4:$error_row; $fail_count++;}
-					if ($haufen < $usr['haufen']||$haufen > ($usr['haufen']+(5000*$datediff))) {$fail = 1; $errlog[] = "Haufen"; $error_row = $error_row<0?5:$error_row; $fail_count++;}
-					if ($heldenpower < $usr['heldenpower']||$heldenpower > ($usr['heldenpower']+5000)) {$fail = 1; $errlog[] = "Heldenpower"; $error_row = $error_row<0?6:$error_row; $fail_count++;}
-					if ($waffenpower < $usr['waffenpower'] || $waffenpower > ($usr['waffenpower']+5000)) {$fail = 1; $errlog[] = "Waffenpower"; $error_row = $error_row<0?7:$error_row; $fail_count++;}
-					if ($karten < $usr['karten']) {$fail = 1; $errlog[] = "Karten"; $error_row = $error_row<0?8:$error_row; $fail_count++;}
-					if ($gerettete < $usr['gerettete']) {$fail = 1; $errlog[] = "Gerettete"; $error_row = $error_row<0?9:$error_row; $fail_count++;}
+					if ($gefeuerte_schuesse < $usr['gefeuerte_schuesse']) {$fail = 1; $errlog[] = "Gefeuerte Schüsse"; $error_row = $error_row<0?5:$error_row; $fail_count++;}
+					if ($haufen < $usr['haufen']||$haufen > ($usr['haufen']+(5000*$datediff))) {$fail = 1; $errlog[] = "Haufen"; $error_row = $error_row<0?6:$error_row; $fail_count++;}
+					if ($heldenpower < $usr['heldenpower']||$heldenpower > ($usr['heldenpower']+5000)) {$fail = 1; $errlog[] = "Heldenpower"; $error_row = $error_row<0?7:$error_row; $fail_count++;}
+					if ($waffenpower < $usr['waffenpower'] || $waffenpower > ($usr['waffenpower']+5000)) {$fail = 1; $errlog[] = "Waffenpower"; $error_row = $error_row<0?8:$error_row; $fail_count++;}
+					if ($karten < $usr['karten']) {$fail = 1; $errlog[] = "Karten"; $error_row = $error_row<0?9:$error_row; $fail_count++;}
+					if ($gerettete < $usr['gerettete']) {$fail = 1; $errlog[] = "Gerettete"; $error_row = $error_row<0?10:$error_row; $fail_count++;}
 
 					if($fail!=1 || $i > 0) break;
 					else{
 					  $save_fail_count = $fail_count;
 					  if($error_row > -1){
-						  if(isset($arr[9])&&$arr[9]==0){
-						  	for($h=9;$h>$error_row;$h--){
+						  if(isset($arr[count($arr)-1])&&$arr[count($arr)-1]==0){
+						  	for($h=count($arr)-1;$h>$error_row;$h--){
 						  	  $arr[$h] = $arr[$h-1];
 						  	}
 						  	$arr[$error_row] = 0;
@@ -351,16 +454,14 @@ function uploadToApi($target_file){
 			$menschen = $arr[2];
 			$gespielte_missionen = $arr[3];
 			$abgeschlossene_missonen = $arr[4];
-			$haufen = $arr[5];
-			$heldenpower = $arr[6];
-			$waffenpower = $arr[7];
-			$karten = $arr[8];
-			$gerettete = $arr[9];
+			$gefeuerte_schuesse = $arr[5];
+			$haufen = $arr[6];
+			$heldenpower = $arr[7];
+			$waffenpower = $arr[8];
+			$karten = $arr[9];
+			$gerettete = $arr[10];
 
 					  }
-
-
-
 
 					}
 				}
@@ -369,7 +470,7 @@ function uploadToApi($target_file){
 		
 		if (isset($duplicate)&&($duplicate===True)) {
 			unlink($target_file);
-			echo 'Duplikate geöscht<br>';
+			echo 'Duplikate gelöscht<br>';
 			return;
 		}
 		if (!empty($errlog)) {
@@ -385,7 +486,7 @@ function uploadToApi($target_file){
 		$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."stats(uid, name, date, exp, streuner, menschen, gespielte_missionen, abgeschlossene_missonen, gefeuerte_schuesse, haufen, heldenpower, waffenpower, karten, gerettete, notizen, fail)
 			VALUES(:uid, :name, :date,:exp, :streuner, :menschen, :gespielte_missionen, :abgeschlossene_missonen, :gefeuerte_schuesse, :haufen, :heldenpower, :waffenpower, :karten, :gerettete, :notizen, :fail)");
 
-
+// $fail  = 1;
 		//$curr_datetime = date("Y-m-d H:i:s");
 		$curr_datetime = date("Y-m-d H:i:s", filemtime($target_file));
 		$statement->execute(array(

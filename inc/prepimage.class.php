@@ -86,6 +86,9 @@ class prepimage {
 			imagejpeg($new,"2ocr/".$this->rfile,100); // Neues Bild speichern
 		}
 		imagedestroy($new);
+
+		// $t = filectime($this->filename);
+		// touch("2cor/".$this->rfile, $t);
 		
 		$this->filetimebyname();
 	}
@@ -102,7 +105,8 @@ class prepimage {
 	}
 	
 	private function filetimebyname() {
-		if ( strpos(strtolower($this->rfile), 'screenshot') !== false ) {
+		// if ( strpos(strtolower($this->rfile), 'screenshot') !== false ) 
+		{
 			$str = strtolower($this->rfile);
 			$w = array('screenshot','-','_');
 			$str = str_replace($w,'',$str);
