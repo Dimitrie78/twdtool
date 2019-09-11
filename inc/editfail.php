@@ -154,6 +154,19 @@ if((!isset($do)) || (!$do)){
 	}
 
 	$datetime = new DateTime($stats['date']);	
+
+	$h_werte = 0;
+	$w_werte = 0;
+	$s_werte = 0;
+	$e_werte = 0;
+	$img_sql = 'SELECT epH, epY, werteH, werteW FROM `'.$config->db_pre.'ocr` WHERE uid='.$_SESSION['userid'].' AND aktiv=1';
+	foreach ($pdo->query($img_sql) as $irow) {
+		$s_werte = ceil($irow['werteH']*1.5);
+		$w_werte = ceil($irow['werteW']*1.5);
+		$e_werte = ceil($irow['epH']*1.6*1.5);
+	}
+	$h_werte = ceil($s_werte/10);
+
 	
 ?>
 
@@ -170,7 +183,7 @@ if((!isset($do)) || (!$do)){
 			  <input  type = "hidden" name="ftype" type="text" value="<?php echo $ftype;?>">
 			  
 			  <div class="form-group">
-				<label for="name">Name:</label><br />
+				<label for="name">Name:</label><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.ceil($e_werte*0.9).'&s='.$s_werte.'&w='.ceil($w_werte*1.5).'&i=-1" style="width:150px; height:auto;"/>'; ?> <br />
 				      <select id="inputUser" id="name" name = "name" class = "form-control" style="width:auto;min-width:200px; display:inline-block;" onchange="var mysel = document.getElementById('correct'); if (mysel!=null) if(this.options[this.selectedIndex].value == '-NEW-') mysel.style.display='block'; else mysel.style.display='none';">
 
 <?php	    
@@ -190,10 +203,11 @@ if((!isset($do)) || (!$do)){
 	}
 	echo '</optgroup>';
 }
-
+	
 	$sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` WHERE active = 1 ORDER BY ign ASC';
 	
     echo '<optgroup label="Aktive">';
+  $selected = '';
 	foreach ($pdo->query($sql) as $row) {
 		if ($stats['uid'] == $row['id']){
 			$selected = ' selected';
@@ -224,57 +238,59 @@ if((!isset($do)) || (!$do)){
 
 			  <div class="form-group">
 				<label for="exp">#1 Erfahrung (####<strong>/</strong>####):</label>
-				<div onclick="moveNumbersDown(0);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(0);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$e_werte.'&s='.$s_werte.'&w=0&i=0" style="width:150px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="exp" name ="exp" value = "<?php echo $stats['exp']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="1">#2 Streuner:</label>
 				<div onclick="moveNumbersDown(1);" class="moveDown">&#8595;</div>
+				<?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=1" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="1" name ="streuner" value = "<?php echo $stats['streuner']; ?>"> 
 			  </div>
 				<div class="form-group">
 				<label for="2">#3 Menschen:</label>
 				<div onclick="moveNumbersDown(2);" class="moveDown">&#8595;</div>
+				<?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=2" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="2" name ="menschen" value = "<?php echo $stats['menschen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="3">#4 Missionen:</label>
-				<div onclick="moveNumbersDown(3);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(3);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=3" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="3" name ="gespielte_missionen" value = "<?php echo $stats['gespielte_missionen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="4">#5 Abgeschlossene Missionen:</label>
-				<div onclick="moveNumbersDown(4);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(4);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=4" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="4" name ="abgeschlossene_missonen" value = "<?php echo $stats['abgeschlossene_missonen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="5">#6 Gefeuerte Schüsse:</label>
-				<div onclick="moveNumbersDown(5);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(5);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=5" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="5" name ="gefeuerte_schuesse" value = "<?php echo $stats['gefeuerte_schuesse']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="6">#7 Kisten (Haufen):</label>
-				<div onclick="moveNumbersDown(6);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(6);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=6" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="6" name ="haufen" value = "<?php echo $stats['haufen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="7">#8 Heldenstärke:</label>
-				<div onclick="moveNumbersDown(7);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(7);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=7" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="7" name ="heldenpower" value = "<?php echo $stats['heldenpower']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="8">#9 Waffenstärke:</label>
-				<div onclick="moveNumbersDown(8);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(8);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=8" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="8" name ="waffenpower" value = "<?php echo $stats['waffenpower']; ?>">
 			  </div>
 			  <div class="form-group">
-				<label for="9">#10 Gesammelte Karten::</label>
-				<div onclick="moveNumbersDown(9);" class="moveDown">&#8595;</div>
+				<label for="9">#10 Gesammelte Karten:</label>
+				<div onclick="moveNumbersDown(9);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=9" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="9" name ="karten" value = "<?php echo $stats['karten']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="10">#11 Gerettete Menschen:</label>
-				<div onclick="moveNumbersDown(10);" class="moveDown">&#8595;</div>
+				<div onclick="moveNumbersDown(10);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=10" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="10" name ="gerettete" value = "<?php echo $stats['gerettete']; ?>">
 			  </div>
 			  <div class="clearfix">
