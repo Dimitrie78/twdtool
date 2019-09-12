@@ -205,8 +205,8 @@ function uploadToApi($target_file){
 	}
 	$ch = curl_init();
 	curl_setopt_array($ch, array(
-	   #CURLOPT_URL => "https://api.ocr.space/parse/image",        #<- free api
-		CURLOPT_URL => "https://apipro2.ocr.space/parse/image",	   #<- pro api
+	   CURLOPT_URL => "https://api.ocr.space/parse/image",        #<- free api
+		// CURLOPT_URL => "https://apipro2.ocr.space/parse/image",	   #<- pro api
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_POST => 1,
 		CURLOPT_HTTPHEADER => array('Content-Type:multipart/form-data', 'apikey:'.$config->ocrspace_apikey.''),
@@ -226,7 +226,7 @@ function uploadToApi($target_file){
 	else 
 	{
 		$ocrresult = $result_array->ParsedResults[0]->ParsedText;
-		 echo 'Ergebnis:'.$ocrresult.'<br />-------|||||---------<br />';
+		 // echo 'Ergebnis:'.$ocrresult.'<br />-------|||||---------<br />';
 		//Entfernt überflüssige Zeichen
 		$ocrresult = str_replace(' ','',$ocrresult);
 		//Entfernt doppelte Zeilenschaltungen durch eine einzige
@@ -269,7 +269,7 @@ function readOCRBigArray($array){
   for($i = 0; $i < count($array); $i++){
     $act_line = trim($array[$i]);
 
-    echo $i.'|'.$act_line.'<br />';
+    // echo $i.'|'.$act_line.'<br />';
     if($i > 3)
 	    if((((stripos($act_line, 'ep')===0) || (stripos($act_line, 'xp')===0)) &&
 	    	 (is_numeric(substr($act_line, 2, 1))) && 

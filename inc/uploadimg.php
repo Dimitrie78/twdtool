@@ -252,12 +252,13 @@ input[type="submit"]:active {
 		# success message
 		if($count !=0){
 			printf("<p class='status'>%d Dateien erfolgreich hochgeladen!</p>\n", $count);
-			echo '<form action="" method="GET" autocomplete="no">	  
+			echo '<form action="" method="GET" autocomplete="no" id="convertIt">	  
 			  <div class="form-group text-center">
 			  <input type="hidden" name="bigfile" id="bigfile" value="0" />
-			   <button type="submit" name="action" value="prepimg" class="btn btn-success">Bilder konvertieren</button>';
+			  <input type="hidden" name="action" value="prepimg" />
+			   <button type="submit" name="b1" class="btn btn-success">Bilder konvertieren</button>';
 			if($count>1&&$count<28)
-			  echo '&nbsp;&nbsp;&nbsp;<button type="submit" name="action" value="prepimg" class="btn btn-success" onclick="document.getElementByID(\'bigfile\').value=1;">Bilder mit BigFile konvertieren</button>';
+			  echo '&nbsp;&nbsp;&nbsp;<button type="button" name="b2" class="btn btn-success" onclick="document.getElementById(\'bigfile\').value=1; document.getElementById(\'convertIt\').submit();">Bilder mit BigFile konvertieren</button>';
 			echo '
 			  </div>
 			</form>';

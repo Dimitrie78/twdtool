@@ -12,6 +12,12 @@ $hasfiles = False;
 if(empty($data)) {
 	echo 'Sie müssen erst ein Handy Profile erstellen oder Aktiv setzen! <a href="index.php?action=setHandyType"> Link </a>';
 } else {
+
+	if (file_exists("../2ocr/bigfile/bigfile.jpg"))
+	  unlink("../2ocr/bigfile/bigfile.jpg");
+	if (file_exists("../2ocr/bigfile/bigfile.txt"))
+	  unlink("../2ocr/bigfile/bigfile.txt");
+
 	
 	$vars = $data[0];
 	$img = new prepimage($vars);
@@ -19,10 +25,10 @@ if(empty($data)) {
 	$screens = glob("screens/*.{jpg,png}", GLOB_BRACE);
 	foreach ($screens as $filename) {
 		if (strlen(trim($filename)) > 0){
-			$counter++;
       $file   = substr($filename, strrpos($filename, '/')+1, strlen($filename));
       $fileid = explode("_", $file);
       if($_SESSION['userid']==$fileid[0]){
+		$counter++;
         $hasfiles = True;
         $img->run($filename);
         unlink($filename);
@@ -32,7 +38,7 @@ if(empty($data)) {
 	}
   echo $counter." Dateien erfolgreich konvertiert!<br />";
 
-  if($counter < 28){
+  if(($counter < 28) && (isSet($_GET['bigfile'])&&$_GET['bigfile']==1)){
  	  $screens = glob("2ocr/*.{jpg,png}", GLOB_BRACE);
 		$c = count($screens);
 		$w = 0; $h = 0; $t = 0;
