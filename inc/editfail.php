@@ -10,10 +10,10 @@ if (!isset($id) && !is_numeric($id)) { exit; }
 if(isset($do) && $do == "failremove" && is_numeric($id)){
 	$id = preg_replace('/[^0-9]/','',$id);
 	
-	if($ftype == 'jpg' && file_exists('2ocr/fail/'.$id.'.jpg')){
+	if(/*$ftype == 'jpg' && */file_exists('2ocr/fail/'.$id.'.jpg')){
 	  unlink('2ocr/fail/'.$id.'.jpg');
 	}
-	elseif($ftype == 'png' && file_exists('2ocr/fail/'.$id.'.png')){
+	elseif(/*$ftype == 'png' && */file_exists('2ocr/fail/'.$id.'.png')){
 	  unlink('2ocr/fail/'.$id.'.png');
 	}	
 	
@@ -97,10 +97,10 @@ if(isset($updatefailid)){
 							  
 			if($query) {       
 				##sicherheit: alles ausser zahlen entfernen, sicheres entfernen
-				if($ftype == 'jpg' && file_exists('2ocr/fail/'.$dbid.'.jpg')){
+				if(/*$ftype == 'jpg' && */file_exists('2ocr/fail/'.$dbid.'.jpg')){
 					unlink('2ocr/fail/'.$dbid.'.jpg');
 				}
-				elseif($ftype == 'png' && file_exists('2ocr/fail/'.$dbid.'.png')){
+				elseif(/*$ftype == 'png' && */file_exists('2ocr/fail/'.$dbid.'.png')){
 					unlink('2ocr/fail/'.$dbid.'.png');
 				}
 
@@ -145,10 +145,12 @@ if((!isset($do)) || (!$do)){
 	if (file_exists($file.'.jpg')){
 		$img = '<img class="card-img-bottom" src="'.$file.'.jpg" style="margin-top:200px; max-height:800px;" alt="Failimg" title="Failimg">';
 		$ftype = 'jpg';
+		$file = $file.'.jpg';
 	}
 	elseif (file_exists($file.'.png')){
 		$img = '<img class="card-img-bottom" src="'.$file.'.png" style="margin-top:200px; max-height:800px;" alt="Failimg" title="Failimg">';
 		$ftype = 'png';
+		$file = $file.'.png';
 	} else {		
 		$img = 'Keine Bilddatei gefunden';	
 	}
@@ -183,7 +185,7 @@ if((!isset($do)) || (!$do)){
 			  <input  type = "hidden" name="ftype" type="text" value="<?php echo $ftype;?>">
 			  
 			  <div class="form-group">
-				<label for="name">Name:</label><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.ceil($e_werte*0.9).'&s='.$s_werte.'&w='.ceil($w_werte*1.5).'&i=-1" style="width:150px; height:auto;"/>'; ?> <br />
+				<label for="name">Name:</label><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.ceil($e_werte*0.9).'&s='.$s_werte.'&w='.ceil($w_werte*1.5).'&i=-1" style="width:150px; height:auto;"/>'; ?> <br />
 				      <select id="inputUser" id="name" name = "name" class = "form-control" style="width:auto;min-width:200px; display:inline-block;" onchange="var mysel = document.getElementById('correct'); if (mysel!=null) if(this.options[this.selectedIndex].value == '-NEW-') mysel.style.display='block'; else mysel.style.display='none';">
 
 <?php	    
@@ -238,59 +240,59 @@ if((!isset($do)) || (!$do)){
 
 			  <div class="form-group">
 				<label for="exp">#1 Erfahrung (####<strong>/</strong>####):</label>
-				<div onclick="moveNumbersDown(0);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$e_werte.'&s='.$s_werte.'&w=0&i=0" style="width:150px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(0);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$e_werte.'&s='.$s_werte.'&w=0&i=0" style="width:150px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="exp" name ="exp" value = "<?php echo $stats['exp']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="1">#2 Streuner:</label>
 				<div onclick="moveNumbersDown(1);" class="moveDown">&#8595;</div>
-				<?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=1" style="width:80px; height:auto;"/>'; ?> 
+				<?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=1" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="1" name ="streuner" value = "<?php echo $stats['streuner']; ?>"> 
 			  </div>
 				<div class="form-group">
 				<label for="2">#3 Menschen:</label>
 				<div onclick="moveNumbersDown(2);" class="moveDown">&#8595;</div>
-				<?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=2" style="width:80px; height:auto;"/>'; ?> 
+				<?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=2" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="2" name ="menschen" value = "<?php echo $stats['menschen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="3">#4 Missionen:</label>
-				<div onclick="moveNumbersDown(3);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=3" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(3);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=3" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="3" name ="gespielte_missionen" value = "<?php echo $stats['gespielte_missionen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="4">#5 Abgeschlossene Missionen:</label>
-				<div onclick="moveNumbersDown(4);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=4" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(4);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=4" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="4" name ="abgeschlossene_missonen" value = "<?php echo $stats['abgeschlossene_missonen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="5">#6 Gefeuerte Schüsse:</label>
-				<div onclick="moveNumbersDown(5);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=5" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(5);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=5" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="5" name ="gefeuerte_schuesse" value = "<?php echo $stats['gefeuerte_schuesse']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="6">#7 Kisten (Haufen):</label>
-				<div onclick="moveNumbersDown(6);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=6" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(6);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=6" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="6" name ="haufen" value = "<?php echo $stats['haufen']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="7">#8 Heldenstärke:</label>
-				<div onclick="moveNumbersDown(7);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=7" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(7);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=7" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="7" name ="heldenpower" value = "<?php echo $stats['heldenpower']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="8">#9 Waffenstärke:</label>
-				<div onclick="moveNumbersDown(8);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=8" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(8);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=8" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="8" name ="waffenpower" value = "<?php echo $stats['waffenpower']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="9">#10 Gesammelte Karten:</label>
-				<div onclick="moveNumbersDown(9);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=9" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(9);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=9" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="9" name ="karten" value = "<?php echo $stats['karten']; ?>">
 			  </div>
 			  <div class="form-group">
 				<label for="10">#11 Gerettete Menschen:</label>
-				<div onclick="moveNumbersDown(10);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file.'.jpg').'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=10" style="width:80px; height:auto;"/>'; ?> 
+				<div onclick="moveNumbersDown(10);" class="moveDown">&#8595;</div><?php echo '<img src="inc/editfail_CropImg.php?f='.urlencode($file).'&h='.$h_werte.'&s='.$s_werte.'&w='.$w_werte.'&i=10" style="width:80px; height:auto;"/>'; ?> 
 				<input type="text" class="form-control" id="10" name ="gerettete" value = "<?php echo $stats['gerettete']; ?>">
 			  </div>
 			  <div class="clearfix">
