@@ -68,7 +68,7 @@ class prepimage {
 		elseif($this->type == 3){
 			$image = imagecreatefrompng($this->filename);
 		}
-
+        imagefilter($image, IMG_FILTER_GRAYSCALE);
 		#imagecopyresampled($new, $image, 0, 0, 0, 100,$new_width , $h1*$poz, $width, $h1);
 		imagecopyresampled($new, $image, 0, 0, $c1, $p1, $new_width, $h1*$poz, $b1, $h1);
 		imagecopyresampled($new, $image, 0, ($h1)*$poz, $c2, $p2, $new_width2, $h2*$poz*$poz_ep, $b2, $h2);
