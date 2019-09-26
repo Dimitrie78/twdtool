@@ -153,7 +153,8 @@ foreach ($usrqry as $usr) {
 	}
 
 	$tbody .=  '<tr '.($missed==1?'style="color:#ff4000;"':'').'>
-		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'">'.$uname.'</a></td>';
+		  <td style="text-align: right; min-width: 40px;">&nbsp;</td>
+		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'" target="_new">'.$uname.'</a></td>';
 
 	for($h=0; $h<count($c);$h++){
     	$tbody .= '<td style="text-align: right;" class="'.($c[$h][0]=='_'?'hidden':'').' col'.$h.'">'.
@@ -196,6 +197,7 @@ $thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
 $thead .=	'<table class="tablesorter table table-hover  datatable table-bordered" id="sortTable" style="width:auto">
 	  <thead>
 	    <tr>
+	    <th scope="col" style="min-width: 40px;" class="">&nbsp;</th>
 		  <th scope="col" style="min-width: 120px;" class="">Spieler/in</th>
 	';
 
@@ -262,6 +264,14 @@ echo $thead.$tbody.$tfoot;
 	    }
 	    */
 	?>
+var table = $("#sortTable");
+table.bind("sortEnd",function() { 
+    var i = 1;
+    table.find("tr:gt(0)").each(function(){
+        $(this).find("td:eq(0)").text(i);
+        i++;
+    });
+});
 
 $(function() {
 
@@ -275,7 +285,7 @@ $(function() {
             },
             type: "numeric"
         });	
-  $("#sortTable").tablesorter({ headers: { 1: { sorter: 'fancyNumber'} }, sortList: [[1,1]], widgets: ['zebra'] });
+  $("#sortTable").tablesorter({ headers: { 1: { sorter: 'fancyNumber'} }, sortInitialOrder: 'desc', sortList: [[2,1]], widgets: ['zebra'] });
 });
  
 
