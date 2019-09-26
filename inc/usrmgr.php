@@ -228,7 +228,17 @@ if ((ismod() & $user['role'] == 3) OR isadmin()){
 }
 
 if(isset($_POST['updateuser']) && is_numeric($_POST['edituid'])){
-
+$oldData = $pdo->prepare('SELECT * FROM '.$config->db_pre.'users WHERE id= :uid LIMIT 1');
+$result = $oldData->execute(array('uid' => $_POST['edituid']));
+$r = $oldData->fetch();
+if ($r){
+	echo 'Datensatz gefunden!<br />'.$r['ign'].'<br />';
+  if($r['ign']!=''&&$_POST['ign']!=$r['ign']){
+  	echo 'Benutzer umbenannt!<br />'.$_POST['ign'].'<br />';
+  	$changeNameFix = $pdo->prepare("UPDATE ".$config->db_pre."namefix SET `replacement` = :new WHERE `replacement` like :old ");
+  	$changeNameFix->execute(array('new' => $_POST['ign'], 'old' => $r['ign']));
+  }
+}
 $curr_datetime =date("Y-m-d H:i:s");
 #ist dev - darf alles
 #hat pw geändert
