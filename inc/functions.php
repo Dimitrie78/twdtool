@@ -98,14 +98,16 @@ function getCurrentURL() {
 function getuid($uid){
 	global $pdo;
 	global $config;
-	$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."users WHERE ign = :ign");
-	$result = $statement->execute(array('ign' => $uid));
-	$usr = $statement->fetch();
-	if (!$usr) {
-		return 0;
-	}else{
-		return $usr['id'];
-	}
+	if(isSet($uid)&&$uid!=''){
+		$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."users WHERE ign = :ign");
+		$result = $statement->execute(array('ign' => $uid));
+		$usr = $statement->fetch();
+		if (!$usr) {
+			return 0;
+		}else{
+			return $usr['id'];
+		}
+  }else return 0;
 }
 
 
@@ -330,23 +332,36 @@ function readOCRArray($array, $target_file){
 	global $pdo;
 	global $config;
 	if(count($array) > 10){
-		$q = $pdo->query("SELECT `searchfor`, `replacement` FROM `".$config->db_pre."namefix`;");
-		$r = $q->fetchAll(PDO::FETCH_KEY_PAIR);
+		$q = $pdo->query("SELECT `searchfor` as s, `replacement` as r FROM `".$config->db_pre."namefix` WHERE `searchfor` like '".$array[0]."' ORDER BY ID DESC LIMIT 1 ;");
+		// $r = $q->fetchAll(PDO::FETCH_KEY_PAIR);
+		$r = $q->fetch();
 	
+    
     $exp = cleanexp($array[0]);
     $x = explode('/',$exp);
+    
+    $name = '';
 
     if(is_numeric($x[0])) {
-      if($r)
+      /*if($r)
         $name = strtr($array[0],$r);
-      else $name = $array[0];
+      else $name = $array[0];*/
       $y = 1;
     } else {
-      if($r)
+/*      if($r)
         $name = strtr($array[0],$r);
       else $name = $array[0];
+      */
       $y = 0;
-    }
+      $name = $array[0];
+		}
+      
+    if($y==0)
+    	if ($r){
+    		// echo 'NameFix found!<br />'.'OCR:|'.$array[0].'|<br />'.'Sea:|'.$r['s'].'|<br />'.'Rep:|'.$r['r'].'|<br />';
+     		$name = $r['r'];
+    	}
+    
 
 		$exp = cleanexp($array[1-$y]);
    
