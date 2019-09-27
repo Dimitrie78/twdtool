@@ -1,11 +1,8 @@
 <?php
 include "verify.php";
-
-msgbox($_GET['msg']);
-
+if(isset($_GET['msg'])){msgbox($_GET['msg']);}
 	if (!isset($_GET["do"])){
 ?>
-
   <div class="clearfix">
 	  <div class="pull-left">
 		Ersetzung eines falsch erkannten OCR-Namens
@@ -36,7 +33,6 @@ msgbox($_GET['msg']);
 		  <td><a href = "?action=ocrfix&do=edit&id='.$row['id'].'"><span class="fas fa-edit"></span></a></td>
 		</tr>';
 	}
-
 	echo '</tbody>
 	</table>';
 }
@@ -47,19 +43,18 @@ if (isset($_GET['do']) && $_GET['do'] == "edit"){
 	$result = $statement->execute(array('id' => $id));
 	$res = $statement->fetch();
 	if(!$res){echo 'Keine Daten zu dieser ID!'; exit();}
-	
+
 	echo 'Suchen nache / Ersetzen durch...';
 ?>
 	<form action="?action=ocrfix&do=update" method = "POST" autocomplete="no">
-	<input  type = "hidden" name = "editid" type="text" value = "<?php echo $id;?>">
-    <div class="form-group">
+	  <input  type = "hidden" name = "editid" type="text" value = "<?php echo $id;?>">
+      <div class="form-group">
         <div class="input-group">
           <span class="input-group-addon "><span class="fa fa-search"></span></span>
-	<input type="text" class="form-control" name = "searchfor" placeholder="Suche" value = "<?=$res['searchfor'];?>" required>
+	      <input type="text" class="form-control" name = "searchfor" placeholder="Suche" value = "<?=$res['searchfor'];?>" required>
         </div>
-   </div>
-
-	<div class="form-group">    
+      </div>
+	  <div class="form-group">    
         <div class="input-group">
 		   <span class="input-group-addon"><span class="fa fa-exchange-alt"></span></span>
            <select name = "replacement" class="form-control"  type="number" min="1" required>
@@ -76,20 +71,16 @@ if (isset($_GET['do']) && $_GET['do'] == "edit"){
 ?>
 			</select>
         </div>
-    </div>
-	
-	<div class="clearfix">
-	  <div class="pull-left">
-		<button type="submit" name = "updaterepl" class="btn btn-success">Update</button>
-	  </div>
-	  <div class="pull-right">
-		<a href="?action=ocrfix&do=delete&id=<?=$id;?>" name="deleterep" class="btn btn-danger" role="button">Entfernen</a>
-	</div>
-
-  </div>
-
-</form>
-
+      </div>
+	  <div class="clearfix">
+	    <div class="pull-left">
+	 	  <button type="submit" name = "updaterepl" class="btn btn-success">Update</button>
+	    </div>
+	    <div class="pull-right">
+		  <a href="?action=ocrfix&do=delete&id=<?=$id;?>" name="deleterep" class="btn btn-danger" role="button">Entfernen</a>
+	    </div>
+      </div>
+    </form>
 <?php
 }
 
@@ -107,40 +98,37 @@ if ((isset($_GET['do']) && $_GET['do']=="update") && isset($_POST['updaterepl'])
 if (isset($_GET['do']) && $_GET['do']=="add"){
 ?>
 	<form action="?action=ocrfix&do=addentry" method = "POST" autocomplete="no">
-    <div class="form-group">
+     <div class="form-group">
         <div class="input-group">
           <span class="input-group-addon "><span class="fa fa-search"></span></span>
 			<input name = "searchfor" type="text" class="form-control" placeholder="Suche" required>
         </div>
-	</div>
+	 </div>
 
-	<div class="form-group">    
+	 <div class="form-group">    
         <div class="input-group">
 		   <span class="input-group-addon"><span class="fa fa-exchange-alt"></span></span>
            <select name = "replacement" class="form-control" type="number" min="1" required>
-<?php 
-	   
+<?php 	   
 	echo '<option value="">--Ersetze durch--</option>';
     $sql = 'SELECT id,ign,telegram,notes FROM `'.$config->db_pre.'users` ORDER BY ign ASC';
     foreach ($pdo->query($sql) as $row) {
 		echo '<option value="'.$row['id'].'">'.$row['ign'].'</option>';
 	}
 ?>
-		</select>
+           </select>
         </div>
-    </div>
+     </div>
 	
-	<div class="clearfix">
+	 <div class="clearfix">
 	  <div class="pull-left">
 		<button type="submit" name = "addrepl" class="btn btn-success">Hinzufügen</button>
 	  </div>
 	  <div class="pull-right">
 		<a href="?action=ocrfix"  class="btn btn-danger" role="button">Zurück</a>
-	</div>
-
-	</div>
-
-	</form>
+	  </div>
+	 </div>
+    </form>
 <?php
 }
 

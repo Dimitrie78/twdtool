@@ -6,8 +6,9 @@ $and_grouplimit_nojoin = ' AND gid = '.$_SESSION['gid'];
 $and_grouplimit = ' AND U.gid = '.$_SESSION['gid'];
 }
 
-if (isdev() && $_POST['gid']){
+if (isdev() && isset($_POST['gid'])){
 if (is_numeric($_POST['gid'])){
+$gid = $_POST['gid'];
 $and_grouplimit_nojoin = ' AND gid = '.$_POST['gid'];
 $and_grouplimit = ' AND U.gid = '.$_POST['gid'];
 }
@@ -17,6 +18,9 @@ $and_grouplimit_nojoin =  ' AND gid = 0';
 $and_grouplimit =  ' AND U.gid = 0';
 }
 }
+
+$gid = (!isset($_POST['gid'])) ? '' : $_POST['gid'];
+$and_grouplimit_nojoin = (!isset($and_grouplimit_nojoin)) ? '' : $and_grouplimit_nojoin;
 
 function topqry($field)
 {
@@ -110,8 +114,8 @@ ORDER BY u.lastlogin DESC";
 	<div class="form-group col-xs-6" style="width:auto;">
 	<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
       <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
-	 <option value="allgrp" <?php if ($_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
-	 <option value="uc" <?php if ($_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+	 <option value="allgrp" <?php if ($gid == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if ($gid == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
 	<?php
 	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
 	

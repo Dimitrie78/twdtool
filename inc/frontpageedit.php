@@ -38,7 +38,7 @@ Zeilenschaltungen werden automatisch registriert. Spezielle Formatierungen müss
         }
         else
         {
-            if ($_POST['sgid'])
+            if (isset($_POST['sgid']))
             {
                 if ($_POST['sgid'] == "dn")
                 {
@@ -93,7 +93,7 @@ Zeilenschaltungen werden automatisch registriert. Spezielle Formatierungen müss
     <label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
       <select onchange="document.getElementById('selgrp').submit()" id="inputGroup" name = "sgid" class = "form-control" style="width:auto;min-width:200px;">
       <option value="dn" <?php echo $seldn;?>>DEV-News (Gepinnt)</option>
-      <option value="ng" <?php echo $selng;?>>Gruppe</option>
+      <option value="ng" <?php echo $selng;?>>Ohne Gruppe</option>
     <?php
         $sql = 'SELECT id, tag, name FROM `' . $config->db_pre . 'groups` ORDER BY name ASC';
         foreach ($pdo->query($sql) as $row)
