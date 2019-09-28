@@ -279,7 +279,7 @@ if($_SESSION['gid'] > 0)
 
 	</div>
   </div> 
-<div class="well">V 1.8.4 Multigroup Beta</div>
+<div class="well">V 1.8.5</div>
 </div>
 <script src="inc/js/bootstrap.min.js"></script>
 <script src="inc/js/bootstrap-tabs.js"></script>
