@@ -712,7 +712,7 @@ function msgbox($msg){
 			okmsg('Der Eintrag wurde hinzugefügt!');
 		break;
 	    case "addfail":
-			failmsg('Der Eintrag konnten nicht hinzugefügt werden!');
+			failmsg('Der Eintrag konnte nicht hinzugefügt werden!');
 		break;
 	    case "deletesuccess":
 			okmsg('Der Eintrag wurde entfernt!');

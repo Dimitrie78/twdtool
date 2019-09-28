@@ -1,15 +1,15 @@
 <?php
 include "verify.php";
 
-msgbox($_GET['msg']);
+if(isset($_GET['msg'])){msgbox($_GET['msg']);}
 
 if (!isset($_GET['do'])){
 
-$grpqry = $pdo->query('SELECT g.id, g.tag, g.name, COUNT(u.id ) AS  "anz"
+$grpqry = $pdo->query('SELECT g.id, g.tag, g.name, g.sort, COUNT(u.id ) AS  "anz"
 FROM '.$config->db_pre.'groups g
 LEFT JOIN '.$config->db_pre.'users u ON g.id = u.gid
 GROUP BY g.id
-order by g.name asc;');
+order by g.sort asc;');
 
 $grpqry->execute();
 ?>
@@ -18,7 +18,8 @@ $grpqry->execute();
 <table class="table table-hover table-fixed datatable table-bordered" id="sortTable" style="width:auto">
   <thead class="thead-dark">
     <tr>
-	  <th scope="col" style="min-width: 41px;">ID</th>
+	  <th scope="col" style="min-width: 41px;">DBID</th>
+	  <th scope="col" style="min-width: 41px;">SORT</th>
       <th scope="col" style="min-width: 50px;">Tag</th>
       <th scope="col" style="min-width: 200px;">Name</th>
 	  <th scope="col" style="min-width: 50px;">Nutzer</th>
@@ -31,6 +32,7 @@ foreach ($grpqry as $group) {
 ?>
 	<tr>
 	  <td><?php echo $group['id']; ?></td>
+	  <td><?php echo $group['sort']; ?></td>
 	  <td><?php echo $group['tag']; ?></td>
       <td><?php echo $group['name']; ?></td>
 	  <td><?php echo $group['anz']; ?></td>
@@ -45,8 +47,8 @@ foreach ($grpqry as $group) {
 <?php
 }
 	
-if($_GET['do'] == "update" && is_numeric($_GET['id'])){
-	$grpqry = $pdo->prepare("SELECT id,tag,name FROM ".$config->db_pre."groups WHERE id = :id");
+if(isset($_GET['do']) && $_GET['do'] == "update" && is_numeric($_GET['id'])){
+	$grpqry = $pdo->prepare("SELECT id,tag,name,sort FROM ".$config->db_pre."groups WHERE id = :id");
 	$grpqry->execute(array('id' => $_GET['id']));
 	if($group = $grpqry->fetch()){ ?>
 <span style = "display: inline-block; margin-bottom:10px; font-weight:bold;">Gruppen-ID: <?php echo $group['id'];?></span>
@@ -61,6 +63,11 @@ if($_GET['do'] == "update" && is_numeric($_GET['id'])){
 			<label for="groupname">Gruppen-Name:</label>
 			<input type="text" class="form-control" id="groupname" name = "groupname"
 			value = "<?php echo $group['name'];?>" maxlength = "20" required> 
+		  </div>
+		  <div class="form-group">
+			<label for="groupsort">Gruppen-SortNR:</label>
+			<input type="number" class="form-control" id="groupname" name = "groupsort"
+			value = "<?php echo $group['sort'];?>" min="1" max="999" required> 
 		  </div>
 		  <div class="clearfix">
 		   <div class="pull-left">
@@ -82,10 +89,11 @@ if($_GET['do'] == "update" && is_numeric($_GET['id'])){
 	}
 }
 
-if($_POST['update'] == "UpdateGroup" && is_numeric($_POST['editid'])){
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'groups SET tag = :tag, name = :name WHERE id = :id');
+if(isset($_POST['update']) && $_POST['update'] == "UpdateGroup" && is_numeric($_POST['editid'])){
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'groups SET tag = :tag, name = :name, sort = :sort WHERE id = :id');
 	if($query->execute(array(':tag' => $_POST['grouptag'],
 						 ':name' => $_POST['groupname'],
+						 ':sort' => $_POST['groupsort'],
 						 ':id' => $_POST['editid']))){
 		header("Location: ?action=groupedit&do=update&id=".$_POST['editid']."&msg=updatesuccess");  
 	} else {
@@ -94,7 +102,7 @@ if($_POST['update'] == "UpdateGroup" && is_numeric($_POST['editid'])){
 	
 }
 
-if($_GET['do'] == "add"){ ?>
+if(isset($_GET['do']) && $_GET['do'] == "add"){ ?>
 <span style = "display: inline-block; margin-bottom:10px; font-weight:bold;">Gruppe erstellen</span>
 <form action="index.php?action=groupedit&do=add2db" method="POST" autocomplete="no">
   <div class="form-group">
@@ -104,6 +112,10 @@ if($_GET['do'] == "add"){ ?>
   <div class="form-group">
     <label for="groupname">Gruppen-Name:</label>
     <input type="text" class="form-control" id="groupname" name = "groupname" maxlength = "20" required> 
+  </div>
+    <div class="form-group">
+    <label for="groupname">Gruppen-SortNR:</label>
+    <input type="text" class="form-control" id="groupsort" name = "groupsort" min="1" max="999" required> 
   </div>
   <div class="clearfix">
     <div class="pull-left">
@@ -119,15 +131,16 @@ if($_GET['do'] == "add"){ ?>
 <?php
 }
 
-if($_POST['creategroup'] == "AddGroup")
+if(isset($_POST['creategroup']) && $_POST['creategroup'] == "AddGroup")
 {
-		$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."groups(tag, name)
-			VALUES(:tag, :name)");
+		$statement = $pdo->prepare("INSERT INTO ".$config->db_pre."groups(tag, name, sort)
+			VALUES(:tag, :name, :sort)");
 
 
 		$statement->execute(array(
 			"tag" => $_POST['grouptag'],
-			"name" => $_POST['groupname']
+			"name" => $_POST['groupname'],
+			"sort" => $_POST['groupsort']
 		));
 		
 		$count = $statement->rowCount();
@@ -139,7 +152,7 @@ if($_POST['creategroup'] == "AddGroup")
 }
 
 
-if($_GET['do'] == "delete" && is_numeric($_GET['id'])){
+if(isset($_GET['do']) && $_GET['do'] == "delete" && is_numeric($_GET['id'])){
 $grpqry = $pdo->prepare('SELECT g.id, g.tag, g.name, COUNT(u.id ) AS  "anz"
 FROM '.$config->db_pre.'groups g
 LEFT JOIN '.$config->db_pre.'users u ON g.id = u.gid
@@ -177,7 +190,7 @@ $grpqry->execute(array('id' => $_GET['id']));
 <?php
 }
 
-if($_POST['delete'] == "DeleteGroup" && is_numeric($_POST['gid'])){
+if(isset($_POST['delete']) && $_POST['delete'] == "DeleteGroup" && is_numeric($_POST['gid'])){
 	if ($_POST['uncategorize'] == 1){ 
 		$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET gid = 0 WHERE gid = ?');
 		$query->execute([$_POST['gid']]);
