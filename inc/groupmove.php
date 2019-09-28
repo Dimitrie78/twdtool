@@ -1,16 +1,16 @@
 <?php
 include "verify.php";
-if(!$_POST["domove"]){
+if(!isset($_POST["domove"])){
 ?>
     <form class="form-vertical" role="form" method = "POST" action = "?action=groupmove" >
     <div class="row">
 	<div class="form-group col-xs-6" style="width:auto;">
 	<label for="startGroup" class = "control-label">Aus Gruppe: <span class="fas fa-arrow-right"></span></label>
      <select onchange="this.form.submit()" id="startGroup" name = "startGroup" class = "form-control" style="width:auto;min-width:200px;">
-	 <option value="allgrp" <?php if ($_POST['startGroup'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
-	 <option value="uc" <?php if ($_POST['startGroup'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+	 <option value="allgrp" <?php if (isset($_POST['startGroup']) && $_POST['startGroup'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if (isset($_POST['startGroup']) && $_POST['startGroup'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
 	<?php
-	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY sort ASC';
 	
 
     foreach ($pdo->query($sql) as $row) {
@@ -57,14 +57,14 @@ echo $out;
 <?php
 
 
-if ($_POST['startGroup'] == 'allgrp' || !$_POST['startGroup']){
+if (isset($_POST['startGroup']) && $_POST['startGroup'] == 'allgrp' || !isset($_POST['startGroup'])){
 $uqry = $pdo->prepare('SELECT U.id, G.id AS gid, G.tag, U.ign
 FROM  `'.$config->db_pre.'users` U
 LEFT JOIN `'.$config->db_pre.'groups` G ON G.id = U.gid ORDER BY tag, ign');	
 $uqry->execute();
 }
 
-if ($_POST['startGroup'] == 'uc'){
+if (isset($_POST['startGroup']) && $_POST['startGroup'] == 'uc'){
 $uqry = $pdo->prepare('SELECT U.id, G.id AS gid, G.tag, U.ign
 FROM  `'.$config->db_pre.'users` U
 LEFT JOIN `'.$config->db_pre.'groups` G ON G.id = U.gid
@@ -72,7 +72,7 @@ WHERE `gid` = 0 ORDER BY ign');
 $uqry->execute();
 }
 
-if (is_numeric($_POST['startGroup'])){
+if (isset($_POST['startGroup']) && is_numeric($_POST['startGroup'])){
 $uqry = $pdo->prepare('SELECT U.id, G.id AS gid, G.tag, U.ign
 FROM  `'.$config->db_pre.'users` U
 LEFT JOIN `'.$config->db_pre.'groups` G ON G.id = U.gid
