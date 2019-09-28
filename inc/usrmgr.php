@@ -92,7 +92,7 @@ elseif ($sgid == 'uc'){$seluc = 'selected';}
 	  <option value="allgrp" <?php echo $selall; ?>>--Alle--</option>
 	  <option value="uc" <?php echo $seluc; ?>>--Ohne Gruppe--</option>
 	<?php
-	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY sort ASC';
+	$sql = 'SELECT `id`, `tag`, `name` FROM `'.$config->db_pre.'groups` ORDER BY `sort` ASC, `tag` ASC';
 	
 	
     foreach ($pdo->query($sql) as $row) {

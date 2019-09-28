@@ -64,7 +64,7 @@ $s1Missed = '';
 $s2Missed = '';
 
 if(!(isSet($openKey)&&$openKey>0)){
-	$groupqry = $pdo->query('SELECT u.gid gid, c.name Name, count(u.ID) Anzahl FROM '.$config->db_pre.'users u left join '.$config->db_pre.'groups c on u.gid = c.id WHERE u.active = 1 Group BY u.gid ORDER BY c.sort ');
+	$groupqry = $pdo->query('SELECT u.gid gid, c.name Name, count(u.ID) Anzahl FROM '.$config->db_pre.'users u left join '.$config->db_pre.'groups c on u.gid = c.id WHERE u.active = 1 Group BY u.gid ORDER BY c.sort ASC, c.tag ASC');
 	$groupqry->execute();
 
 	$grouppicker = '';

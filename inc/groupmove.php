@@ -10,7 +10,7 @@ if(!isset($_POST["domove"])){
 	 <option value="allgrp" <?php if (isset($_POST['startGroup']) && $_POST['startGroup'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
 	 <option value="uc" <?php if (isset($_POST['startGroup']) && $_POST['startGroup'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
 	<?php
-	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY sort ASC';
+	$sql = 'SELECT `id`, `tag`, `name` FROM `'.$config->db_pre.'groups` ORDER BY `sort` ASC, `tag` ASC';
 	
 
     foreach ($pdo->query($sql) as $row) {

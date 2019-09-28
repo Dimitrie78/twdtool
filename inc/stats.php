@@ -76,7 +76,7 @@ $and_grouplimit = ' AND gid = '.$user_gid;
 	 <option value="allgrp" <?php if ($target_gid  == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
 	 <option value="uc" <?php if ($target_gid  == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
 <?php
-	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY sort ASC';
+	$sql = 'SELECT `id`, `tag`, `name` FROM `'.$config->db_pre.'groups` ORDER BY `sort` ASC, `tag` ASC';
 
     foreach ($pdo->query($sql) as $row) {
 		if ($target_gid == $row['id'])

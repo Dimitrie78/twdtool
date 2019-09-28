@@ -9,7 +9,7 @@ $grpqry = $pdo->query('SELECT g.id, g.tag, g.name, g.sort, COUNT(u.id ) AS  "anz
 FROM '.$config->db_pre.'groups g
 LEFT JOIN '.$config->db_pre.'users u ON g.id = u.gid
 GROUP BY g.id
-order by g.sort asc;');
+order by g.sort asc, g.tag asc;');
 
 $grpqry->execute();
 ?>
