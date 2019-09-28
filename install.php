@@ -4,7 +4,7 @@ ob_start();
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <title>TWD Stattool: Installation</title>
+  <title>TWD Stattool: Installation V 1.8.5</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://bootswatch.com/3/slate/bootstrap.min.css">
@@ -15,7 +15,7 @@ ob_start();
 	<div class="modal-dialog">
 	<div class="modal-content">
 	  <div class="modal-heading">
-		<h2 class="text-center">TWD Stattool: Installation</h2>
+		<h2 class="text-center">TWD Stattool: Installation V 1.8.5</h2>
 	  </div>
 	  <hr />
 	  <div class="modal-body">
@@ -171,6 +171,7 @@ return (object) array(
 				  `id` int(10) NOT NULL AUTO_INCREMENT,
 				  `tag` varchar(5) NOT NULL,
 				  `name` varchar(20) NOT NULL,
+				  `sort` int(4) NOT NULL,
 				  PRIMARY KEY (`id`),
 				  UNIQUE KEY `tag` (`tag`)
 				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
