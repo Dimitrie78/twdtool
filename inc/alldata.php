@@ -2,13 +2,13 @@
 include "verify.php";
 
 echo "Statistik von allen</b>";
-
+$and_grouplimit = '';
 if (!isdev()){
 $gidfilter = 'gid = '.$_SESSION['gid'];
 $and_grouplimit = ' AND '.$gidfilter;
 }
 
-if (isdev() && $_POST['gid']){
+if (isdev() && isset($_POST['gid'])){
 if (is_numeric($_POST['gid'])){
 $and_grouplimit = ' AND gid = '.$_POST['gid'];
 }
@@ -24,10 +24,10 @@ $and_grouplimit =  ' AND gid = 0';
 <form class="form-vertical" role="form" method = "POST" action = "?action=alldata" >
 <label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
       <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
-	 <option value="allgrp" <?php if ($_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
-	 <option value="uc" <?php if ($_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
+	 <option value="allgrp" <?php if (isSet($_POST['gid'])&& $_POST['gid'] == 'allgrp'){echo ' selected';} ?>>--Alle--</option>
+	 <option value="uc" <?php if (isSet($_POST['gid']) && $_POST['gid'] == 'uc'){echo ' selected';} ?>>--Ohne Gruppe--</option>
 <?php
-	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY sort ASC';
 	
     foreach ($pdo->query($sql) as $row) {
 		if ($_POST['gid'] == $row['id'])
