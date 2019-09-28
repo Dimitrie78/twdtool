@@ -1,6 +1,6 @@
 <?php
 include "verify.php";
-msgbox($_GET['msg']);
+if(isset($_GET['msg'])){msgbox($_GET['msg']);}
 $uid =0;
 $uid = ((isset($_POST['edituid'])&&$_POST['edituid'] > "") ?$_POST['edituid'] : (isset($_GET['uid'])?$_GET['uid']:'0')); 
 $sgid = ((isset($_POST['sgid'])&&$_POST['sgid'] > "") ?$_POST['sgid'] : (isset($_GET['sgid'])?$_GET['sgid']:0)); 
@@ -33,6 +33,8 @@ $and_grouplimit = '';
 $anz = '';
 $gidselected = '';
 $selected = '';
+$selall = '';
+$seluc = '';
 
 if (!isdev()){
 	$gidfilter = 'gid = '.$_SESSION['gid'];
@@ -55,15 +57,15 @@ if (isdev() && $sgid){
 	}
 }
 
-if ($_POST['optactive'] == "all"){
+if (isset($_POST['optactive']) && $_POST['optactive'] == "all"){
 	$filter = $where_grouplimit;
 	$optall = "checked";
 }
-elseif ($_POST['optactive'] == "active" OR !$_POST){
+elseif (isset($_POST['optactive']) &&$_POST['optactive'] == "active" OR !$_POST){
 	$filter = 'WHERE active = 1'.$and_grouplimit;
 	$optactive = "checked";
 }
-elseif ($_POST['optactive'] == "inactive"){
+elseif (isset($_POST['optactive']) && $_POST['optactive'] == "inactive"){
 	$filter = 'WHERE active = 0'.$and_grouplimit;
 	$optinactive = "checked";
 }
@@ -79,22 +81,18 @@ $anz = $cqry->fetchColumn();
 		<label class="radio-inline"><input type="radio" value = "inactive" name="optactive" <?=$optinactive;?> onchange="this.form.submit()">Inaktive</label>
 		<span style="padding-left:5px">[<?=$anz;?> User]</span>
 	</div>
-
 	<div class="row">
 <?php if (isdev()) {
 if ($sgid == 'allgrp'){$selall = 'selected';}
 elseif ($sgid == 'uc'){$seluc = 'selected';}
-
  ?>
-
-
 	<div class="form-group col-xs-6" style="width:auto;">
 	<label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
       <select onchange="this.form.submit()" id="inputGroup" name = "sgid" class = "form-control" style="width:auto;min-width:200px;">
 	  <option value="allgrp" <?php echo $selall; ?>>--Alle--</option>
 	  <option value="uc" <?php echo $seluc; ?>>--Ohne Gruppe--</option>
 	<?php
-	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY name ASC';
+	$sql = 'SELECT id, tag, name FROM `'.$config->db_pre.'groups` ORDER BY sort ASC';
 	
 	
     foreach ($pdo->query($sql) as $row) {

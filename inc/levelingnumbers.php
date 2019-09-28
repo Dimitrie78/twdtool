@@ -8,7 +8,7 @@ if (!isdev())
     $and_grouplimit = ' AND U.gid = ' . $_SESSION['gid'];
 }
 
-if (isdev() && $_POST['gid'])
+if (isdev() && isset($_POST['gid']))
 {
     if (is_numeric($_POST['gid']))
     {
@@ -28,19 +28,19 @@ if (isdev())
 <label for="inputGroup" class = "control-label">Gruppe wählen: <span class="fas fa-arrow-right"></span></label>
       <select onchange="this.form.submit()" id="inputGroup" name = "gid" class = "form-control" style="width:auto;min-width:200px;">
 	 <option value="allgrp" <?php
-    if ($_POST['gid'] == 'allgrp')
+    if (isset($_POST['gid']) && $_POST['gid'] == 'allgrp')
     {
         echo ' selected';
     }
 ?>>--Alle--</option>
 	 <option value="uc" <?php
-    if ($_POST['gid'] == 'uc')
+    if (isset($_POST['gid']) && $_POST['gid'] == 'uc')
     {
         echo ' selected';
     }
 ?>>--Ohne Gruppe--</option>
 <?php
-    $sql = 'SELECT id, tag, name FROM `' . $config->db_pre . 'groups` ORDER BY name ASC';
+    $sql = 'SELECT id, tag, name FROM `' . $config->db_pre . 'groups` ORDER BY sort ASC';
     foreach ($pdo->query($sql) as $row)
     {
         if ($_POST['gid'] == $row['id'])
@@ -79,6 +79,7 @@ foreach ($usrqry as $usr)
 	WHERE uid =' . $uid . '
 	ORDER BY date DESC
 	LIMIT 1 , 1';
+	
     
     //reset variables
     $date1                    = '';
@@ -135,7 +136,7 @@ foreach ($usrqry as $usr)
         $karten2                  = $row2['karten'];
         $gerettete2               = $row2['gerettete'];
     }
-    
+	
     $tage                    = ($date1 && $date2) ? ceil((strtotime($date1) - strtotime($date2)) / 86400) : 0;
     $streuner                = ($streuner1 && $streuner2) ? $streuner1 - $streuner2 : 0;
     $menschen                = ($menschen1 && $menschen2) ? $menschen1 - $menschen2 : 0;
@@ -157,10 +158,9 @@ foreach ($usrqry as $usr)
     {
         $tbody .= '<td style="text-align: left;">' . $usr['tag'] . '</td>';
     }
+
     $tbody .= '<td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid=' . $uid . '">' . $uname . '</a></td>
-          <td style="text-align: right;">' . date('d.m.y', strtotime($date2)) . '</td>
-          <td style="text-align: right;">' . date('d.m.y', strtotime($date1)) . '</td>
-		  <td style="text-align: right;">' . $tage . '</td>
+          <td style="text-align: right;">' . $tage . '</td>
 		  <td style="text-align: right;">' . $streuner . '</td>
 		  <td style="text-align: right;">' . $menschen . '</td>
 		  <td style="text-align: right;">' . $gespielte_missionen . '</td>
@@ -177,10 +177,11 @@ foreach ($usrqry as $usr)
 		</tr>';
 }
 
-$thead .= '<div class="table-responsive">
+$thead = '<div class="table-responsive">
  <table id="levelingnumbers" class="table table-striped table-condensed datatable table-bordered nowrap table-hover table-fixed" style="width:100%">
   <thead>
     <tr>';
+	
 if (isdev())
 {
     $thead .= '<th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Gruppe"><i class="gi gi-users"></i> GRP</a></th>';
@@ -190,8 +191,6 @@ if ($mode == 'noicons')
 {
     $thead .= '
       <th>IGN</th>
-	  <th>DAT1</th>
-	  <th>DAT2</th>
 	  <th>TG</th>
 	  <th>STR</th>
       <th>MEN</th>
@@ -215,8 +214,6 @@ elseif ($mode == 'icons')
 	
     $thead .= '
       <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Ingame Name"><i class="gi gi-id-card"></i> IGN</a></th>
-	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Datum von"><i class="gi gi-clock-o"></i> #1</a></th>
-	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Datum bis"><i class="gi gi-clock-o"></i> #2</a></th>
 	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Anzahl Tage"><span class="glyphicon glyphicon-calendar"></span> TG</a></th>
 	  <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Streuner"><i class="gi gi-poison"></i> STR</a></th>
       <th nowrap><a href="#" data-toggle="tooltip" data-placement="top" title="Menschen"><i class="gi gi-heartbeat"></i> MEN</a></th>
