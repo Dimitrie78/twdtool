@@ -7,8 +7,12 @@ if (isset($_POST['uid'])) {
 	$sUser = $_GET['uid'];
 }
 
+#$_SESSION['mode'] = '';
 
 if (isset($_GET['mode'])) {
+	if($_GET['mode'] == 'classic'){
+#	$_SESSION['mode'] = 'classic';
+	}
 	$mode = $_GET['mode'];
 } else {
   if (isSet($config->useClassicStat)&&($config->useClassicStat==1))
@@ -16,6 +20,8 @@ if (isset($_GET['mode'])) {
   else
 	$mode = '';
 }
+
+echo $_SESSION['mode'];
 
 if(!$sUser) {
 	$sUser = $_POST['suid'];
@@ -66,7 +72,7 @@ $and_grouplimit = ' AND gid = '.$user_gid;
 
 
 ?>  
-<form class="form-vertical" role="form" method = "POST" action = "?action=stats" >
+<form class="form-vertical" role="form" method = "POST" action = "?action=stats&mode=<?php echo $mode;?>" >
 <input  type = "hidden" name = "suid" type="text" value = "<? echo $sUser; ?>">
 
 <?php if (isdev()){?>
