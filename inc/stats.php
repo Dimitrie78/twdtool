@@ -163,21 +163,21 @@ if(!(isSet($mode)&&$mode=='classic')){
 $q_str = "
 			SELECT * FROM 
 (			    SELECT 
-			      `id` as _id
- 				, `date` as _date
+			      `id` as __id
+ 				, `date` as __date
 			    , DATE_FORMAT(`date`, '%d.%m.%Y') as Datum
 			    , (@actTage := CASE WHEN IFNULL(@lastDate, '2000-01-01') = '2000-01-01' THEN 0 ELSE DATEDIFF(`date`, @lastDate) END) as Tage
 			    , `exp` as LVL, `streuner` as Streuner, `menschen` as Menschen
-			    , (@actKills := CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE ((`streuner`+`menschen`)-@lastKills) END) as Diff_Kills
-			    , (CASE WHEN @actTage < 1 THEN 0 ELSE round(@actKills/@actTage, 0) END) as ProTag
-			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/(`streuner`+`menschen`), 2) END) as Schü_pro_Kill
+			    , (@actKills := CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE ((`streuner`+`menschen`)-@lastKills) END) as _Diff_Kills
+			    , (CASE WHEN @actTage < 1 THEN 0 ELSE round(@actKills/@actTage, 0) END) as _ProTag
+			    , (CASE WHEN @actKills < 1 THEN 0 ELSE round(`gefeuerte_schuesse`/(`streuner`+`menschen`), 2) END) as _Schü_pro_Kill
 				,  `gespielte_missionen` as GespMis
-			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as Diff_GM
+			    , CASE WHEN IFNULL(@lastGespielt, 0) = 0 THEN 0 ELSE (`gespielte_missionen`-@lastGespielt) END as _Diff_GM
 			    , `abgeschlossene_missonen` as AbgeMis
-			    , CASE WHEN IFNULL(@lastAbgeschl, 0) = 0 THEN 0 ELSE (`abgeschlossene_missonen`-@lastAbgeschl) END as Diff_AM
+			    , CASE WHEN IFNULL(@lastAbgeschl, 0) = 0 THEN 0 ELSE (`abgeschlossene_missonen`-@lastAbgeschl) END as _Diff_AM
 			    , `gefeuerte_schuesse` as Schüsse, `haufen` as Haufen, `waffenpower` as Waffen, `heldenpower` as Helden, `karten` as Karten, `gerettete` as Gerettete
-			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END as Diff_Gerettet
-			    , (@actGerett := CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END) as _Diff_Gerett
+			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END as _Diff_Gerettet
+			    , (@actGerett := CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (`gerettete`-@lastGerett) END) as __Diff_Gerett
 			    , CASE WHEN IFNULL(@lastKills, 0) = 0 THEN 0 ELSE(round(@actKills/@actTage, 0)*7) END as chart_Kills_pro_Woche
 			    , CASE WHEN IFNULL(@lastGerett, 0) = 0 THEN 0 ELSE (round(@actGerett/@actTage, 0)*7) END as chart_Gerettete_pro_Woche
 			    , (`streuner`) as chart_Streuner
@@ -185,22 +185,22 @@ $q_str = "
 			    , (`gerettete`) as chart_Gerettete
 			    , (`streuner`+`menschen`) as chart_Kills
 
-			    , (@lastKills := (`streuner`+`menschen`)) as _calc2
-			    , (@lastGespielt := `gespielte_missionen`) as _calc3
-			    , (@lastAbgeschl := `abgeschlossene_missonen`) as _calc4
-			    , (@lastGerett := `gerettete`) as _calc5
-			    , (@lastDate := `date`) as _calc6
+			    , (@lastKills := (`streuner`+`menschen`)) as __calc2
+			    , (@lastGespielt := `gespielte_missionen`) as __calc3
+			    , (@lastAbgeschl := `abgeschlossene_missonen`) as __calc4
+			    , (@lastGerett := `gerettete`) as __calc5
+			    , (@lastDate := `date`) as __calc6
 			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC 
-			) as e ORDER BY `_date` DESC ".$limit."
+			) as e ORDER BY `__date` DESC ".$limit."
 		";
 }else{
 $q_str = "
 			SELECT * FROM 
 (			    SELECT 
-			      `id` as _id
- 				, `date` as _date
+			      `id` as __id
+ 				, `date` as __date
 			    , DATE_FORMAT(`date`, '%d.%m.%Y') as Datum
-			    , (@actTage := CASE WHEN IFNULL(@lastDate, '2000-01-01') = '2000-01-01' THEN 0 ELSE DATEDIFF(`date`, @lastDate) END) as _Tage
+			    , (@actTage := CASE WHEN IFNULL(@lastDate, '2000-01-01') = '2000-01-01' THEN 0 ELSE DATEDIFF(`date`, @lastDate) END) as __Tage
 			    ,  `exp` as LVL,`exp` as EP, `streuner` as Streuner, `menschen` as Menschen
 			    , (round(`gefeuerte_schuesse`/`streuner`, 2)) as Schü_pro_Str
 				,  `gespielte_missionen` as GespMis
@@ -213,11 +213,11 @@ $q_str = "
 			    , (`heldenpower`) as chart_Heldenstärke
 			    , (`waffenpower`) as chart_Waffenstärke
 			    , (`gerettete`) as chart_Überlebende
-			    , (@lastKills := (`streuner`+`menschen`)) as _calc2
-			    , (@lastGespielt := `gespielte_missionen`) as _calc3
-			    , (@lastAbgeschl := `abgeschlossene_missonen`) as _calc4
-			    , (@lastGerett := `gerettete`) as _calc5
-			    , (@lastDate := `date`) as _calc6
+			    , (@lastKills := (`streuner`+`menschen`)) as __calc2
+			    , (@lastGespielt := `gespielte_missionen`) as __calc3
+			    , (@lastAbgeschl := `abgeschlossene_missonen`) as __calc4
+			    , (@lastGerett := `gerettete`) as __calc5
+			    , (@lastDate := `date`) as __calc6
 			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC 
 			) as e ORDER BY `_date` DESC ".$limit."
 		";
@@ -238,7 +238,7 @@ $total_column = 0;
   for ($counter = 0; $counter < $total_column; $counter ++) {
     $meta = $query_stat->getColumnMeta($counter);
     // echo $meta['name'].'TEST<br />';
-    if((strlen($meta['name'])>0)&&(substr($meta['name'],0, 1)!='_'))
+    if((strlen($meta['name'])>0)&&(substr($meta['name'],1, 1)!='_'))
       $c[] = $meta['name'];
   }
 }
@@ -246,6 +246,7 @@ $total_column = 0;
 if ($config->statlimit){
 	echo'<div class="slidecontainer">
 		   Die letzten <label for="inputUser" class = "control-label"> <span id="demo"></span> von '.$total_stats.' </label> Einträgen
+		<!--   <input type="hidden" name="mode" value="'.$mode.'" /> -->
 	  <input onchange="this.form.submit()" type="range" min="1" max="'.$total_stats.'" value="'.$sel_limit.'" step="1" class="slider" id="myRange" name="limit">
 	</div>
 	</form>';
@@ -262,10 +263,14 @@ if ($config->statlimit){
    <table id="stats" class="table table-striped table-bordered nowrap table-hover table-condensed datatable" style="width:100%">
         <thead class="thead-dark">
             <tr>
+							<?php if (isadminormod()){ ?>
+							<th>Edit</th>
+							<?php } ?>
+
                 <?php 
 			  		for($h=0; $h<count($c);$h++){
 					  if(!(strpos($c[$h], 'chart_')!==false))
-			  		    echo '<th>'.str_replace('_pro_', '\\', $c[$h]).'</th>';
+			  		    echo '<th class="'.($c[$h][0]=='_'&&$c[$h][1]!='_'?'hidden':'').' col'.$h.'">'.str_replace('_pro_', '\\', $c[$h]).'</th>';
 			  		}
 
                 ?>
@@ -286,9 +291,6 @@ if ($config->statlimit){
 				<th>Karten</th>
 			    <th>Gerettet</th>
 			-->
-				<?php if (isadminormod()){ ?>
-				<th>Edit</th>
-				<?php } ?>
             </tr>
         </thead>
         <tbody>
@@ -311,37 +313,62 @@ foreach ($query_stat as $row) {
 	// unset($datetime);
 	#$schuestr = $row['gefeuerte_schuesse']/$row['streuner']
 	echo '<tr>';
+	if (isadminormod()){ 
+		echo '<td style="text-align: center;"><a href="?action=editstat&id='.$row['__id'].'&uid='.$sUser.'" role="button" title="Diese Statistik bearbeiten"><span class="fas fa-edit"></span></a></td>';
+	} 
 	for($h=0; $h<count($c);$h++){
 		if ($c[$h] == 'LVL')
 		    echo '<td style="text-align: right;">'.number_format(leveldata($row[$c[$h]]), 2, ",", ".").'</td>';
 		else {
-			if((strpos($c[$h], 'chart_')!==false) && $row[$c[$h]]<>0 ) {
-				$datetime = new DateTime($row['_date']);
-				$year = $datetime->format('Y');
-				$month = $datetime->format('m')-1; #highcharts monat fängt bei 0 an zu zählen!
-				$day = $datetime->format('j');
-				if (!isSet($chart[$h])) $chart[$h] = array();
-				$chart[$h][$i] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row[$c[$h]].']'; 
-				unset($datetime);
+			if((strpos($c[$h], 'chart_')!==false) ) {
+				if ( $row[$c[$h]]<>0){
+					$datetime = new DateTime($row['__date']);
+					$year = $datetime->format('Y');
+					$month = $datetime->format('m')-1; #highcharts monat fängt bei 0 an zu zählen!
+					$day = $datetime->format('j');
+					if (!isSet($chart[$h])) $chart[$h] = array();
+					$chart[$h][$i] = '[Date.UTC('.$year.', '.$month.', '.$day.'), '.$row[$c[$h]].']'; 
+					unset($datetime);
+			  }
 			}else{
 			  if((strpos(strtolower($c[$h]), 'datum')!==false)||(strpos(strtolower($c[$h]), 'date')!==false)||(strpos(strtolower($c[$h]), 'ep')!==false)||(strpos(strtolower($c[$h]), 'xp')!==false))
-  		    	echo '<td style="text-align: right;">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+  		    	echo '<td style="text-align: right;" class="'.($c[$h][0]=='_'&&$c[$h][1]!='_'?'hidden':'').' col'.$h.'">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
   		   	  else
-  		    	echo '<td style="text-align: right;">'.number_format($row[$c[$h]], (strpos($row[$c[$h]], '.')!==false?2:0), ",", ".")./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+  		    	echo '<td style="text-align: right;" class="'.($c[$h][0]=='_'&&$c[$h][1]!='_'?'hidden':'').' col'.$h.'">'.number_format($row[$c[$h]], (strpos($row[$c[$h]], '.')!==false?2:0), ",", ".")./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
   		    }
 		}
 	}
 
-	if (isadminormod()){ 
-		echo '<td style="text-align: center;"><a href="?action=editstat&id='.$row['_id'].'&uid='.$sUser.'" role="button" title="Diese Statistik bearbeiten"><span class="fas fa-edit"></span></a></td>';
-	} 
 					
 	// echo "<tr>";
 	$i++;
 }
+  echo '	
+	</tbody>
+	</table>';
+$tfoot = '';
+$tfoot .= '<div style="margin-left: auto; margin-right: auto; padding-left:30px;"><div style="float:left; width:33%;">';
+$half = ceil(count($c)/3);
+$_c = 0;
+for($h=0; $h<count($c);$h++){
+	if((strpos($c[$h], 'chart_')===false) ) 
+	if ($c[$h][1]!='_'){
+
+	if ($half == $_c || ($half*2) == $_c) $tfoot .= '</div><div style="float:left; width:33%;">';
+	$tfoot .= '<label><input type="checkbox" id="chk_col_'.$h.'" onchange="if(this.checked) $(\'.col'.$h.'\').removeClass(\'hidden\'); else $(\'.col'.$h.'\').addClass(\'hidden\');" '.($c[$h][0]!='_'?'checked=checked':'').' /> '.($c[$h][0]=='_'?substr($c[$h], 1, strlen($c[$h])):$c[$h]).'</label><br />';
+			$_c++;
+}
+}
+
+$tfoot .= '</div></div>';
+$tfoot .= '<div style="clear:both;">&nbsp;</div>';
+
+echo $tfoot;
 
 ?>
-	
+
+
+	</div>
 
 <script type="text/javascript">
 $(function () { 
@@ -431,10 +458,7 @@ slider.oninput = function() {
 
 </script>
    
-	</tbody>
-	</table>
 
-	</div>
 <?php
 }
 }
