@@ -10,22 +10,7 @@ include("inc/header.php");
 define('TIMEZONE', 'Europe/Berlin');
 date_default_timezone_set(TIMEZONE);
 
-try {  
-  $options = array(
-        PDO::ATTR_ERRMODE => 'PDO::ERRMODE_'.$errmode, 
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    );  
-  $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword,$options);
-
-
-  $vers = $pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
-  if (stripos($vers, 'MariaDB')===false)
-    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-}catch(PDOException $e){
-    echo "Datenbankverbindung fehlgeschlagen: " . $e->getMessage();
-  exit;
-}
+include("inc/db_con.php");
 
 $rights = array("3" => "User",
                "2" => "Mod",
@@ -42,6 +27,7 @@ $rights = array("3" => "User",
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="inc/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="inc/js/jquery.tabledit.js"></script>
 <script type="text/javascript" src="inc/js/functions.js"></script>
 <script src="inc/js/jquery.ui.touch-punch.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">

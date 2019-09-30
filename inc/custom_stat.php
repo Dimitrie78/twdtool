@@ -2,13 +2,13 @@
 // error_reporting(E_ALL);
 extract($_GET);
 extract($_POST);
-$group = '';
+// $group = '';
 if(isSet($createOpenKey)&&$createOpenKey==1){
 	$sq = "INSERT ".$config->db_pre."openStats (gid, Query, DateVon, DateBis, DateDisable) VALUES (".(isSet($cgroup)&&$cgroup!=""?$cgroup:0).", '".(isSet($cfelder)?($cfelder):"")."', '".$cdate1."', '".$cdate2."', DATE_ADD(CURDATE(), INTERVAL 10 DAY))";
 	// print $sq;
 	$cKeyqry = $pdo->query($sq);
 
-	$cKeyqry->execute();
+	// $cKeyqry->execute();
 	$openKey = $pdo->lastInsertId();
 }
 
@@ -41,6 +41,22 @@ include "verify.php";
 $felder = (isSet($config->customstats)&&$config->customstats?$config->customstats:' (`streuner`+`menschen`) as `Kills (Streuner+Menschen)`, round((`streuner`+`menschen`)/$days) as `pro Tag (Kills)`, `streuner` as `_Streuner`, `menschen` as `_Menschen`, `gespielte_missionen` as `_gesp. Mis.`, `abgeschlossene_missonen` as `abg. Mis.`, `gefeuerte_schuesse` as `_Schüsse`, `haufen` as `Kisten`, `heldenpower` as `_Helden`, `waffenpower` as `_Waffen`, `waffenpower`+`heldenpower` as `Upgrades (Helden+Waffen)`, `karten` as `_Karten` , `gerettete` as `Gerettete`');
 
 }
+
+$min_Numbers = array();
+
+if (isSet($group)&&$group>0){
+  $minQuery = $pdo->query('SELECT `Spalte`, `Min` FROM '.$config->db_pre.'minNumbers WHERE gid = '.$group);
+	$minQuery->execute();
+	if($minQuery){
+	  foreach ($minQuery as $oMin) {
+		  if($oMin["Spalte"]!=''){
+  			$min_Numbers[$oMin["Spalte"]] = $oMin["Min"];
+  		}
+		}
+	}
+}
+// }
+
 
 $tbody = '';
 $c = array(); //columns
@@ -151,13 +167,17 @@ foreach ($usrqry as $usr) {
 	for($h=0; $h<count($c);$h++){
     			$e[] = (isSet($s1[$h])&&$s1[$h]&&isSet($s2[$h])&&$s2[$h])?$s1[$h]-$s2[$h]:0;
 	}
-
 	$tbody .=  '<tr '.($missed==1?'style="color:#ff4000;"':'').'>
 		  <td style="text-align: right; min-width: 40px;">&nbsp;</td>
 		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'" target="_new">'.$uname.'</a></td>';
 
 	for($h=0; $h<count($c);$h++){
-    	$tbody .= '<td style="text-align: right;" class="'.($c[$h][0]=='_'?'hidden':'').' col'.$h.'">'.
+  	$_h = substr($c[$h], 0, (strpos($c[$h], '(', 0)===false)?strlen($c[$h]):strpos($c[$h], '(', 0));
+  	$_h = trim(($_h[0]=='_'?substr($_h, 1, strlen($_h)):$_h));
+	  $minValue = ($missed!=1&&isSet($min_Numbers[$_h]))&&($min_Numbers[$_h]>0)&&$datediff>0&&(floor($min_Numbers[$_h]/7)>floor($e[$h]/$datediff))?1:0;
+  		  // echo 'TEST:'.$min_Numbers[$c[$h]].'|'.$c[$h];
+	  // if($minValue==1) echo 'TEST';
+    	$tbody .= '<td style="text-align: right; '.($minValue?'color:#ff6666;':'').'" class="'.($c[$h][0]=='_'?'hidden':'').' col'.$h.'">'.
 number_format(round((isSet($e[$h])?$e[$h]:0)/(isSet($avgTage)&&$avgTage?$datediff:1)),0, ",", ".")
     			.'</td>';
 

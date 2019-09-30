@@ -47,8 +47,22 @@ foreach ($grpqry as $group) {
 <?php
 }
 	
+$pdo->query('CREATE TABLE IF NOT EXISTS `'.$config->db_pre.'minNumbers` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `gid` int(11) NOT NULL DEFAULT \'1\',
+  `Spalte` varchar(50) DEFAULT NULL,
+  `Min` int(11) NOT NULL DEFAULT \'0\',
+  PRIMARY KEY (`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;');
+	
+if($_GET['do'] == "insMin" && is_numeric($_GET['id'])){
+  $insMinQuery = $pdo->query('INSERT INTO '.$config->db_pre.'minNumbers (gid, Spalte, Min) VALUES ('.$_GET['id'].', "", "")');
+  $_GET['do'] = 'update';
+	// $insMinQuery->execute([]);
+}
 if(isset($_GET['do']) && $_GET['do'] == "update" && is_numeric($_GET['id'])){
 	$grpqry = $pdo->prepare("SELECT id,tag,name,sort FROM ".$config->db_pre."groups WHERE id = :id");
+
 	$grpqry->execute(array('id' => $_GET['id']));
 	if($group = $grpqry->fetch()){ ?>
 <span style = "display: inline-block; margin-bottom:10px; font-weight:bold;">Gruppen-ID: <?php echo $group['id'];?></span>
@@ -87,10 +101,44 @@ if(isset($_GET['do']) && $_GET['do'] == "update" && is_numeric($_GET['id'])){
 	else {
 		failmsg('Der Eintrag konnte nicht geladen werden!');
 	}
+// }
+$min_Numbers = array();
+	$minQuery = $pdo->prepare('SELECT `ID`, '.$_GET['id'].' as `gid`, `Spalte`, `Min` FROM '.$config->db_pre.'minNumbers WHERE gid = '.$_GET['id']);
+	$minQuery->execute([]);
+		// $min_Numbers = $minQuery->fetchAll();
+	?>
+	<h2>Minimum-Anforderungen</h2>
+
+	<table id="data_table" class="table table-striped">
+	<thead>
+	<tr>
+	<th style="display:none;">ID</th>
+	<th style="display:none;">gid</th>
+	<th>Spalte</th>
+	<th>Min-Wert</th>
+	</tr>
+	</thead>
+	<tbody>
+	<?php
+	while( $min_Numbers = $minQuery->fetch()) {
+	?>
+	<tr id="<?php echo $min_Numbers['ID']; ?>">
+	<td style="display:none;"><?php echo $min_Numbers['ID']; ?></td>
+	<td style="display:none;"><?php echo $min_Numbers['gid']; ?></td>
+	<td><?php echo $min_Numbers['Spalte']; ?></td>
+	<td><?php echo $min_Numbers['Min']; ?></td>
+	</tr>
+	<?php } ?>
+	</tbody>
+	</table>
+
+	<a href="?action=groupedit&do=insMin&id=<?php echo $_GET['id']; ?>" style = "margin-bottom: 10px" class="btn btn-success" role="button"><span class = "fas fa-plus-square"></span> Minimum hinzufügen</a>
+	<?php
+		
 }
 
-if(isset($_POST['update']) && $_POST['update'] == "UpdateGroup" && is_numeric($_POST['editid'])){
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'groups SET tag = :tag, name = :name, sort = :sort WHERE id = :id');
+if(isSet($_POST['update'])&&($_POST['update'] == "UpdateGroup") &&isSet($_POST['editid'])&& is_numeric($_POST['editid'])){
+	$query = $pdo->prepare('UPDATE '.$config->db_pre.'groups SET tag = :tag, name = :name WHERE id = :id');
 	if($query->execute(array(':tag' => $_POST['grouptag'],
 						 ':name' => $_POST['groupname'],
 						 ':sort' => $_POST['groupsort'],
@@ -232,4 +280,24 @@ if(isset($_POST['delete']) && $_POST['delete'] == "DeleteGroup" && is_numeric($_
         });
     }); 
 
+ $(document).ready(function(){
+$('#data_table').Tabledit({
+deleteButton: true,
+editButton: true,
+restoreButton:false,
+columns: {
+identifier: [0, 'ID'],
+editable: [[1, 'gid'], [2, 'Spalte'], [3, 'Min']]
+},
+hideIdentifier: true,
+url: 'inc/groupedit_update.php',
+onSuccess:function(data, textStatus, jqXHR)
+      {
+       if(data.action == 'delete')
+       {
+        $('#'+data.id).remove();
+       }
+      }
+});
+});
 </script>
