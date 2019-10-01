@@ -219,7 +219,7 @@ $q_str = "
 			    , (@lastGerett := `gerettete`) as __calc5
 			    , (@lastDate := `date`) as __calc6
 			    FROM ".$config->db_pre."stats WHERE uid = ".$sUser." AND fail = 0 ORDER BY `date` ASC 
-			) as e ORDER BY `_date` DESC ".$limit."
+			) as e ORDER BY `__date` DESC ".$limit."
 		";
 }
 $query_stat = $pdo->prepare($q_str);
