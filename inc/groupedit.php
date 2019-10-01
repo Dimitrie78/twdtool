@@ -85,8 +85,8 @@ if(isset($_GET['do']) && $_GET['do'] == "update" && is_numeric($_GET['id'])){
 		  </div>
 		  <div class="clearfix">
 		   <div class="pull-left">
-		    <button type="submit" name = "update" value="UpdateGroup" class="btn btn-success">
-		    <span class = "fas fa-edit"></span> Gruppe updaten</button>
+		    <button type="submit" name="update" value="UpdateGroup" class="btn btn-success">
+		    <span class="fas fa-edit"></span> Gruppe updaten</button>
 	       </div>
 		   <div class="pull-right">
 		  <a href="?action=groupedit&do=delete&id=<?php echo $group['id'];?>" class="btn btn-danger" role="button">
@@ -137,8 +137,8 @@ $min_Numbers = array();
 		
 }
 
-if(isSet($_POST['update'])&&($_POST['update'] == "UpdateGroup") &&isSet($_POST['editid'])&& is_numeric($_POST['editid'])){
-	$query = $pdo->prepare('UPDATE '.$config->db_pre.'groups SET tag = :tag, name = :name WHERE id = :id');
+if(isSet($_POST['update'])&&($_POST['update'] == "UpdateGroup") &&isSet($_POST['editid'])&&is_numeric($_POST['editid'])){
+	$query = $pdo->prepare('UPDATE `'.$config->db_pre.'groups` SET `tag`=:tag, `name`=:name, `sort`=:sort WHERE `id`=:id');
 	if($query->execute(array(':tag' => $_POST['grouptag'],
 						 ':name' => $_POST['groupname'],
 						 ':sort' => $_POST['groupsort'],
