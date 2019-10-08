@@ -38,6 +38,13 @@ if(isSet($openKey)&&$openKey>0){
 }else{
 include "verify.php";
 
+$and_grouplimit = "";
+if (!isdev()){
+  $group = $_SESSION['gid'];
+}
+
+
+
 $felder = (isSet($config->customstats)&&$config->customstats?$config->customstats:' (`streuner`+`menschen`) as `Kills (Streuner+Menschen)`, round((`streuner`+`menschen`)/$days) as `pro Tag (Kills)`, `streuner` as `_Streuner`, `menschen` as `_Menschen`, `gespielte_missionen` as `_gesp. Mis.`, `abgeschlossene_missonen` as `abg. Mis.`, `gefeuerte_schuesse` as `_Schüsse`, `haufen` as `Kisten`, `heldenpower` as `_Helden`, `waffenpower` as `_Waffen`, `waffenpower`+`heldenpower` as `Upgrades (Helden+Waffen)`, `karten` as `_Karten` , `gerettete` as `Gerettete`');
 
 }
@@ -191,7 +198,7 @@ $thead = '';
 if(!(isSet($openKey)&&$openKey>0)){
 	$thead .= '
 	<div class="table-responsive"> 
-	<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;Von: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select>
+	<form action="" method="get"><input type="hidden" name="action" value="custom_stat" />'.(isdev()?'Gruppe: <select id="group" name="group"><option value="-1" selected=selected></option>'.$grouppicker.'</select>&nbsp;&nbsp;':'').'Von: <select id="date2" name="date2"><option value="" selected=selected></option>'.$datepicker.'</select>
 	&nbsp;&nbsp;&nbsp;Bis: <select id="date1" name="date1"><option value="" selected=selected></option>'.$datepicker.'</select> <button type="submit" class="btn btn-success">Laden</button></form>';
 $thead .= ($datediff?$datediff.' Tage<br/>':'<br />');
 }else{
