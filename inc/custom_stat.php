@@ -61,7 +61,7 @@ if (isSet($group)&&$group>0){
 $tbody = '';
 $c = array(); //columns
 
-$usrqry = $pdo->query('SELECT id,ign FROM '.$config->db_pre.'users WHERE active > 0 '.(isSet($group)&&$group>0?' AND gid='.$group.' ':'').' ORDER BY ign');
+$usrqry = $pdo->query('SELECT id,ign, gid FROM '.$config->db_pre.'users WHERE active > 0 '.(isSet($group)&&$group>0?' AND gid='.$group.' ':'').' ORDER BY ign');
 $usrqry->execute();
 $datediff = 0;
 if (isSet($date1)&&isSet($date2)){
@@ -102,6 +102,7 @@ if(!(isSet($openKey)&&$openKey>0)){
 }
 $count = 0;
 $missed = 0;
+$group_color_picker = array();
 foreach ($usrqry as $usr) {
 	$missed = 0;
 	$count++;
@@ -163,14 +164,15 @@ foreach ($usrqry as $usr) {
 	
 
 	// if((!$streuner1)||(!$streuner2)) continue;
-
+		
 	for($h=0; $h<count($c);$h++){
     			$e[] = (isSet($s1[$h])&&$s1[$h]&&isSet($s2[$h])&&$s2[$h])?$s1[$h]-$s2[$h]:0;
 	}
+	if(!in_array($usr['gid'], $group_color_picker)) $group_color_picker[] = $usr['gid'];
 	$tbody .=  '<tr '.($missed==1?'style="color:#ff4000;"':'').'>
 		  <td style="text-align: right; min-width: 40px;">&nbsp;</td>
-		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'" target="_new">'.$uname.'</a></td>';
-
+		  <td style="text-align: left; min-width: 120px;"><a href = "?action=stats&uid='.$uid.'" target="_new" class="group'.(array_search($usr['gid'], $group_color_picker)+1).'">'.$uname.'</a></td>';
+	
 	for($h=0; $h<count($c);$h++){
   	$_h = substr($c[$h], 0, (strpos($c[$h], '(', 0)===false)?strlen($c[$h]):strpos($c[$h], '(', 0));
   	$_h = trim(($_h[0]=='_'?substr($_h, 1, strlen($_h)):$_h));
