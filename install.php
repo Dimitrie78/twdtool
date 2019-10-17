@@ -4,7 +4,7 @@ ob_start();
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <title>TWD Stattool: Installation V 1.8.5</title>
+  <title>TWD Stattool: Installation V 1.8.6</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://bootswatch.com/3/slate/bootstrap.min.css">
@@ -15,7 +15,7 @@ ob_start();
 	<div class="modal-dialog">
 	<div class="modal-content">
 	  <div class="modal-heading">
-		<h2 class="text-center">TWD Stattool: Installation V 1.8.5</h2>
+		<h2 class="text-center">TWD Stattool: Installation V 1.8.6</h2>
 	  </div>
 	  <hr />
 	  <div class="modal-body">
@@ -97,10 +97,12 @@ return (object) array(
 	\'dbusername\' => \''. $_POST["dbusername"]. '\',
 	\'dbpassword\' => \''. $_POST["dbpassword"]. '\',
 	\'dbname\' => \''. $_POST["dbname"]. '\',
+	\'apiprovider\'  => \'ocrspacefree\',
 	\'ocrspace_apikey\' => \''. $_POST["ocrspace_apikey"]. '\',
 	\'theme\' => \'slate\',
 	\'statlimit\' => \'8\',
-	\'db_pre\' => \''. $_POST["db_pre"]. '\');
+	\'db_pre\' => \''. $_POST["db_pre"]. '\',
+	\'useClassicStat\' => \'1\');
 ?>';
 			$pre = $_POST["db_pre"];
 			$fp = FOPEN("conf/config.php", "w");
@@ -117,7 +119,7 @@ return (object) array(
 				  `searchfor` varchar(255) NOT NULL,
 				  `replacement` varchar(255) NOT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 				CREATE TABLE IF NOT EXISTS `".$pre."news` (
 				  `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -127,7 +129,7 @@ return (object) array(
 				  `active` tinyint(1) NOT NULL,
 				  `devnews` tinyint(1) NOT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 				CREATE TABLE IF NOT EXISTS `".$pre."stats` (
 				  `id` int(10) NOT NULL AUTO_INCREMENT,
@@ -148,7 +150,7 @@ return (object) array(
 				  `notizen` text NOT NULL,
 				  `fail` tinyint(1) NOT NULL,
 				  PRIMARY KEY (`id`)
-				) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 				CREATE TABLE IF NOT EXISTS `".$pre."users` (
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -174,7 +176,7 @@ return (object) array(
 				  `sort` int(4) NOT NULL,
 				  PRIMARY KEY (`id`),
 				  UNIQUE KEY `tag` (`tag`)
-				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 				CREATE TABLE IF NOT EXISTS `".$pre."ocr` (
 					`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -195,6 +197,14 @@ return (object) array(
 					`werteY` int(11) DEFAULT NULL,
 				  PRIMARY KEY (`id`)
 				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+				
+				CREATE TABLE `".$pre."minNumbers` (
+				  `ID` int(11) NOT NULL AUTO_INCREMENT,
+				  `gid` int(11) NOT NULL DEFAULT '1',
+				  `Spalte` varchar(50) DEFAULT NULL,
+				  `Min` int(11) NOT NULL DEFAULT '0',
+				  PRIMARY KEY (`ID`)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 				CREATE TABLE IF NOT EXISTS `".$pre."openStats` (
 				  `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -205,7 +215,7 @@ return (object) array(
 				  `DateDisable` date NULL,
 				  `active` bit(1) NULL DEFAULT b'1',
 				PRIMARY KEY (`Id`)
-				) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 				";
 
 				if ($conn->query($createqry))
@@ -288,7 +298,7 @@ if(!$_POST) {
 		  </div>
 		  <div class="form-group">
 			<label for="ocrspace_apikey"><a href="https://ocr.space" target="_new">OCR.Space API KEY:</a></label>
-			<input type="text" class="form-control" id="ocrspace_apikey" name="ocrspace_apikey" required> 
+			<input type="text" class="form-control" id="ocrspace_apikey" name="ocrspace_apikey"> 
 		  </div>
 		  <div class="form-group">
 			<label for="firstuser">Ingame-Name des Tool-Admins / DEV-User</label>

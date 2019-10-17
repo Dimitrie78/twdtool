@@ -471,18 +471,39 @@ body.loading .modal {
 .hidden{
   display:none;
 }
+.shown{
+  display:block;
+}
+
+
+.group1 {color:rgb(255,255,255);}
+.group2 {color:rgb(200,185,146);}
+.group3 {color:rgb(150,152,184);}
+.group4 {color:rgb(169,200,146);}
+.group5 {color:rgb(139,  0, 83);}
+.group6 {color:rgb(146,200,193);}
+.group7 {color:rgb(200,146,200);}
+.group8 {color:rgb(138, 43,226);}
+.group9 {color:rgb( 70,130,180);}
+.group10{color:rgb(210,105, 30);}
+
+
 
 th{
   white-space:nowrap;
 }
 
 
-input[type="checkbox"][name="mvid[]"] {
+input[type="checkbox"][name="mvid[]"],
+input[type="checkbox"][name="autologin"]
+ {
     display:none;
 }
 
 
-input[type="checkbox"][name="mvid[]"] + label span {
+input[type="checkbox"][name="mvid[]"] + label span,
+input[type="checkbox"][name="autologin"] + label span
+ {
     display:inline-block;
     width:19px;
     height:19px;
@@ -492,6 +513,8 @@ input[type="checkbox"][name="mvid[]"] + label span {
     cursor:pointer;
 }
 
-input[type="checkbox"][name="mvid[]"]:checked + label span {
+input[type="checkbox"][name="mvid[]"]:checked + label span,
+input[type="checkbox"][name="autologin"]:checked + label span
+ {
     background:url(../img/ui-checkbox-c.svg) top no-repeat;
 }

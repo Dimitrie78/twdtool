@@ -5,6 +5,9 @@ header("Content-Type: text/html; charset=utf-8");
 if (!file_exists("conf/config.php")){exit('Config Datei fehlt. Bitte installieren.');}
 $config = include("conf/config.php");
 $errmode = 'EXCEPTION'; // SILENT im Produktivbetrieb, EXCEPTION oder WARNING beim Debuggen
+$cookie_name = 'twdtool';
+$cookie_time = (3600 * 24 * 365); // 365 Tage
+$alwaysallowed_grp = array(1, 99); //gruppen die sich immer einloggen dürfen - egal ob aktiv oder inaktiv (dev und admin)
 include("inc/functions.php");
 include("inc/header.php");
 define('TIMEZONE', 'Europe/Berlin');
@@ -58,8 +61,6 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 	$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."users WHERE ign = :ign");
 	$result = $statement->execute(array('ign' => $ign));
 	$user = $statement->fetch();
-	//gruppen die sich immer einloggen dürfen - egal ob aktiv oder inaktiv (dev und admin)
-	$alwaysallowed_grp = array(1, 99);
 	  //Überprüfung des Passworts
 	if ($user !== false && password_verify($passwd, $user['passwd'])) {
 		if ($user['active'] == 0 AND !in_array($user['role'],$alwaysallowed_grp))
@@ -80,6 +81,12 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 			$fail = "";
 			$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET lastlogin = NOW() WHERE id = :id');
 			$query->execute(array(':id' => $_SESSION['userid']));
+			
+			if(isset($_POST['autologin']) == 1)
+				{
+					$password_hash = password_hash($passwd, PASSWORD_DEFAULT); 
+					setcookie ($cookie_name, 'usr='.$ign.'&hash='.$password_hash, time() + $cookie_time);
+				}
 		}
     } else {
 		$fail = '<div class="modal-heading">
@@ -90,13 +97,49 @@ if (isset($_POST["loginname"]) && isset($_POST["loginpasswort"])){
 }
 
 if (!isset($_SESSION["login"])||($_SESSION["login"] != 1) || !isset($_SESSION["gid"])){
+	
+	if(isSet($_COOKIE[$cookie_name])){
+		parse_str($_COOKIE[$cookie_name],$ck);
+		#$ck['usr'];
+		#$ck['hash'];
+		#check stuff and...
+		
+		$statement = $pdo->prepare("SELECT * FROM ".$config->db_pre."users WHERE ign = :ign");
+		$result = $statement->execute(array('ign' => $ck['usr']));
+		$user = $statement->fetch();
+		  //Überprüfung des Passworts
+		if ($user !== false && password_verify($ck['hash'], $user['passwd'])) {
+			if ($user['active'] == 0 AND !in_array($user['role'],$alwaysallowed_grp))
+			{
+				 $fail = '<div class="modal-heading">
+					<h2 class="text-center">Dein Account ist ungültig</h2>
+				</div>';
+				unset($_SESSION["login"]); 
+			}						
+		}
+		else{
+			session_regenerate_id();
+			$_SESSION['userid'] = $user['id'];
+			$_SESSION['role'] = $user['role'];
+			$_SESSION['ign'] = $user['ign'];
+			$_SESSION['gid'] = $user['gid'];
+			$_SESSION["login"] = 1;
+			$fail = "";
+			$query = $pdo->prepare('UPDATE '.$config->db_pre.'users SET lastlogin = NOW() WHERE id = :id');
+			$query->execute(array(':id' => $_SESSION['userid']));
+			header('Location: index.php');
+		}
+	}
+	else{
 	include("login.php");
+}	
 	exit;
 } 
 	
 if (isset($_GET["action"]) && ($_GET["action"] == "logout")){
+	setcookie($cookie_name, "", time()-3600);
 	unset($_SESSION["login"]);
-	session_destroy();
+	session_destroy();		
 	header('Location: index.php');
 	exit;
 }
@@ -182,6 +225,7 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
       <div class="panel-body">
 	  
 <?php
+echo getuid('gorb23 MTW');
 include ("inc/routing.php");
 
 if (!isset($_GET["action"])){
@@ -265,7 +309,7 @@ if($_SESSION['gid'] > 0)
 
 	</div>
   </div> 
-<div class="well">V 1.8.5</div>
+<div class="well">V 1.8.6</div>
 </div>
 <script src="inc/js/bootstrap.min.js"></script>
 <script src="inc/js/bootstrap-tabs.js"></script>

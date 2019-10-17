@@ -2,9 +2,16 @@
 // ajaxUploadToApi.php
 
 session_start();
-
+use Google\Cloud\Vision\VisionClient;
 $config = include("../conf/config.php");
 
+	if($config->apiprovider == 'google'){
+		require_once("googleapi/vendor/autoload.php"); 
+		putenv('GOOGLE_APPLICATION_CREDENTIALS=googleapi/key.json');
+		$vision = new VisionClient();
+	}
+	
+	
 $pdo = new PDO("mysql:host=".$config->dbhost.";dbname=".$config->dbname.";charset=utf8", $config->dbusername, $config->dbpassword);
 $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 

@@ -1,5 +1,4 @@
 <?php
-
 // Multi-Dimensionaler In-Array Checker
 function in_array_r($item , $array){
     return preg_match('/"'.preg_quote($item, '/').'"/i' , json_encode($array));
@@ -99,7 +98,7 @@ function getuid($uid){
 	global $pdo;
 	global $config;
 	if(isSet($uid)&&$uid!=''){
-		$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."users WHERE ign = :ign");
+		$statement = $pdo->prepare("SELECT id FROM ".$config->db_pre."users WHERE `ign` = :ign");
 		$result = $statement->execute(array('ign' => $uid));
 		$usr = $statement->fetch();
 		if (!$usr) {
@@ -178,59 +177,91 @@ function utf8_converter($array) {
     return $array;
 }
 
+
+
 function uploadToApi($target_file){
 	global $pdo;
-	global $config;
-	// echo 'uploadToApi:'.$target_file.'<br />';
+	global $config;	
+	global $vision;
+	# echo 'uploadToApi:'.$target_file.'<br />';
 	list($width, $height, $type) = getimagesize($target_file);
 	$imageurl = getCurrentPath().'/'.$target_file;
-	//2 is jpg, 3 is png
-	if($type == 2){
-		$data = array(
-			"language" => "cht",
-			"isOverlayRequired" => "false",
-			"detectOrientation" => "false",
-			"scale" => "false",
-			"filetype" => 'JPG',
-			"url" => $imageurl,
-		);
-	}
-	elseif($type == 3){
-		$data = array(
-			"language" => "cht",
-			"isOverlayRequired" => "false",
-			"detectOrientation" => "false",
-			"scale" => "false",
-			"filetype" => 'PNG',
-			"url" => $imageurl,
-		);
-	}
-	$ch = curl_init();
-	curl_setopt_array($ch, array(
-	   CURLOPT_URL => "https://api.ocr.space/parse/image",        #<- free api
-		// CURLOPT_URL => "https://apipro2.ocr.space/parse/image",	   #<- pro api
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_POST => 1,
-		CURLOPT_HTTPHEADER => array('Content-Type:multipart/form-data', 'apikey:'.$config->ocrspace_apikey.''),
-		CURLOPT_POSTFIELDS => $data,
-	));
+	#exit();
+	if($config->apiprovider != 'google'){
+	 if($config->apiprovider == 'ocrspacepro'){
+		 $apiurl = 'https://apipro2.ocr.space/parse/image';
+	 }
+	 else
+	 {
+		 $apiurl = 'https://api.ocr.space/parse/image';
+	 }
+	 
+	 
+		//2 is jpg, 3 is png
+		if($type == 2){
+			$data = array(
+				"language" => "cht",
+				"isOverlayRequired" => "false",
+				"detectOrientation" => "false",
+				"scale" => "false",
+				"filetype" => 'JPG',
+				"url" => $imageurl,
+			);
+		}
+		elseif($type == 3){
+			$data = array(
+				"language" => "cht",
+				"isOverlayRequired" => "false",
+				"detectOrientation" => "false",
+				"scale" => "false",
+				"filetype" => 'PNG',
+				"url" => $imageurl,
+			);
+		}
+		$ch = curl_init();
+		curl_setopt_array($ch, array(
+		    CURLOPT_URL => $apiurl,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_POST => 1,
+			CURLOPT_HTTPHEADER => array('Content-Type:multipart/form-data', 'apikey:'.$config->ocrspace_apikey.''),
+			CURLOPT_POSTFIELDS => $data,
+		));
 
-	$result = curl_exec($ch);
-	curl_close($ch);
-
+		$result = curl_exec($ch);
+		curl_close($ch);
+			
 	$result_array = json_decode($result);
 
 
-	if(!empty($result_array->ErrorMessage))
-	{
-		echo 'OCR-Problem: '.$result_array->ErrorMessage[0];
-	}
-	else 
-	{
+	#if(!empty($result_array->ErrorMessage))  //for ocrspace
+	#{
+	#	echo 'OCR-Problem: '.$result_array->ErrorMessage[0];
+	#}
+	#else 
+	#{
 		$ocrresult = $result_array->ParsedResults[0]->ParsedText;
+	}
+	else
+	{
+		echo 'Google-OCR läuft...';
+		$imageResource = fopen($target_file, 'r'); #<- images from upload2api image param
+		$image = $vision->image($imageResource, ['DOCUMENT_TEXT_DETECTION']);
+		$result = $vision->annotate($image);
+		$document = $result->fullText();
+		$ocrresult = $document->text();
+		#echo '<pre>';
+		#echo print_r($ocrresult);
+		#echo '</pre>';
+		#$ocrresult = str_replace(' ','',$ocrresult);
+		#$ocrresult = preg_replace("/[\r\n]+[\s\t]*[\r\n]+/","\n", $ocrresult);
+		#$array = preg_split("/\r\n|\n|\r/", $ocrresult); //<- Extracted Imagetext in Array Pieces, Name, Exp, etc...
+		
+	}
+
 		 // echo 'Ergebnis:'.$ocrresult.'<br />-------|||||---------<br />';
 		//Entfernt überflüssige Zeichen
-		$ocrresult = str_replace(' ','',$ocrresult);
+		
+		#$ocrresult = str_replace(' ','',$ocrresult);
 		//Entfernt doppelte Zeilenschaltungen durch eine einzige
 		$ocrresult = preg_replace("/[\r\n]+[\s\t]*[\r\n]+/","\n", $ocrresult);
 		
@@ -256,7 +287,7 @@ function uploadToApi($target_file){
 			return readOCRBigArray($array);
 		}else
 		  return readOCRArray($array, $target_file);		
-  }
+  #}
 }
 
 function readOCRBigArray($array){
@@ -327,6 +358,8 @@ function readOCRBigArray($array){
 }
 
 function readOCRArray($array, $target_file){
+	#echo '<hr><b>'.getuid($array[0]).'</b><hr>';
+	#exit();
 	// echo 'readOCRArray:'.$target_file.'<br />';
 	// echo 'fm:'.date("Y-m-d", filemtime($target_file)).'<br />';
 	global $pdo;
@@ -337,34 +370,41 @@ function readOCRArray($array, $target_file){
 		$r = $q->fetch();
 	
     
-    $exp = cleanexp($array[0]);
-    $x = explode('/',$exp);
+    #$exp = cleanexp($array[0]);
+    #$x = explode('/',$exp);
     
-    $name = '';
+    #$name = '';
 
-    if(is_numeric($x[0])) {
+    #if(is_numeric($x[0])) {
       /*if($r)
         $name = strtr($array[0],$r);
       else $name = $array[0];*/
-      $y = 1;
-    } else {
+    #  $y = 1;
+    #} else {
 /*      if($r)
         $name = strtr($array[0],$r);
       else $name = $array[0];
       */
-      $y = 0;
-      $name = $array[0];
-		}
+    #  $y = 0;
+    #  $name = $array[0];
+	#	}
       
-    if($y==0)
+    #if($y==0)
     	if ($r){
     		// echo 'NameFix found!<br />'.'OCR:|'.$array[0].'|<br />'.'Sea:|'.$r['s'].'|<br />'.'Rep:|'.$r['r'].'|<br />';
-     		$name = $r['r'];
+     	    $name = $r['r'];
     	}
+		else
+		{
+			$name = $array[0];
+		}
     
-
-		$exp = cleanexp($array[1-$y]);
-   
+  #echo 'Name: '.$name.'<br>';
+		#$exp = cleanexp($array[1-$y]);
+		$exp = cleanexp($array[1]);
+  #echo 'EXP '.$exp.'<br>';
+  #echo '<br>';
+  
 		$streuner =  str_replace("o","0",$array[2-$y]);
 		$menschen = str_replace("o","0",$array[3-$y]);
 		$gespielte_missionen =  str_replace("o","0",$array[4-$y]);
