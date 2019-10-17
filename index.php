@@ -225,7 +225,6 @@ $fails = $pdo->query("SELECT count(id) as anz FROM ".$config->db_pre."stats WHER
       <div class="panel-body">
 	  
 <?php
-echo getuid('gorb23 MTW');
 include ("inc/routing.php");
 
 if (!isset($_GET["action"])){
