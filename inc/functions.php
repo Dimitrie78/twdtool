@@ -4,44 +4,47 @@ function in_array_r($item , $array){
     return preg_match('/"'.preg_quote($item, '/').'"/i' , json_encode($array));
 }
 
-// Ermittlung des aktuellen Levels und des Prozentsatzes
-// der Komplettierung zum nächsten Level - Rückgabe als Array (lvl,prozent)
-function leveldata($exp){
+//Leveldaten
   $lvls = array(
-  '12150300' => '34',
-  '10705300' => '33',
-  '9380300' => '32',
+   '12150300' => '34',
+   '10705300' => '33',
+    '9380300' => '32',
     '8155300' => '31',
     '7030300' => '30',
     '6005300' => '29',
-  '5080300' => '28',
+    '5080300' => '28',
     '4255300' => '27',
     '3530300' => '26',
     '2885300' => '25',
-  '2320300' => '24',
+    '2320300' => '24',
     '1835300' => '23',
     '1430300' => '22',
     '1105300' => '21',
-    '830300' => '20',
-    '605300' => '19',
-    '430300' => '18',
-    '305300' => '17',
-    '205300' => '16',
-    '130300' => '15',
-    '80300' => '14',
-    '45300' => '13',
-    '25300' => '12',
-    '15300' => '11',
-    '9300' => '10',
-    '5300' => '9',
-    '2300' => '8',
-    '1100' => '7',
-    '750' => '6',
-    '500' => '5',
-    '300' => '4',
-    '50' => '3',
-    '3' => '2'
+     '830300' => '20',
+     '605300' => '19',
+     '430300' => '18',
+     '305300' => '17',
+     '205300' => '16',
+     '130300' => '15',
+      '80300' => '14',
+      '45300' => '13',
+      '25300' => '12',
+      '15300' => '11',
+       '9300' => '10',
+       '5300' => '9',
+       '2300' => '8',
+       '1100' => '7',
+        '750' => '6',
+        '500' => '5',
+        '300' => '4',
+         '50' => '3',
+          '3' => '2'
   );
+
+// Ermittlung des aktuellen Levels und des Prozentsatzes
+// der Komplettierung zum nächsten Level - Rückgabe als Array (lvl,prozent)
+function leveldata($exp){
+global $lvls;
 	//Entfernung aller ungültigen Zeichen
 	$clean = preg_replace("/[^0-9\\/]+/i", "",trim($exp));
 	$exp = explode('/',$clean);
@@ -63,13 +66,12 @@ function leveldata($exp){
 #geht davon aus das davor eine 1 erkannt wurde, die wird mit dem / ersetzt
 function cleanexp($exp)
 {
+global $lvls;
 $replaceoarr = array("o" => "0","O" => "0","I" => "1");	
 $exp = preg_replace("/[^0-9\\/]+/i", "",strtr($exp,$replaceoarr));
-
-$lvls = array('12150300','10705300','9380300','8155300','7030300','6005300','5080300','4255300','3530300','2885300','2320300','1835300','1430300','1105300','830300','605300','430300','305300','205300','130300','80300','45300','25300','15300','9300','5300','2300','1100','750','500','300','50','3');
 if (strpos($exp, "/") == false)
 	{
-	foreach($lvls as $searchfor)
+	foreach($lvls as $searchfor => $lvls)
 		{
 		$pos = strripos($exp, $searchfor);
 		if (!$pos === false)
@@ -233,10 +235,11 @@ function uploadToApi($target_file){
 	$result_array = json_decode($result);
 
 
-	#if(!empty($result_array->ErrorMessage))  //for ocrspace
-	#{
-	#	echo 'OCR-Problem: '.$result_array->ErrorMessage[0];
-	#}
+	if(!empty($result_array->ErrorMessage))  //for ocrspace
+	{
+		echo 'OCR.SPACE-Problem: '.$result_array->ErrorMessage[0];
+		exit();
+	}
 	#else 
 	#{
 		$ocrresult = $result_array->ParsedResults[0]->ParsedText;
@@ -367,29 +370,19 @@ function readOCRArray($array, $target_file){
 	if(count($array) > 10){
 		$q = $pdo->query("SELECT `searchfor` as s, `replacement` as r FROM `".$config->db_pre."namefix` WHERE `searchfor` like '".$array[0]."' ORDER BY ID DESC LIMIT 1 ;");
 		// $r = $q->fetchAll(PDO::FETCH_KEY_PAIR);
+		#r = Namefix
 		$r = $q->fetch();
 	
-    
-    #$exp = cleanexp($array[0]);
-    #$x = explode('/',$exp);
-    
-    #$name = '';
+    #Wenn in der ersten Zeile EXP statt der Name erkannt wurde verschiebe alles nach unten.
+	#y=1 bedeutet es wurde EXP gefunden!
+    if(strpos($array[0], '/') && in_array_r(explode('/',$array[0])[1],$lvls)){
+		$y = 1;
+		}
+		else
+		{
+		$y = 0;
+		}
 
-    #if(is_numeric($x[0])) {
-      /*if($r)
-        $name = strtr($array[0],$r);
-      else $name = $array[0];*/
-    #  $y = 1;
-    #} else {
-/*      if($r)
-        $name = strtr($array[0],$r);
-      else $name = $array[0];
-      */
-    #  $y = 0;
-    #  $name = $array[0];
-	#	}
-      
-    #if($y==0)
     	if ($r){
     		// echo 'NameFix found!<br />'.'OCR:|'.$array[0].'|<br />'.'Sea:|'.$r['s'].'|<br />'.'Rep:|'.$r['r'].'|<br />';
      	    $name = $r['r'];
@@ -398,13 +391,12 @@ function readOCRArray($array, $target_file){
 		{
 			$name = $array[0];
 		}
+		
+		if($y==1){
+			$name = '';
+		}
     
-  #echo 'Name: '.$name.'<br>';
-		#$exp = cleanexp($array[1-$y]);
-		$exp = cleanexp($array[1]);
-  #echo 'EXP '.$exp.'<br>';
-  #echo '<br>';
-  
+		$exp = cleanexp($array[1-$y]); 
 		$streuner =  str_replace("o","0",$array[2-$y]);
 		$menschen = str_replace("o","0",$array[3-$y]);
 		$gespielte_missionen =  str_replace("o","0",$array[4-$y]);
