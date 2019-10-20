@@ -160,6 +160,7 @@ $q_str = "	SET @lastKills = 0, @lastGespielt = 0, @lastAbgeschl = 0, @lastGerett
 $query_stat2 = $pdo->prepare($q_str);
 $query_stat2->execute();
 if(!(isSet($mode)&&$mode=='classic')){
+# %H:%i:%s bei date_format dazu wenn zeit dazu soll
 $q_str = "
 			SELECT * FROM 
 (			    SELECT 
@@ -194,6 +195,7 @@ $q_str = "
 			) as e ORDER BY `__date` DESC ".$limit."
 		";
 }else{
+# %H:%i:%s bei date_format dazu wenn zeit dazu soll
 $q_str = "
 			SELECT * FROM 
 (			    SELECT 
@@ -332,14 +334,13 @@ foreach ($query_stat as $row) {
 			  }
 			}else{
 			  if((strpos(strtolower($c[$h]), 'datum')!==false)||(strpos(strtolower($c[$h]), 'date')!==false)||(strpos(strtolower($c[$h]), 'ep')!==false)||(strpos(strtolower($c[$h]), 'xp')!==false))
-  		    	echo '<td style="text-align: right;" class="'.($c[$h][0]=='_'&&$c[$h][1]!='_'?'hidden':'').' col'.$h.'">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+  		    	echo '<td style="text-align: right;white-space:nowrap;" class="'.($c[$h][0]=='_'&&$c[$h][1]!='_'?'hidden':'').' col'.$h.'">'.$row[$c[$h]]./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
   		   	  else
-  		    	echo '<td style="text-align: right;" class="'.($c[$h][0]=='_'&&$c[$h][1]!='_'?'hidden':'').' col'.$h.'">'.number_format($row[$c[$h]], (strpos($row[$c[$h]], '.')!==false?2:0), ",", ".")./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
+  		    	echo '<td style="text-align: right;white-space:nowrap;" class="'.($c[$h][0]=='_'&&$c[$h][1]!='_'?'hidden':'').' col'.$h.'">'.number_format($row[$c[$h]], (strpos($row[$c[$h]], '.')!==false?2:0), ",", ".")./*'|'.$chart[$h][$i].'|'.$i.*/'</td>';
   		    }
 		}
 	}
-
-					
+	
 	// echo "<tr>";
 	$i++;
 }

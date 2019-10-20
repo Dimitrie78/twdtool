@@ -243,6 +243,9 @@ input[type="submit"]:active {
 	<div class="wrap">
 		
 		<?php
+		if($config->apiprovider == 'google'){
+			gglapicounter ('read', 'inc/counter.txt',1000,900);
+		}
 		# error messages
 		if (isset($message)) {
 			foreach ($message as $msg) {

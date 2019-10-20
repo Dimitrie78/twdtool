@@ -179,6 +179,59 @@ function utf8_converter($array) {
     return $array;
 }
 
+function gglapicounter ($mode, $counterfile, $cntlimit=1000, $cntwarning=900){
+//parameter: read oder write, path/counter.txt, 1000,900 (limit und warnlimit sind optional)
+//counterfile = counter.txt im inc Verzeichnis. Aufruf immer von einbindenden Verzeichnis aus.
+
+if(!file_exists($counterfile)){
+	touch($counterfile);
+}
+	
+$datnow = date('m.Y');
+$cntdata = explode('|',file_get_contents($counterfile));
+
+$cntdate = $cntdata[0];
+$cntnbr = $cntdata[1];
+
+if($cntnbr >= $cntlimit){
+?>
+<div class="alert alert-danger" role="alert">API Limit erreicht. Weiterer Ablauf gestoppt - Weiteres OCR mit Google nicht mehr möglich<br><b>Empfehlung:</b> Auf OCR Space Free umstellen (Dazu die config Datei bearbeiten)</div><br>
+<?php
+exit();
+}
+elseif($cntnbr > $cntwarning){
+?><div class="alert alert-warning" role="alert">Warnung: API Limit fast erreicht</div><br><?php
+}
+
+	## Neues Monat beginnt -> Counter resetten | Auch wenn nur im Lesemodus
+	if($datnow <> $cntdate){
+		file_put_contents($counterfile, $datnow.'|1');	
+	}
+	else{
+		if($mode == 'write'){
+			$cntinfo = 'API Aufruf ';
+			$cntnbr++; //nächster aufruf
+			file_put_contents($counterfile, $cntdate.'|'.($cntnbr));
+		}
+	}
+
+	$prozent = round(($cntnbr/$cntlimit*100), 1);
+
+if($mode == 'read'){
+$cntinfo = 'Verbrauchte API-Aufrufe: ';	
+}
+echo $cntinfo.$cntnbr.' von '.$cntlimit.' ['.$prozent.'%]<br>';
+?>
+<div class="progress">
+  <div title="Verbrauchte Aufrufe" class="progress-bar progress-bar-warning" role="progressbar" style="width:<?php echo $prozent; ?>%">
+    Verbraucht
+  </div>
+  <div title="Freie Aufrufe" class="progress-bar progress-bar-success" role="progressbar" style="width:<?php echo (100-$prozent); ?>%">
+    Frei
+  </div>
+</div><?php
+}
+
 
 
 function uploadToApi($target_file){
@@ -240,14 +293,13 @@ function uploadToApi($target_file){
 		echo 'OCR.SPACE-Problem: '.$result_array->ErrorMessage[0];
 		exit();
 	}
-	#else 
-	#{
 		$ocrresult = $result_array->ParsedResults[0]->ParsedText;
 	}
 	else
 	{
-		echo 'Google-OCR läuft...';
-		$imageResource = fopen($target_file, 'r'); #<- images from upload2api image param
+		echo 'Google-OCR läuft...<br>';
+		gglapicounter ('write', 'counter.txt', 1000, 900);
+		$imageResource = fopen($target_file, 'r'); 
 		$image = $vision->image($imageResource, ['DOCUMENT_TEXT_DETECTION']);
 		$result = $vision->annotate($image);
 		$document = $result->fullText();
