@@ -250,7 +250,7 @@ function uploadToApi($target_file){
 	 {
 		 $apiurl = 'https://api.ocr.space/parse/image';
 	 }
-	 
+	  $scale = file_exists("../2ocr/bigfile/bigfile.jpg")?"false":"true"; //einzel-Dateien --> Scale = true;
 	 
 		//2 is jpg, 3 is png
 		if($type == 2){
@@ -258,7 +258,7 @@ function uploadToApi($target_file){
 				"language" => "cht",
 				"isOverlayRequired" => "false",
 				"detectOrientation" => "false",
-				"scale" => "false",
+				"scale" => $scale, //"false",
 				"filetype" => 'JPG',
 				"url" => $imageurl,
 			);
@@ -268,7 +268,7 @@ function uploadToApi($target_file){
 				"language" => "cht",
 				"isOverlayRequired" => "false",
 				"detectOrientation" => "false",
-				"scale" => "false",
+				"scale" => $scale, //"false",
 				"filetype" => 'PNG',
 				"url" => $imageurl,
 			);
@@ -359,9 +359,9 @@ function readOCRBigArray($array){
 
     // echo $i.'|'.$act_line.'<br />';
     if($i > 3)
-	    if((((stripos($act_line, 'ep')===0) || (stripos($act_line, 'xp')===0)) &&
-	    	 (is_numeric(substr($act_line, 2, 1))) && 
-	    	 (is_numeric(substr($act_line, strlen($act_line)-1, 1)))) || ($i == (count($array)-1)))
+	    if((((stripos( $act_line, 'ep')===0) || (stripos($act_line, 'xp')===0)) &&
+	    	 (is_numeric(substr(str_replace(' ', '', $act_line), 2, 1))) && 
+	    	 (is_numeric(substr($act_line, strlen(str_replace(' ', '', $act_line))-1, 1)))) || ($i == (count($array)-1)))
 	    {
 	    
 	    	if ($i == (count($array)-1)){
@@ -370,12 +370,13 @@ function readOCRBigArray($array){
 	    	}
 	    	// echo ' - EP found';
 	     	if(count($little)>20){
-	     		echo ' - Fehler!1';
+	     		echo ' - BigFile-Fehler! 1 <br />'.$filelist[$c].'<br /><div style="border:1px solid silver; background-color:#ffcc66;color:black;padding:3px;margin:2px;">'.implode('<br />', $little).'</div><br  />';
 	     		exit;
 	     	}else if (count($little)<1&&$i>3){
-	     		echo ' - Fehler!2';
+	     		echo ' - BigFile-Fehler! 2 <br />'.$filelist[$c].'<br /><div style="border:1px solid silver; background-color:#ffcc66;color:black;padding:3px;margin:2px;">'.implode('<br />', $little).'</div><br  />';
 	     		exit;
 	     	}
+		   	if(!isSet($config->apiprovider)||($config->apiprovider != 'google'))
 		   	if(count($little)>12){
 	    		//BUG OCR.Space --> doppelte Nummern filtern
 	    		$last = '';
@@ -425,28 +426,23 @@ function readOCRArray($array, $target_file){
 		#r = Namefix
 		$r = $q->fetch();
 	
-    #Wenn in der ersten Zeile EXP statt der Name erkannt wurde verschiebe alles nach unten.
-	#y=1 bedeutet es wurde EXP gefunden!
-    if(strpos($array[0], '/') && in_array_r(explode('/',$array[0])[1],$lvls)){
+    
+    $exp = cleanexp($array[0]);
+    $x = explode('/',$exp);
+    $name = '';
+
+    if(is_numeric($x[0])) {
 		$y = 1;
-		}
-		else
-		{
+    } else {
 		$y = 0;
 		}
 
+      
     	if ($r){
-    		// echo 'NameFix found!<br />'.'OCR:|'.$array[0].'|<br />'.'Sea:|'.$r['s'].'|<br />'.'Rep:|'.$r['r'].'|<br />';
      	    $name = $r['r'];
-    	}
-		else
-		{
-			$name = $array[0];
-		}
-		
-		if($y==1){
-			$name = '';
-		}
+  	  echo 'Fix gefunden!';
+    }else $name = $array[0];
+    
     
 		$exp = cleanexp($array[1-$y]); 
 		$streuner =  str_replace("o","0",$array[2-$y]);
