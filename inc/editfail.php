@@ -179,7 +179,7 @@ if((!isset($do)) || (!$do)){
         <div class="card">
           <div class="card-block">
             <h4 class="card-title">Fehlerbehebung für ID <?php echo $stats['id'].' vom '.$datetime->format('d.m.Y H:i:s'); ?></h4>
-            <p class="card-text">Erkannter Name: <span style="font-weight:bold;"><?php echo $stats['name']; ?></span> <br>Übertrage die Werte vom Bild in das Formular.<br>Fehler: <br /><span class="card-error">&nbsp;&nbsp;&nbsp;<?php echo $stats['notizen']; ?> </span></p>
+            <p class="card-text">Erkannter Name: <span style="font-weight:bold;"><?php echo $stats['name']; ?></span> <br>Übertrage die Werte vom Bild in das Formular.<br>Fehler: <br /><span class="card-error">&nbsp;&nbsp;&nbsp;<?php echo $stats['notizen']!=''?explode('\n', $stats['notizen'])[0]:''; ?> </span></p>
 			<form action="?action=editfail&id=<?=$id?>" method="POST" autocomplete="no">
 			  <input  type = "hidden" name="editid" type="text" value="<?php echo $stats['id'];?>">
 			  <input  type = "hidden" name="ftype" type="text" value="<?php echo $ftype;?>">

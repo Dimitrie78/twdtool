@@ -424,7 +424,7 @@ function readOCRArray($array, $target_file){
 	global $config;
 	if(count($array) > 10){
 		$name = '';
-
+		$y = 0; 
 		//wenn array[1] keine typischen Symbole für EP-Werte aufweist, dann teste array[0]
 		if (strripos($array[1], 'ep') === false && strripos($array[1], 'xp') === false && strripos($array[1], '/') === false)
 		{
