@@ -177,9 +177,13 @@ if((!isset($do)) || (!$do)){
     <div class="row">
       <div class="col-md-6">
         <div class="card">
-          <div class="card-block">
+          <div class="card-block" onclick="document.getElementById('ocr').style.display=document.getElementById('ocr').style.display=='block'?'none':'block';">
             <h4 class="card-title">Fehlerbehebung für ID <?php echo $stats['id'].' vom '.$datetime->format('d.m.Y H:i:s'); ?></h4>
-            <p class="card-text">Erkannter Name: <span style="font-weight:bold;"><?php echo $stats['name']; ?></span> <br>Übertrage die Werte vom Bild in das Formular.<br>Fehler: <br /><span class="card-error">&nbsp;&nbsp;&nbsp;<?php echo $stats['notizen']!=''?explode('\n', $stats['notizen'])[0]:''; ?> </span></p>
+            <p class="card-text">Erkannter Name: <span style="font-weight:bold;"><?php echo $stats['name']; ?></span> <br>Übertrage die Werte vom Bild in das Formular.<br>Fehler: <br /><span class="card-error">&nbsp;&nbsp;&nbsp;<?php echo $stats['notizen']!=''?explode('\n', $stats['notizen'])[0]:''; ?> </span>
+						<?php if(strpos($stats['notizen'], '\n')!==false)
+										echo '<div id="ocr" style="display:none; height:auto; width:200px; border:1px silver dashed; background-color:#333333; margin-left:10px; padding:5px;"><u><b>OCR-Result:</b></u><br />'.explode('\n', $stats['notizen'])[1].'</div><br />';
+						?>
+						</p>
 			<form action="?action=editfail&id=<?=$id?>" method="POST" autocomplete="no">
 			  <input  type = "hidden" name="editid" type="text" value="<?php echo $stats['id'];?>">
 			  <input  type = "hidden" name="ftype" type="text" value="<?php echo $ftype;?>">

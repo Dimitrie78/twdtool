@@ -419,7 +419,7 @@ function readOCRArray($array, $target_file){
 	// echo 'readOCRArray:'.$target_file.'<br />';
 	// echo 'fm:'.date("Y-m-d", filemtime($target_file)).'<br />';
 	// echo '<br />OCR-Result:<br />'.implode("<br />", $array).'<br />----------</br>';
-	$ocr_result = implode("\n", $array); //in Notizen speichern, wenn ein Fehler auftritt
+	$ocr_result = implode("<br />", $array); //in Notizen speichern, wenn ein Fehler auftritt
 	global $pdo;
 	global $config;
 	if(count($array) > 10){
