@@ -193,10 +193,10 @@ if((!isset($do)) || (!$do)){
   echo '<option value="-NEW-">Benutzer anlegen</option>';
   if ($stats['uid'] < 1){
 
-	$sql2 = 'CREATE TEMPORARY TABLE nearUser SELECT s.uid, u.ign, max(s.streuner) as streuner FROM `'.$config->db_pre.'stats` as s LEFT JOIN `'.$config->db_pre.'users` as u ON u.id = s.uid WHERE u.active = 1 GROUP BY s.uid;';
+	$sql2 = 'CREATE TEMPORARY TABLE nearUser SELECT s.uid, u.ign, max(s.streuner) as streuner, max(menschen) as menschen, max(haufen) as haufen FROM `'.$config->db_pre.'stats` as s LEFT JOIN `'.$config->db_pre.'users` as u ON u.id = s.uid WHERE u.active = 1 GROUP BY s.uid;';
 	$query_nearUser = $pdo->prepare($sql2);
 	$query_nearUser->execute();
-	$sql2 = 'SELECT uid, ign, streuner from nearUser WHERE streuner < '.$stats['streuner'].' ORDER BY streuner DESC LIMIT 3';
+	$sql2 = 'SELECT uid, ign, streuner from nearUser WHERE streuner < '.$stats['streuner'].' AND menschen < '.$stats['menschen'].' AND haufen < '.$stats['haufen'].' ORDER BY streuner DESC LIMIT 3';
 	$query_nearUser = $pdo->prepare($sql2);
 	$query_nearUser->execute();
 	echo '<optgroup label="Vorschläge">';
