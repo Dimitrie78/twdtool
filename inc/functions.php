@@ -69,9 +69,9 @@ function cleanexp($exp)
 global $lvls;
 $replaceoarr = array("o" => "0","O" => "0","I" => "1");	
 $exp = preg_replace("/[^0-9\\/]+/i", "",strtr($exp,$replaceoarr));
-if (strpos($exp, "/") == false)
+if (strpos($exp, "/") === false)
 	{
-	foreach($lvls as $searchfor => $lvls)
+	foreach($lvls as $searchfor => $l)
 		{
 		$pos = strripos($exp, $searchfor);
 		if (!$pos === false)
@@ -418,48 +418,54 @@ function readOCRArray($array, $target_file){
 	#exit();
 	// echo 'readOCRArray:'.$target_file.'<br />';
 	// echo 'fm:'.date("Y-m-d", filemtime($target_file)).'<br />';
+	// echo '<br />OCR-Result:<br />'.implode("<br />", $array).'<br />----------</br>';
+	$ocr_result = implode("\n", $array); //in Notizen speichern, wenn ein Fehler auftritt
 	global $pdo;
 	global $config;
 	if(count($array) > 10){
+		$name = '';
+
+		//wenn array[1] keine typischen Symbole für EP-Werte aufweist, dann teste array[0]
+		if (strripos($array[1], 'ep') === false && strripos($array[1], 'xp') === false && strripos($array[1], '/') === false)
+		{
+			$exp = cleanexp($array[0]);
+			// echo 'cleanxp:'.$exp.'<br />';;
+			$x = explode('/',$exp);
+			// echo '$x[0]:'.$x[0].'<br />';
+
+			if(is_numeric($x[0])) 
+			  $y = 1; //Name fehlt, alle Array-Werte um $y=1 verschoben
+			else $y = 0;			
+		}
+		
+		//OCR-Fix anwenden
 		$q = $pdo->query("SELECT `searchfor` as s, `replacement` as r FROM `".$config->db_pre."namefix` WHERE `searchfor` like '".$array[0]."' ORDER BY ID DESC LIMIT 1 ;");
-		// $r = $q->fetchAll(PDO::FETCH_KEY_PAIR);
 		#r = Namefix
 		$r = $q->fetch();
-	
-    
-    $exp = cleanexp($array[0]);
-    $x = explode('/',$exp);
-    $name = '';
+		if ($r){
+			$name = $r['r'];
+			echo 'Fix gefunden! ';
+		} else $name = $array[0];
 
-    if(is_numeric($x[0])) {
-		$y = 1;
-    } else {
-		$y = 0;
-		}
-
-      
-    	if ($r){
-     	    $name = $r['r'];
-  	  echo 'Fix gefunden!';
-    }else $name = $array[0];
-    
-    
-		$exp = cleanexp($array[1-$y]); 
-		$streuner =  str_replace("o","0",$array[2-$y]);
-		$menschen = str_replace("o","0",$array[3-$y]);
-		$gespielte_missionen =  str_replace("o","0",$array[4-$y]);
-		$abgeschlossene_missonen =  str_replace("o","0",$array[5-$y]);
-		$gefeuerte_schuesse =  str_replace("o","0",$array[6-$y]);
-		$haufen =  str_replace("o","0",$array[7-$y]);
-		$heldenpower =  str_replace("o","0",$array[8-$y]);
-		$waffenpower =  str_replace("o","0",$array[9-$y]);
-		$karten =  str_replace("o","0",$array[10-$y]);
-		$gerettete =  str_replace("o","0",$array[11-$y]);
+		$exp 											= cleanexp($array[1-$y]); 
+		$streuner 								=  str_replace("o","0",$array[2-$y]);
+		$menschen 								=  str_replace("o","0",$array[3-$y]);
+		$gespielte_missionen 			=  str_replace("o","0",$array[4-$y]);
+		$abgeschlossene_missonen 	=  str_replace("o","0",$array[5-$y]);
+		$gefeuerte_schuesse 			=  str_replace("o","0",$array[6-$y]);
+		$haufen 									=  str_replace("o","0",$array[7-$y]);
+		$heldenpower 							=  str_replace("o","0",$array[8-$y]);
+		$waffenpower 							=  str_replace("o","0",$array[9-$y]);
+		$karten 									=  str_replace("o","0",$array[10-$y]);
+		$gerettete 								=  str_replace("o","0",$array[11-$y]);
 
 		#nur die datei ohne weitere Verzeichnisse daran bereitstellen
 		$onlyfile = substr(strrchr($target_file, "/"), 1);
-		$fileext = substr(strrchr($target_file, "."), 1);
-		$usrid = getuid($name);
+		$fileext 	= substr(strrchr($target_file, "."), 1);
+
+		if($name)
+			$usrid = getuid($name);
+		else $usrid = 0;
 
 		$notizen = '';
 		unset($errlog);
@@ -469,17 +475,17 @@ function readOCRArray($array, $target_file){
 		if($usrid == 0) {
 			$fail = 1;
 			$errlog[] = "Name";
-			if($exp=='') $errlog[] = "EP";
-			if($streuner==0) $errlog[] = "Streuner";
-			if($menschen==0) $errlog[] = "Menschen";
-			if($gespielte_missionen==0) $errlog[] = "gespielte Missionen";
+			if($exp=='') 										$errlog[] = "EP";
+			if($streuner==0) 								$errlog[] = "Streuner";
+			if($menschen==0) 								$errlog[] = "Menschen";
+			if($gespielte_missionen==0) 		$errlog[] = "gespielte Missionen";
 			if($abgeschlossene_missonen==0) $errlog[] = "Abgeschl. Missonen";
-			if($gefeuerte_schuesse==0) $errlog[] = "Schüsse";
-			if($haufen==0) $errlog[] = "Kisten";
-			if($heldenpower==0) $errlog[] = "Weldenpower";
-			if($waffenpower==0) $errlog[] = "Waffenpower";
-			if($karten==0) $errlog[] = "Karten";
-			if($gerettete==0) $errlog[] = "Gerettete";
+			if($gefeuerte_schuesse==0) 			$errlog[] = "Schüsse";
+			if($haufen==0) 									$errlog[] = "Kisten";
+			if($heldenpower==0) 						$errlog[] = "Weldenpower";
+			if($waffenpower==0) 						$errlog[] = "Waffenpower";
+			if($karten==0) 									$errlog[] = "Karten";
+			if($gerettete==0) 							$errlog[] = "Gerettete";
 		}
 		else
 		{
@@ -570,6 +576,7 @@ function readOCRArray($array, $target_file){
 		}
 		if (!empty($errlog)) {
 			$notizen = implode(",", $errlog);
+			$notizen .= '\n'.$ocr_result;
 		}
 		else{
 			$notizen = "";
@@ -585,10 +592,10 @@ function readOCRArray($array, $target_file){
 		//$curr_datetime = date("Y-m-d H:i:s");
 		$curr_datetime = date("Y-m-d H:i:s", filemtime($target_file));
 		$statement->execute(array(
-			"uid" => getuid($name),
-			"name" => $name,
+			"uid" => $usrid,//getuid($name),
+			"name" => $name?$name:"", 
 			"date" =>  $curr_datetime,
-			"exp" => $exp,
+			"exp" => $exp?$exp:"",
 			"streuner" => $streuner,
 			"menschen" => $menschen,
 			"gespielte_missionen" => $gespielte_missionen,	
@@ -610,7 +617,7 @@ function readOCRArray($array, $target_file){
 
 			#fehler provoziern zum test
 			if ($fail == 1){
-				echo ' <b>[FAIL]:</b> '.$notizen;
+				echo ' <b>[FAIL]:</b> '.implode(",", $errlog);
 				rename($target_file,'../2ocr/fail/'.$pdo->lastInsertId().'.'.$fileext);
 			}else{
 				unlink($target_file);
