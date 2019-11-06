@@ -2,11 +2,18 @@
 <?php
 include "verify.php";
 
+$bigfile = "2ocr/bigfile/bigfile.jpg";
+$bigfile_txt = "2ocr/bigfile/bigfile.txt";
+if(isSet($_GET['KillBigFile']) && $_GET['KillBigFile']==1){
+  if (file_exists($bigfile)) unlink($bigfile);
+  if (file_exists($bigfile_txt)) unlink($bigfile_txt);
+}
+
 #Todo: Für alle umgewandelten Dateien
 #$target_file = "ocr_foo.jpg";
 $hasfiles = False;
 $data = array();
-$bigfile = "2ocr/bigfile/bigfile.jpg";
+
 if (file_exists($bigfile)) {
   echo 'bigfile gefunden!<br />';
   $screens = glob("2ocr/bigfile/*.{jpg,png}", GLOB_BRACE);

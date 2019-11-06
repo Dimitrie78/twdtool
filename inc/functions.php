@@ -370,10 +370,28 @@ function readOCRBigArray($array){
 	    	}
 	    	// echo ' - EP found';
 	     	if(count($little)>20){
-	     		echo ' - BigFile-Fehler! 1 <br />'.$filelist[$c].'<br /><div style="border:1px solid silver; background-color:#ffcc66;color:black;padding:3px;margin:2px;">'.implode('<br />', $little).'</div><br  />';
+	     		echo ' - BigFile-Fehler! 1 <br />'.$filelist[$c].'<br /><div style="border:1px solid silver; background-color:#ffcc66;color:black;padding:3px;margin:2px;">'.implode('<br />', $little).'</div>
+ 	     		  <br />
+	     			<form action="" method="GET" autocomplete="no">	  
+						  <div class="form-group text-center">
+						   <input type="hidden" name="action" value="import" />
+						   <input type="hidden" name="KillBigFile" value="1" />
+						   <button type="submit" name="submit_kill" class="btn btn-success">BigFile löschen und erneut einlesen</button>
+						  </div>
+						</form>
+	     		<br  />';
 	     		exit;
 	     	}else if (count($little)<1&&$i>3){
-	     		echo ' - BigFile-Fehler! 2 <br />'.$filelist[$c].'<br /><div style="border:1px solid silver; background-color:#ffcc66;color:black;padding:3px;margin:2px;">'.implode('<br />', $little).'</div><br  />';
+	     		echo ' - BigFile-Fehler! 2 <br />'.$filelist[$c].'<br /><div style="border:1px solid silver; background-color:#ffcc66;color:black;padding:3px;margin:2px;">'.implode('<br />', $little).'</div>
+ 	     		  <br />
+	     			<form action="" method="GET" autocomplete="no">	  
+						  <div class="form-group text-center">
+						   <input type="hidden" name="action" value="import" />
+						   <input type="hidden" name="KillBigFile" value="1" />
+						   <button type="submit" name="submit_kill" class="btn btn-success">BigFile löschen und erneut einlesen</button>
+						  </div>
+						</form>
+						<br  />';
 	     		exit;
 	     	}
 		   	if(!isSet($config->apiprovider)||($config->apiprovider != 'google'))
